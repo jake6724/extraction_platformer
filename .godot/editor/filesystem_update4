@@ -1,0 +1,7 @@
+res://scripts/player.gd
+res://scenes/SophiaSkin.tscn
+res://materials/grid_shader_2.gdshader
+res://materials/grid_shader.gdshader
+res://scenes/Player.tscn
+res://scripts/afterimage_mesh.gd
+res://scripts/sophia_skin.gd

@@ -1,0 +1,27 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b61qefm0aunyh"]
+
+[ext_resource type="Shader" uid="uid://ccb7pjhp3jxol" path="res://materials/grid_shader.gdshader" id="1_rd52g"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_rd52g")
+shader_parameter/subdivisions = 32.0
+shader_parameter/grid_width = 0.0
+shader_parameter/background_color = Color(0, 0.40392157, 0.2509804, 1)
+shader_parameter/background_color_two = Color(0, 0.3214974, 0.19602501, 1)
+shader_parameter/grid_color = Color(2.8878452e-07, 0.6943789, 0.44463924, 1)
+shader_parameter/dashed_scale_x = 0.01999999955296
+shader_parameter/dashed_scale_y = 0.02
+shader_parameter/dashed_count_x = 1.0
+shader_parameter/dashed_count_y = 1.0
+shader_parameter/point_width = 0.0
+shader_parameter/point_color = Color(0, 0, 0, 1)
+shader_parameter/point_scale_x = 0.05
+shader_parameter/point_scale_y = 0.05
+shader_parameter/inside_width = 0.01
+shader_parameter/inside_subdivisions = 3.0
+shader_parameter/inside_color = Color(0, 0.7323041, 0.46992534, 1)
+shader_parameter/in_dashed_scale_x = 0.3
+shader_parameter/in_dashed_scale_y = 0.3
+shader_parameter/in_dashed_count_x = 0.0
+shader_parameter/in_dashed_count_y = 0.0
