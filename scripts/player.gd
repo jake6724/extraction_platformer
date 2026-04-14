@@ -10,22 +10,28 @@ extends CharacterBody3D
 @export var zoom_max: float = 20
 @export var right_click_to_rotate_camera: bool = false
 @export_group("Movement")
+var can_move: bool = true # Used to enable/disable move and jump input
 @export var move_speed: float = 8.0
 @export var move_speed_sprint: float = 10.0
 var move_speed_base: float 
-@export_range(20,100,1) var acceleration: float = 20.0
+@export var acceleration: float = 70
 # @export var jump_power: float = 11.75 # Give jump height of ~2 meters. Slighly higher
 @export var jump_power: float = 15.0
 @export_range(0,1,.1) var jump_coyote_time: float = .25
 var jump_max: int = 2
 var jump_count: int = 0
-@export var gravity: float = -30
-
+@export_group("Gravity")
+@export var gravity_default: float = -30
+@export var gravity_wall_slide: float = -2
+@export var gravity_wall_slide_increment: float = 0.09
+var gravity: float
+@export var min_y_velocity: float = -30 # Fastest real-velocity character can fall
+@export var max_y_velocity: float = 30 # Fastest real-velocity character can move up
+@export_group("Camera")
 @export var _camera: Camera3D
 @export var _camera_pivot: Node3D
 var camera_limit_left: float
 var camera_limit_right: float 
-
 var _camera_input_direction: Vector2 = Vector2.ZERO
 var _last_movement_direction: Vector3 = Vector3.BACK
 var _rotate_camera: bool = false
@@ -46,15 +52,27 @@ var after_image_spawn_time_max: float = .02
 var after_image_spawn_time_count: float 
 var after_image_active: float = false
 
+@export var wall_raycast: RayCast3D
+@export var wall_raycast_distance_y: float = .35
+@export var wall_push_power: float = 15
+@export var wall_jump_power: float = 12.0
+@export var wall_jump_move_disable_duration: float = .1
 var is_on_wall: bool = false
+var wall_jump_timer: Timer = Timer.new()
 
 func _ready():
+	gravity = gravity_default
 	move_speed_base = move_speed
 	coyote_jump_timer.one_shot = true
 	coyote_jump_timer.autostart = false
 	add_child(coyote_jump_timer)
 	coyote_jump_timer.timeout.connect(on_coyote_jump_timer_timeout)
 	_rotate_camera = not right_click_to_rotate_camera
+
+	wall_jump_timer.one_shot = true
+	wall_jump_timer.autostart = false
+	add_child(wall_jump_timer)
+	wall_jump_timer.timeout.connect(on_wall_jump_timer_timeout)
 
 	initialize_camera()
 
@@ -68,7 +86,6 @@ func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
 	camera_limit_left = left_limit.z
 	camera_limit_right = right_limit.z
 
-
 func _input(_event):
 	if Input.is_action_just_pressed("left_click"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -78,11 +95,13 @@ func _input(_event):
 		# move_speed = move_speed_sprint
 		# _skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
 		dash()
+	
 	# if Input.is_action_just_released("sprint"):
 	# 	move_speed = move_speed_base
 	# 	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
 	if Input.is_action_just_pressed("jump"):
-		jump()
+		if can_move:
+			jump()
 	if right_click_to_rotate_camera:
 		if Input.is_action_just_pressed("right_click"):
 			_rotate_camera = true
@@ -92,16 +111,6 @@ func _input(_event):
 		zoom_target -= zoom_step
 	if Input.is_action_just_pressed("scroll_down"):
 		zoom_target += zoom_step
-
-func dash() -> void:
-	after_image_active = true
-	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var right_direction: Vector3 = _camera.global_basis.x
-	var move_direction: Vector3 = (right_direction * raw_input.x).normalized()
-	velocity += (move_direction * 25)
-	velocity.y += 10
-	await get_tree().create_timer(.6).timeout
-	after_image_active = false
 	
 func _process(delta):
 	process_camera_limits()
@@ -110,36 +119,32 @@ func _process(delta):
 	process_after_image(delta)
 
 func _physics_process(delta: float) -> void:
-	print(is_on_wall_only())
 	# For a sidescroller we only need the right direction
-	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var raw_input: Vector2 = Vector2.ZERO
+	var move_direction: Vector3 = Vector3.ZERO
 	var right_direction: Vector3 = _camera.global_basis.x
-
-	var move_direction: Vector3 =(right_direction * raw_input.x)
-	move_direction.y = 0.0 # Player will never give up-and-down move input. Jumping and falling with handle this
-	move_direction = move_direction.normalized() # This is just intended to be a direction vector so it needs to be normalized
+	if can_move:
+		raw_input = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+		move_direction = (right_direction * raw_input.x)
+		move_direction.y = 0.0 # Player will never give up-and-down move input. Jumping and falling with handle this
+		move_direction = move_direction.normalized() # This is just intended to be a direction vector so it needs to be normalized
 
 	# Acceleration can be added by using move_toward(). This will also prevent overshooting inheritly
 	var y_velocity = velocity.y
 	velocity.y = 0.0
 	velocity = velocity.move_toward(move_direction * move_speed, acceleration * delta)
-	velocity.y = (y_velocity + (gravity * delta))
+	velocity.y = clampf((y_velocity + (gravity * delta)), min_y_velocity, max_y_velocity)
+
+	if move_direction.z < 0:
+		wall_raycast.target_position.y = wall_raycast_distance_y
+	elif move_direction.z > 0:
+		wall_raycast.target_position.y = -wall_raycast_distance_y
 
 	if prev_is_on_floor != is_on_floor() and not is_on_floor():
 		coyote_jump_timer.start(jump_coyote_time)
-
 	prev_is_on_floor = is_on_floor()
 
-	# WALL SLIDING/JUMPING
-	if is_on_wall_only() and not is_on_wall and move_direction != Vector3.ZERO: # Start wall slide
-		is_on_wall = true
-		velocity = Vector3.ZERO
-		gravity = -2
-		jump_count = 0
-	elif not is_on_wall_only() and is_on_wall: # JUST fell off wall
-		is_on_wall = false
-		gravity = -30
-
+	process_wall_slide(move_direction)
 	process_camera_position(delta)
 	move_and_slide()
 
@@ -152,19 +157,12 @@ func _physics_process(delta: float) -> void:
 	
 	# Animate
 	if is_on_wall:
-		# print("Took wall")
 		_skin.wall_slide()
-
 	elif not is_on_floor() and velocity.y <= 0:
-		# print("Took fall")
 		_skin.fall()
-
 	elif not is_on_floor() and velocity.y > 0:
-		# print("Took Jump")
 		_skin.jump()
-		
 	elif is_on_floor():
-		# print("Took grounded")
 		coyote_jump_available = true
 		coyote_jump_timer.stop()
 		var ground_speed: float = velocity.length()
@@ -173,8 +171,6 @@ func _physics_process(delta: float) -> void:
 			_skin.move()
 		else:
 			_skin.idle()
-
-	_skin.player_is_on_wall = is_on_wall
 
 func process_camera_zoom(delta: float) -> void:
 	if not is_equal_approx(_camera.position.x, zoom_target):
@@ -189,6 +185,18 @@ func process_camera_position(delta: float) -> void:
 	_camera.global_transform.origin.z = lerp(_camera.global_transform.origin.z, _camera_pivot.global_transform.origin.z, delta * CAMERA_FOLLOW_SPEED)
 	_camera.global_transform.origin.y = lerp(_camera.global_transform.origin.y, _camera_pivot.global_transform.origin.y, delta * CAMERA_FOLLOW_SPEED)
 
+func process_wall_slide(_move_direction: Vector3) -> void:
+	if can_wall_slide() and not is_on_wall and _move_direction != Vector3.ZERO: # Start wall slide
+		is_on_wall = true
+		velocity = Vector3.ZERO
+		gravity = gravity_wall_slide
+		jump_count = 0
+	elif not can_wall_slide() and is_on_wall: # JUST fell off wall
+		is_on_wall = false
+		gravity = gravity_default
+	elif is_on_wall: # Is actively wall sliding
+		gravity -= gravity_wall_slide_increment
+
 func process_after_image(delta) -> void:
 	if abs(velocity.z) > 8.1:
 		after_image_spawn_time_count += delta
@@ -200,15 +208,38 @@ func jump() -> void:
 	if is_on_floor() or coyote_jump_available or (jump_count < jump_max):
 		jump_count += 1
 		coyote_jump_available = false
-		velocity.y = jump_power
 		_skin.jump()
-
-		# Push off away from wall if sliding
+		var _jump_power: float = jump_power
 		if is_on_wall:
-			velocity.z += (get_wall_normal().z * 15)
+			_jump_power = wall_jump_power 
+			velocity.z += (get_wall_normal().z * wall_push_power) # Push off away from wall if sliding
+			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
+
+			# Only disable input in
+			can_move = false
+			wall_jump_timer.start(wall_jump_move_disable_duration)
+
+		velocity.y = _jump_power
 
 func on_coyote_jump_timer_timeout() -> void:
 	coyote_jump_available = false
+
+## Returns true if wall_raycast is colliding, and character is not on floor
+func can_wall_slide() -> bool:
+	return wall_raycast.is_colliding() and not is_on_floor()
+
+func dash() -> void:
+	after_image_active = true
+	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var right_direction: Vector3 = _camera.global_basis.x
+	var move_direction: Vector3 = (right_direction * raw_input.x).normalized()
+	velocity += (move_direction * 25)
+	velocity.y += 10
+	await get_tree().create_timer(.6).timeout
+	after_image_active = false
+
+func on_wall_jump_timer_timeout() -> void:
+	can_move = true
 
 func create_after_image() -> void:
 	pass

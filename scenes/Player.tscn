@@ -7,24 +7,27 @@
 radius = 0.34765625
 height = 1.53125
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("_camera", "_camera_pivot", "_skin", "after_image_parent", "wall_collider")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("_camera", "_camera_pivot", "_skin", "after_image_parent", "wall_raycast")]
 collision_layer = 2
 script = ExtResource("1_v6fml")
 zoom_sensitivity = 6.0
 zoom_max = 17.0
-acceleration = 70.0
 jump_coyote_time = 0.3
 _camera = NodePath("Camera3D")
 _camera_pivot = NodePath("CameraPivot")
 _skin = NodePath("SophiaSkin")
 after_image_parent = NodePath("AfterImageParent")
-wall_collider = NodePath("")
+wall_raycast = NodePath("CollisionShape3D/RayCast3D")
 
 [node name="SophiaSkin" parent="." instance=ExtResource("1_p0vlq")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.765625, 0)
 shape = SubResource("CapsuleShape3D_p0vlq")
+
+[node name="RayCast3D" type="RayCast3D" parent="CollisionShape3D"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.65, 0)
+target_position = Vector3(0, 0.356, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1704572, 0)
