@@ -11,8 +11,10 @@ extends CharacterBody3D
 @export var right_click_to_rotate_camera: bool = false
 @export_group("Movement")
 var can_move: bool = true # Used to enable/disable move and jump input
-@export var move_speed: float = 8.0
+@export var move_speed_ground: float = 8.0
+@export var move_speed_air: float = 12.0
 @export var move_speed_sprint: float = 10.0
+var move_speed: float 
 var move_speed_base: float 
 @export var acceleration: float = 70
 # @export var jump_power: float = 11.75 # Give jump height of ~2 meters. Slighly higher
@@ -24,6 +26,7 @@ var jump_count: int = 0
 @export var gravity_default: float = -30
 @export var gravity_wall_slide: float = -2
 @export var gravity_wall_slide_increment: float = 0.09
+@export var gravity_scale: float = 1.0
 var gravity: float
 @export var min_y_velocity: float = -30 # Fastest real-velocity character can fall
 @export var max_y_velocity: float = 30 # Fastest real-velocity character can move up
@@ -54,15 +57,22 @@ var after_image_active: float = false
 
 @export var wall_raycast: RayCast3D
 @export var wall_raycast_distance_y: float = .35
-@export var wall_push_power: float = 15
+@export var wall_push_power: float = 13
 @export var wall_jump_power: float = 12.0
 @export var wall_jump_move_disable_duration: float = .1
 var is_on_wall: bool = false
 var wall_jump_timer: Timer = Timer.new()
 
+@export_group("Particles")
+@export var dust_particles: GPUParticles3D
+var emit_acc_target: float = 0.2
+var emit_acc_count: float = 0.0
+
 func _ready():
+	# dust_particles.emitting = false
 	gravity = gravity_default
-	move_speed_base = move_speed
+	move_speed = move_speed_ground
+
 	coyote_jump_timer.one_shot = true
 	coyote_jump_timer.autostart = false
 	add_child(coyote_jump_timer)
@@ -92,10 +102,14 @@ func _input(_event):
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("sprint"):
+		pass
 		# move_speed = move_speed_sprint
 		# _skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
-		dash()
-	
+		# dash()
+		# dust_particles.restart()
+		# await dust_particles.finished
+		# dust_particles.emitting = false
+			
 	# if Input.is_action_just_released("sprint"):
 	# 	move_speed = move_speed_base
 	# 	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
@@ -129,11 +143,12 @@ func _physics_process(delta: float) -> void:
 		move_direction.y = 0.0 # Player will never give up-and-down move input. Jumping and falling with handle this
 		move_direction = move_direction.normalized() # This is just intended to be a direction vector so it needs to be normalized
 
-	# Acceleration can be added by using move_toward(). This will also prevent overshooting inheritly
+	move_speed = move_speed_ground if is_on_floor() else move_speed_air
+
 	var y_velocity = velocity.y
 	velocity.y = 0.0
-	velocity = velocity.move_toward(move_direction * move_speed, acceleration * delta)
-	velocity.y = clampf((y_velocity + (gravity * delta)), min_y_velocity, max_y_velocity)
+	velocity = velocity.move_toward(move_direction * move_speed, acceleration * delta) # Apply horizontal movement
+	velocity.y = clampf((y_velocity + (gravity * (gravity_scale * delta))), min_y_velocity, max_y_velocity) # Apply vertical movement
 
 	if move_direction.z < 0:
 		wall_raycast.target_position.y = wall_raycast_distance_y
@@ -171,6 +186,17 @@ func _physics_process(delta: float) -> void:
 			_skin.move()
 		else:
 			_skin.idle()
+
+	if is_equal_approx(velocity.z, 0) or not is_on_floor():
+		dust_particles.emitting = false
+	else:
+		dust_particles.emitting = true
+
+	# emit_acc_count += delta
+	# if emit_acc_count >= emit_acc_target:
+	# 	print("Trigger")
+	# 	emit_acc_count = 0
+	# 	dust_particles.restart()
 
 func process_camera_zoom(delta: float) -> void:
 	if not is_equal_approx(_camera.position.x, zoom_target):

@@ -17,8 +17,8 @@ var run_tilt = 0.0 : set = _set_run_tilt
 
 var player_is_on_wall: bool
 
-func _process(delta):
-	print(state_machine.get_current_node())
+# func _process(delta):
+# 	print(state_machine.get_current_node())
 
 func _ready():
 	blink_timer.connect("timeout", func():
