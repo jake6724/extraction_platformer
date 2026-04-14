@@ -17,6 +17,9 @@ var run_tilt = 0.0 : set = _set_run_tilt
 
 var player_is_on_wall: bool
 
+func _process(delta):
+	print(state_machine.get_current_node())
+
 func _ready():
 	blink_timer.connect("timeout", func():
 		eye_mat.set("uv1_offset", Vector3(0.0, 0.5, 0.0))
@@ -57,4 +60,4 @@ func edge_grab():
 	state_machine.travel("EdgeGrab")
 
 func wall_slide():
-	state_machine.travel("WallSlide")
+	state_machine.start("WallSlide")
