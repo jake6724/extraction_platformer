@@ -6,8 +6,6 @@ extends CharacterBody3D
 @export var rotation_speed: float = 12.0
 @export_range(1, 20, 1) var zoom_sensitivity: float = .5
 @export_range(.1, 10, .1) var zoom_step: float = 1
-@export var zoom_min: float = 2
-@export var zoom_max: float = 20
 @export var right_click_to_rotate_camera: bool = false
 @export_group("Movement")
 var can_move: bool = true # Used to enable/disable move and jump input
@@ -33,6 +31,8 @@ var gravity: float
 @export_group("Camera")
 @export var _camera: Camera3D
 @export var _camera_pivot: Node3D
+var camera_zoom_min: float = 2
+var camera_zoom_max: float = 30
 var camera_limit_left: float
 var camera_limit_right: float 
 var _camera_input_direction: Vector2 = Vector2.ZERO
@@ -102,6 +102,7 @@ func _input(_event):
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("sprint"):
+		velocity.y += (jump_power * 1.5)
 		pass
 		# move_speed = move_speed_sprint
 		# _skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
@@ -161,6 +162,7 @@ func _physics_process(delta: float) -> void:
 
 	process_wall_slide(move_direction)
 	process_camera_position(delta)
+	process_dust_particles()
 	move_and_slide()
 
 	# Ensure that character look direction does not update when there is no input
@@ -187,20 +189,9 @@ func _physics_process(delta: float) -> void:
 		else:
 			_skin.idle()
 
-	if is_equal_approx(velocity.z, 0) or not is_on_floor():
-		dust_particles.emitting = false
-	else:
-		dust_particles.emitting = true
-
-	# emit_acc_count += delta
-	# if emit_acc_count >= emit_acc_target:
-	# 	print("Trigger")
-	# 	emit_acc_count = 0
-	# 	dust_particles.restart()
-
 func process_camera_zoom(delta: float) -> void:
 	if not is_equal_approx(_camera.position.x, zoom_target):
-		zoom_target = clamp(zoom_target, zoom_min, zoom_max)
+		zoom_target = clamp(zoom_target, camera_zoom_min, camera_zoom_max)
 		_camera.position.x = lerp(_camera.position.x, zoom_target, zoom_sensitivity * delta)
 
 func process_camera_limits() -> void:
@@ -222,6 +213,12 @@ func process_wall_slide(_move_direction: Vector3) -> void:
 		gravity = gravity_default
 	elif is_on_wall: # Is actively wall sliding
 		gravity -= gravity_wall_slide_increment
+
+func process_dust_particles() -> void:
+	if not is_equal_approx(velocity.z, 0) and is_on_floor():
+		dust_particles.emitting = true
+	else:
+		dust_particles.emitting = false
 
 func process_after_image(delta) -> void:
 	if abs(velocity.z) > 8.1:
