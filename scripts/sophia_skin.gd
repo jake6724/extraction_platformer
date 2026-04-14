@@ -15,6 +15,8 @@ var run_tilt = 0.0 : set = _set_run_tilt
 
 @export var mesh: MeshInstance3D
 
+var player_is_on_wall: bool
+
 func _ready():
 	blink_timer.connect("timeout", func():
 		eye_mat.set("uv1_offset", Vector3(0.0, 0.5, 0.0))

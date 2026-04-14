@@ -6,15 +6,16 @@ extends CharacterBody3D
 @export var rotation_speed: float = 12.0
 @export_range(1, 20, 1) var zoom_sensitivity: float = .5
 @export_range(.1, 10, .1) var zoom_step: float = 1
-@export var zoom_min: float = -12
-@export var zoom_max: float = -4
+@export var zoom_min: float = 2
+@export var zoom_max: float = 20
 @export var right_click_to_rotate_camera: bool = false
 @export_group("Movement")
 @export var move_speed: float = 8.0
 @export var move_speed_sprint: float = 10.0
 var move_speed_base: float 
 @export_range(20,100,1) var acceleration: float = 20.0
-@export var jump_power: float = 11.75 # Give jump height of ~2 meters. Slighly higher
+# @export var jump_power: float = 11.75 # Give jump height of ~2 meters. Slighly higher
+@export var jump_power: float = 15.0
 @export_range(0,1,.1) var jump_coyote_time: float = .25
 var jump_max: int = 2
 var jump_count: int = 0
@@ -22,14 +23,17 @@ var jump_count: int = 0
 
 @export var _camera: Camera3D
 @export var _camera_pivot: Node3D
+var camera_limit_left: float
+var camera_limit_right: float 
 
 var _camera_input_direction: Vector2 = Vector2.ZERO
 var _last_movement_direction: Vector3 = Vector3.BACK
 var _rotate_camera: bool = false
 
-var zoom_target: float = -8
+var zoom_target: float = 8
 
 const MOVE_DIRECTION_THRESHOLD: float = 0.2
+const CAMERA_FOLLOW_SPEED: float = 12
 
 @export var _skin: Node3D
 
@@ -38,11 +42,13 @@ var coyote_jump_timer: Timer = Timer.new()
 var prev_is_on_floor: bool = true
 
 @export var after_image_parent: Node
-var after_image_spawn_time_max: float = .07
+var after_image_spawn_time_max: float = .02
 var after_image_spawn_time_count: float 
+var after_image_active: float = false
+
+var is_on_wall: bool = false
 
 func _ready():
-	# zoom_target = _spring_arm.spring_length 
 	move_speed_base = move_speed
 	coyote_jump_timer.one_shot = true
 	coyote_jump_timer.autostart = false
@@ -50,15 +56,18 @@ func _ready():
 	coyote_jump_timer.timeout.connect(on_coyote_jump_timer_timeout)
 	_rotate_camera = not right_click_to_rotate_camera
 
-func _process(delta):
-	if not is_equal_approx(_camera.position.x, zoom_target):
-		zoom_target = clamp(zoom_target, zoom_min, -4)
-		_camera.position.x = lerp(_camera.position.x, zoom_target, zoom_sensitivity * delta)
+	initialize_camera()
 
-	after_image_spawn_time_count += delta
-	if after_image_spawn_time_count >= after_image_spawn_time_max:
-		create_after_image()
-		after_image_spawn_time_count = 0
+func initialize_camera() -> void:
+	_camera.global_transform.origin = _camera_pivot.global_transform.origin
+	_camera.rotation_degrees.y = 90
+	_camera.position.x = zoom_target
+
+## Set by parent Level
+func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
+	camera_limit_left = left_limit.z
+	camera_limit_right = right_limit.z
+
 
 func _input(_event):
 	if Input.is_action_just_pressed("left_click"):
@@ -66,11 +75,12 @@ func _input(_event):
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("sprint"):
-		move_speed = move_speed_sprint
-		_skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
-	if Input.is_action_just_released("sprint"):
-		move_speed = move_speed_base
-		_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
+		# move_speed = move_speed_sprint
+		# _skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
+		dash()
+	# if Input.is_action_just_released("sprint"):
+	# 	move_speed = move_speed_base
+	# 	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
 	if Input.is_action_just_pressed("jump"):
 		jump()
 	if right_click_to_rotate_camera:
@@ -79,15 +89,28 @@ func _input(_event):
 		if Input.is_action_just_released("right_click"):
 			_rotate_camera = false
 	if Input.is_action_just_pressed("scroll_up"):
-		zoom_target += zoom_step
-	if Input.is_action_just_pressed("scroll_down"):
 		zoom_target -= zoom_step
+	if Input.is_action_just_pressed("scroll_down"):
+		zoom_target += zoom_step
+
+func dash() -> void:
+	after_image_active = true
+	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var right_direction: Vector3 = _camera.global_basis.x
+	var move_direction: Vector3 = (right_direction * raw_input.x).normalized()
+	velocity += (move_direction * 25)
+	velocity.y += 10
+	await get_tree().create_timer(.6).timeout
+	after_image_active = false
+	
+func _process(delta):
+	process_camera_limits()
+	process_camera_zoom(delta)
+
+	process_after_image(delta)
 
 func _physics_process(delta: float) -> void:
-	# Reset _camera_input_direction for the next time _unhandled_input() is triggered
-	# If this is not reset, the camera will keep rotating until new input comes in
-	# _camera_input_direction = Vector2.ZERO
-
+	print(is_on_wall_only())
 	# For a sidescroller we only need the right direction
 	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var right_direction: Vector3 = _camera.global_basis.x
@@ -107,6 +130,17 @@ func _physics_process(delta: float) -> void:
 
 	prev_is_on_floor = is_on_floor()
 
+	# WALL SLIDING/JUMPING
+	if is_on_wall_only() and not is_on_wall and move_direction != Vector3.ZERO: # Start wall slide
+		is_on_wall = true
+		velocity = Vector3.ZERO
+		gravity = -2
+		jump_count = 0
+	elif not is_on_wall_only() and is_on_wall: # JUST fell off wall
+		is_on_wall = false
+		gravity = -30
+
+	process_camera_position(delta)
 	move_and_slide()
 
 	# Ensure that character look direction does not update when there is no input
@@ -115,12 +149,22 @@ func _physics_process(delta: float) -> void:
 
 	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
 	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
-
+	
 	# Animate
-	if not is_on_floor() and velocity.y <= 0:
+	if is_on_wall:
+		# print("Took wall")
+		_skin.wall_slide()
+
+	elif not is_on_floor() and velocity.y <= 0:
+		# print("Took fall")
 		_skin.fall()
+
+	elif not is_on_floor() and velocity.y > 0:
+		# print("Took Jump")
+		_skin.jump()
 		
 	elif is_on_floor():
+		# print("Took grounded")
 		coyote_jump_available = true
 		coyote_jump_timer.stop()
 		var ground_speed: float = velocity.length()
@@ -130,6 +174,28 @@ func _physics_process(delta: float) -> void:
 		else:
 			_skin.idle()
 
+	_skin.player_is_on_wall = is_on_wall
+
+func process_camera_zoom(delta: float) -> void:
+	if not is_equal_approx(_camera.position.x, zoom_target):
+		zoom_target = clamp(zoom_target, zoom_min, zoom_max)
+		_camera.position.x = lerp(_camera.position.x, zoom_target, zoom_sensitivity * delta)
+
+func process_camera_limits() -> void:
+	_camera.global_position.z = clamp(_camera.global_position.z, camera_limit_right, camera_limit_left)
+
+## MUST be called in `_physics_process` to avoid desyncing which causes jittering
+func process_camera_position(delta: float) -> void:
+	_camera.global_transform.origin.z = lerp(_camera.global_transform.origin.z, _camera_pivot.global_transform.origin.z, delta * CAMERA_FOLLOW_SPEED)
+	_camera.global_transform.origin.y = lerp(_camera.global_transform.origin.y, _camera_pivot.global_transform.origin.y, delta * CAMERA_FOLLOW_SPEED)
+
+func process_after_image(delta) -> void:
+	if abs(velocity.z) > 8.1:
+		after_image_spawn_time_count += delta
+		if after_image_spawn_time_count >= after_image_spawn_time_max:
+			create_after_image()
+			after_image_spawn_time_count = 0
+
 func jump() -> void:
 	if is_on_floor() or coyote_jump_available or (jump_count < jump_max):
 		jump_count += 1
@@ -137,23 +203,24 @@ func jump() -> void:
 		velocity.y = jump_power
 		_skin.jump()
 
+		# Push off away from wall if sliding
+		if is_on_wall:
+			velocity.z += (get_wall_normal().z * 15)
+
 func on_coyote_jump_timer_timeout() -> void:
 	coyote_jump_available = false
 
 func create_after_image() -> void:
 	pass
+	# var lifetime: float = .25
 	# var skin_clone: SophiaSkin = _skin.duplicate()
 	# var after_image: AfterImage = skin_clone as AfterImage
-	# print(after_image)
 
 
 	# after_image_parent.add_child(skin_clone)
 	# skin_clone.global_position = _skin.mesh.global_position
 	# skin_clone.global_rotation = _skin.global_rotation
 	# skin_clone.animation_tree.active = false
-
-	# var after_image: AfterImage = _skin
-	# after_image = _skin
-	# after_image_parent.add_child(after_image)
-	# after_image.global_position = _skin.mesh.global_position
-	# after_image.global_rotation = _skin.global_rotation
+	# skin_clone.mesh.transparency = .8
+	# await get_tree().create_timer(lifetime).timeout
+	# skin_clone.queue_free()
