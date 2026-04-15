@@ -1,7 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=12 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="PackedScene" uid="uid://prh35jb6tjtd" path="res://scenes/SophiaSkin.tscn" id="1_p0vlq"]
-[ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player.gd" id="1_v6fml"]
+[ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
+[ext_resource type="Script" uid="uid://dmetde2fqpryq" path="res://scripts/player/player_hurtbox.gd" id="3_3li8b"]
+[ext_resource type="Material" uid="uid://ioi0p4q0f70j" path="res://materials/outline_material.tres" id="3_mdl7e"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p0vlq"]
 radius = 0.34765625
@@ -16,8 +18,8 @@ curve = SubResource("Curve_v6fml")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_v6fml"]
 lifetime_randomness = 0.33
-direction = Vector3(0, 1, 0)
-spread = 0.0
+direction = Vector3(1, 1, 0)
+spread = 180.0
 flatness = 1.0
 initial_velocity_min = 0.25
 initial_velocity_max = 0.5
@@ -27,6 +29,7 @@ scale_max = 1.25
 scale_curve = SubResource("CurveTexture_3li8b")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v6fml"]
+next_pass = ExtResource("3_mdl7e")
 diffuse_mode = 3
 metallic_specular = 1.0
 roughness = 0.0
@@ -36,11 +39,14 @@ material = SubResource("StandardMaterial3D_v6fml")
 radius = 0.25
 height = 0.5
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("_camera", "_camera_pivot", "_skin", "after_image_parent", "wall_raycast", "dust_particles")]
-collision_layer = 2
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3li8b"]
+radius = 0.34765625
+height = 1.0080566
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("_camera", "_camera_pivot", "_skin", "after_image_parent", "wall_raycast", "dust_particles", "player_hurtbox", "platform_target")]
+collision_mask = 4
 script = ExtResource("1_v6fml")
 zoom_sensitivity = 6.0
-zoom_max = 17.0
 jump_coyote_time = 0.3
 _camera = NodePath("Camera3D")
 _camera_pivot = NodePath("CameraPivot")
@@ -48,6 +54,8 @@ _skin = NodePath("SophiaSkin")
 after_image_parent = NodePath("AfterImageParent")
 wall_raycast = NodePath("CollisionShape3D/RayCast3D")
 dust_particles = NodePath("DustParticles")
+player_hurtbox = NodePath("PlayerHurtbox")
+platform_target = NodePath("")
 
 [node name="SophiaSkin" parent="." instance=ExtResource("1_p0vlq")]
 
@@ -58,6 +66,7 @@ shape = SubResource("CapsuleShape3D_p0vlq")
 [node name="RayCast3D" type="RayCast3D" parent="CollisionShape3D"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.65, 0)
 target_position = Vector3(0, 0.356, 0)
+collision_mask = 4
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1704572, 0)
@@ -70,7 +79,18 @@ top_level = true
 
 [node name="DustParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14138544, 0)
-amount = 10
+visible = false
+amount = 15
 explosiveness = 0.15
 process_material = SubResource("ParticleProcessMaterial_v6fml")
 draw_pass_1 = SubResource("SphereMesh_v6fml")
+
+[node name="PlayerHurtbox" type="Area3D" parent="."]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("3_3li8b")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerHurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64294434, 0)
+shape = SubResource("CapsuleShape3D_3li8b")
+debug_color = Color(0, 0.5565641, 0.33413175, 0.41960785)

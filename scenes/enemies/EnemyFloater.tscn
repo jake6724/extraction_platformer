@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=3 uid="uid://bodsvsc1dnh3i"]
+
+[ext_resource type="Script" uid="uid://cr7yi2hxhrchc" path="res://scripts/enemies/floater.gd" id="1_w35ln"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_w35ln"]
+radius = 1.0
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ej4nl"]
+albedo_color = Color(0.89080036, 0, 0.04400021, 1)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_w35ln"]
+radius = 1.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_w35ln"]
+height = 7.75
+radius = 8.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ej4nl"]
+radius = 1.0
+
+[node name="EnemyFloater" type="CharacterBody3D" node_paths=PackedStringArray("area_detect_player", "area_attack")]
+collision_layer = 2
+collision_mask = 4
+script = ExtResource("1_w35ln")
+area_detect_player = NodePath("AreaPlayerDetect")
+area_attack = NodePath("AreaAttack")
+metadata/_custom_type_script = "uid://cr7yi2hxhrchc"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_w35ln")
+surface_material_override/0 = SubResource("StandardMaterial3D_ej4nl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_w35ln")
+
+[node name="AreaPlayerDetect" type="Area3D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AreaPlayerDetect"]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -0.125, 5.463918e-09, 0)
+shape = SubResource("CylinderShape3D_w35ln")
+debug_color = Color(0.5831081, 0.55111194, 3.85046e-07, 0.41960785)
+
+[node name="AreaAttack" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AreaAttack"]
+shape = SubResource("SphereShape3D_ej4nl")
+debug_color = Color(0.8123125, 0.41055724, 0, 0.41960785)

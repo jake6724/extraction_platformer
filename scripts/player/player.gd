@@ -32,7 +32,7 @@ var gravity: float
 @export var _camera: Camera3D
 @export var _camera_pivot: Node3D
 var camera_zoom_min: float = 2
-var camera_zoom_max: float = 30
+var camera_zoom_max: float = 20
 var camera_limit_left: float
 var camera_limit_right: float 
 var _camera_input_direction: Vector2 = Vector2.ZERO
@@ -51,7 +51,7 @@ var coyote_jump_timer: Timer = Timer.new()
 var prev_is_on_floor: bool = true
 
 @export var after_image_parent: Node
-var after_image_spawn_time_max: float = .02
+var after_image_spawn_time_max: float = .08
 var after_image_spawn_time_count: float 
 var after_image_active: float = false
 
@@ -67,6 +67,9 @@ var wall_jump_timer: Timer = Timer.new()
 @export var dust_particles: GPUParticles3D
 var emit_acc_target: float = 0.2
 var emit_acc_count: float = 0.0
+
+@export_group("Components")
+@export var player_hurtbox: PlayerHurtbox
 
 func _ready():
 	# dust_particles.emitting = false
@@ -85,6 +88,9 @@ func _ready():
 	wall_jump_timer.timeout.connect(on_wall_jump_timer_timeout)
 
 	initialize_camera()
+	dust_particles.visible = true
+
+	player_hurtbox.hit.connect(on_player_hurtbox_hit)
 
 func initialize_camera() -> void:
 	_camera.global_transform.origin = _camera_pivot.global_transform.origin
@@ -102,7 +108,7 @@ func _input(_event):
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("sprint"):
-		velocity.y += (jump_power * 1.5)
+		velocity.y = (jump_power * 1.5)
 		pass
 		# move_speed = move_speed_sprint
 		# _skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
@@ -130,7 +136,6 @@ func _input(_event):
 func _process(delta):
 	process_camera_limits()
 	process_camera_zoom(delta)
-
 	process_after_image(delta)
 
 func _physics_process(delta: float) -> void:
@@ -221,11 +226,11 @@ func process_dust_particles() -> void:
 		dust_particles.emitting = false
 
 func process_after_image(delta) -> void:
-	if abs(velocity.z) > 8.1:
-		after_image_spawn_time_count += delta
-		if after_image_spawn_time_count >= after_image_spawn_time_max:
-			create_after_image()
-			after_image_spawn_time_count = 0
+	# if abs(velocity.z) > 8.1:
+	after_image_spawn_time_count += delta
+	if after_image_spawn_time_count >= after_image_spawn_time_max:
+		create_after_image()
+		after_image_spawn_time_count = 0
 
 func jump() -> void:
 	if is_on_floor() or coyote_jump_available or (jump_count < jump_max):
@@ -264,17 +269,16 @@ func dash() -> void:
 func on_wall_jump_timer_timeout() -> void:
 	can_move = true
 
+func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
+	velocity = _hit_impulse
+
 func create_after_image() -> void:
 	pass
+	# var after_image_scene: PackedScene = load("res://scenes/AfterImage.tscn")
 	# var lifetime: float = .25
-	# var skin_clone: SophiaSkin = _skin.duplicate()
-	# var after_image: AfterImage = skin_clone as AfterImage
+	# var after_image: AfterImage = after_image_scene.instantiate()
+	# after_image_parent.add_child(after_image)
+	# after_image.initialize(_skin)
 
-
-	# after_image_parent.add_child(skin_clone)
-	# skin_clone.global_position = _skin.mesh.global_position
-	# skin_clone.global_rotation = _skin.global_rotation
-	# skin_clone.animation_tree.active = false
-	# skin_clone.mesh.transparency = .8
 	# await get_tree().create_timer(lifetime).timeout
-	# skin_clone.queue_free()
+	# after_image.queue_free()

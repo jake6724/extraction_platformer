@@ -15,10 +15,6 @@ run/main_scene="uid://bfbpxodaug1w2"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
-[display]
-
-window/size/viewport_height=720
-
 [input]
 
 left_click={
@@ -81,3 +77,14 @@ respawn={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":82,"key_label":0,"unicode":114,"location":0,"echo":false,"script":null)
 ]
 }
+
+[layer_names]
+
+3d_physics/layer_1="player"
+3d_physics/layer_2="enemy"
+3d_physics/layer_3="terrain"
+3d_physics/layer_4="player_hurtbox"
+
+[rendering]
+
+textures/default_filters/use_nearest_mipmap_filter=true
