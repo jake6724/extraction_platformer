@@ -1,0 +1,105 @@
+[gd_scene load_steps=18 format=3 uid="uid://dn78n48kdx6uf"]
+
+[ext_resource type="Script" uid="uid://bfpn0yp3rcb0m" path="res://scripts/enemies/bullet.gd" id="1_ecrck"]
+[ext_resource type="Material" uid="uid://cverkl30cr4j" path="res://materials/SpikeShaderMaterial.tres" id="2_urv78"]
+[ext_resource type="Shader" uid="uid://ct0hqpkl6ri5u" path="res://materials/outline.gdshader" id="3_xpvdg"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_ecrck"]
+material = ExtResource("2_urv78")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_urv78"]
+
+[sub_resource type="Curve" id="Curve_xpvdg"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -4.5335016, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_qu1gl"]
+curve = SubResource("Curve_xpvdg")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_urv78"]
+spread = 180.0
+initial_velocity_max = 2.0
+scale_min = 0.25
+scale_max = 1.25
+scale_curve = SubResource("CurveTexture_qu1gl")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qu1gl"]
+render_priority = 0
+shader = ExtResource("3_xpvdg")
+shader_parameter/color = Color(0, 0, 0, 1)
+shader_parameter/size = 1.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hnhsu"]
+next_pass = SubResource("ShaderMaterial_qu1gl")
+diffuse_mode = 3
+metallic_specular = 1.0
+roughness = 0.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_3retx"]
+material = SubResource("StandardMaterial3D_hnhsu")
+radius = 0.25
+height = 0.5
+
+[sub_resource type="Curve" id="Curve_qu1gl"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -3.246176, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_hnhsu"]
+curve = SubResource("Curve_qu1gl")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_xpvdg"]
+spread = 180.0
+initial_velocity_max = 5.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.25
+scale_max = 1.25
+scale_curve = SubResource("CurveTexture_hnhsu")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xpvdg"]
+render_priority = 0
+shader = ExtResource("3_xpvdg")
+shader_parameter/color = Color(0, 0, 0, 1)
+shader_parameter/size = 1.05
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qu1gl"]
+next_pass = SubResource("ShaderMaterial_xpvdg")
+diffuse_mode = 3
+metallic_specular = 1.0
+roughness = 0.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_hnhsu"]
+material = SubResource("StandardMaterial3D_qu1gl")
+radius = 0.25
+height = 0.5
+
+[node name="Bullet" type="CharacterBody3D" node_paths=PackedStringArray("mesh", "collider", "trail_particles", "explode_particles")]
+collision_layer = 0
+collision_mask = 4
+script = ExtResource("1_ecrck")
+mesh = NodePath("Mesh")
+collider = NodePath("CollisionShape3D")
+trail_particles = NodePath("TrailParticles")
+explode_particles = NodePath("ExplodeParticles")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.3711385e-08, -4.371139e-08, -1, -1, 0, 4.371139e-08, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("SphereMesh_ecrck")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.0008193255, -0.00053429604)
+shape = SubResource("SphereShape3D_urv78")
+
+[node name="TrailParticles" type="GPUParticles3D" parent="."]
+amount = 20
+lifetime = 0.15000000000000002
+process_material = SubResource("ParticleProcessMaterial_urv78")
+draw_pass_1 = SubResource("SphereMesh_3retx")
+
+[node name="ExplodeParticles" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 20
+lifetime = 0.3
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_xpvdg")
+draw_pass_1 = SubResource("SphereMesh_hnhsu")

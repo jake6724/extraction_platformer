@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://ynu2kut2xcqd"]
+
+[ext_resource type="Script" uid="uid://bdvpvqe8snsfh" path="res://scripts/enemies/shooter.gd" id="1_exyeq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_exyeq"]
+albedo_color = Color(0.90444326, 0.41286474, 5.7756904e-07, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_exyeq"]
+material = SubResource("StandardMaterial3D_exyeq")
+radius = 0.1
+height = 0.2
+
+[node name="Shooter" type="Node3D" node_paths=PackedStringArray("bullet_parent")]
+script = ExtResource("1_exyeq")
+bullet_parent = NodePath("BulletParent")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_exyeq")
+
+[node name="BulletParent" type="Node" parent="."]

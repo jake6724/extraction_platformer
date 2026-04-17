@@ -1,4 +1,17 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://41avpc24wsls"]
+[gd_scene load_steps=10 format=3 uid="uid://l3kpcfyvnwvf"]
+
+[ext_resource type="Script" uid="uid://b4njhxcuh6luu" path="res://scripts/environment/spike_platform.gd" id="1_33f0h"]
+[ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="2_ivx78"]
+[ext_resource type="PackedScene" uid="uid://dac0md3embuq4" path="res://scenes/environment/Spike.tscn" id="3_6jbe4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_6jbe4"]
+size = Vector3(1, 0.25, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dq0pl"]
+size = Vector3(1, 0.1, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6jbe4"]
+size = Vector3(1, 0.25241327, 2.0041409)
 
 [sub_resource type="Shader" id="Shader_6jbe4"]
 code = "shader_type spatial;
@@ -213,7 +226,7 @@ void fragment() {
 }
 "
 
-[resource]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dq0pl"]
 render_priority = 0
 shader = SubResource("Shader_6jbe4")
 shader_parameter/world_uv = false
@@ -223,7 +236,7 @@ shader_parameter/preset_color = 0
 shader_parameter/base_color = Color(0, 0, 0, 1)
 shader_parameter/metalic = 0.0
 shader_parameter/roughness = 1.0
-shader_parameter/grid_scale = 8.52
+shader_parameter/grid_scale = 40.73
 shader_parameter/grid_width = 0.002000000095
 shader_parameter/grid_color = Color(0.6332655, 0.6393974, 0.6393953, 1)
 shader_parameter/inside_scale = 0.0
@@ -236,3 +249,97 @@ shader_parameter/checkered_blend_color = 0.1
 shader_parameter/use_inside_uv = false
 shader_parameter/use_albedo_color = false
 shader_parameter/albedo_alpha = 0.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_6jbe4"]
+material = SubResource("ShaderMaterial_dq0pl")
+top_radius = 0.1
+bottom_radius = 0.1
+height = 1.1
+
+[node name="SpikePlatform" type="AnimatableBody3D" node_paths=PackedStringArray("spike_area")]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_33f0h")
+spike_area = NodePath("SpikeArea")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+layers = 4
+mesh = SubResource("BoxMesh_6jbe4")
+surface_material_override/0 = ExtResource("2_ivx78")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07554343, 0)
+shape = SubResource("BoxShape3D_dq0pl")
+
+[node name="SpikeArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SpikeArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3609094, -0.001950264)
+shape = SubResource("BoxShape3D_6jbe4")
+debug_color = Color(0.99904376, 0, 0.13815239, 0.41960785)
+
+[node name="Axis" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_6jbe4")
+
+[node name="Spike" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, 0.8329789)
+skeleton = NodePath("")
+
+[node name="Spike3" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, 0.8329789)
+skeleton = NodePath("")
+
+[node name="Spike2" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, 0.8329789)
+skeleton = NodePath("")
+
+[node name="Spike4" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, 0.4281035)
+skeleton = NodePath("")
+
+[node name="Spike5" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, 0.4281035)
+skeleton = NodePath("")
+
+[node name="Spike6" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, 0.4281035)
+skeleton = NodePath("")
+
+[node name="Spike7" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, -0.00047928095)
+skeleton = NodePath("")
+
+[node name="Spike8" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, -0.00047928095)
+skeleton = NodePath("")
+
+[node name="Spike9" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, -0.00047928095)
+skeleton = NodePath("")
+
+[node name="Spike10" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, -0.40337068)
+skeleton = NodePath("")
+
+[node name="Spike11" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, -0.40337068)
+skeleton = NodePath("")
+
+[node name="Spike12" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, -0.40337068)
+skeleton = NodePath("")
+
+[node name="Spike13" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, -0.7960583)
+skeleton = NodePath("")
+
+[node name="Spike14" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, -0.7960583)
+skeleton = NodePath("")
+
+[node name="Spike15" parent="." instance=ExtResource("3_6jbe4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, -0.7960583)
+skeleton = NodePath("")

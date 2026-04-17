@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=14 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
 [ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_8xg12"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
+[ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
+[ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="8_g3y3g"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_d0gs8"]
 size = Vector3(83.91, 1, 152.76)
@@ -129,7 +131,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_8xg12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 37, -15)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
@@ -142,3 +144,15 @@ player = NodePath("../Player")
 [node name="Platform3" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 14)
 player = NodePath("../Player")
+
+[node name="SpikePlatform" parent="." instance=ExtResource("7_0n17k")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 17)
+
+[node name="SpikePlatform2" parent="." instance=ExtResource("7_0n17k")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 15)
+
+[node name="SpikePlatform3" parent="." instance=ExtResource("7_0n17k")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 13)
+
+[node name="SpinTurrent" parent="." instance=ExtResource("8_g3y3g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 17)

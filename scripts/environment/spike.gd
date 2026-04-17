@@ -1,0 +1,2 @@
+class_name Spike
+extends MeshInstance3D

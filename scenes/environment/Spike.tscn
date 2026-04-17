@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://dac0md3embuq4"]
+
+[ext_resource type="Material" uid="uid://cverkl30cr4j" path="res://materials/SpikeShaderMaterial.tres" id="2_seqgf"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ldksk"]
+material = ExtResource("2_seqgf")
+top_radius = 0.007
+bottom_radius = 0.12
+height = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D"]
+mesh = SubResource("CylinderMesh_ldksk")

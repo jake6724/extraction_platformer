@@ -7,6 +7,7 @@ extends CharacterBody3D
 @export_range(1, 20, 1) var zoom_sensitivity: float = .5
 @export_range(.1, 10, .1) var zoom_step: float = 1
 @export var right_click_to_rotate_camera: bool = false
+@export var after_image_active: bool = false
 @export_group("Movement")
 var can_move: bool = true # Used to enable/disable move and jump input
 @export var move_speed_ground: float = 8.0
@@ -53,7 +54,6 @@ var prev_is_on_floor: bool = true
 @export var after_image_parent: Node
 var after_image_spawn_time_max: float = .08
 var after_image_spawn_time_count: float 
-var after_image_active: float = false
 
 @export var wall_raycast: RayCast3D
 @export var wall_raycast_distance_y: float = .35
@@ -65,8 +65,8 @@ var wall_jump_timer: Timer = Timer.new()
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
-var emit_acc_target: float = 0.2
-var emit_acc_count: float = 0.0
+@export var jump_dust_particles: GPUParticles3D
+
 
 @export_group("Components")
 @export var player_hurtbox: PlayerHurtbox
@@ -89,6 +89,7 @@ func _ready():
 
 	initialize_camera()
 	dust_particles.visible = true
+	jump_dust_particles.visible = true
 
 	player_hurtbox.hit.connect(on_player_hurtbox_hit)
 
@@ -97,7 +98,7 @@ func initialize_camera() -> void:
 	_camera.rotation_degrees.y = 90
 	_camera.position.x = zoom_target
 
-## Set by parent Level
+## Called by parent Level
 func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
 	camera_limit_left = left_limit.z
 	camera_limit_right = right_limit.z
@@ -109,17 +110,12 @@ func _input(_event):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("sprint"):
 		velocity.y = (jump_power * 1.5)
+		jump_dust_particles.restart()
+		#sprint()
+
+	if Input.is_action_just_released("sprint"):
 		pass
-		# move_speed = move_speed_sprint
-		# _skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
-		# dash()
-		# dust_particles.restart()
-		# await dust_particles.finished
-		# dust_particles.emitting = false
-			
-	# if Input.is_action_just_released("sprint"):
-	# 	move_speed = move_speed_base
-	# 	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
+
 	if Input.is_action_just_pressed("jump"):
 		if can_move:
 			jump()
@@ -226,14 +222,16 @@ func process_dust_particles() -> void:
 		dust_particles.emitting = false
 
 func process_after_image(delta) -> void:
-	# if abs(velocity.z) > 8.1:
-	after_image_spawn_time_count += delta
-	if after_image_spawn_time_count >= after_image_spawn_time_max:
-		create_after_image()
-		after_image_spawn_time_count = 0
+	if after_image_active:
+		after_image_spawn_time_count += delta
+		if after_image_spawn_time_count >= after_image_spawn_time_max:
+			create_after_image()
+			after_image_spawn_time_count = 0
 
 func jump() -> void:
 	if is_on_floor() or coyote_jump_available or (jump_count < jump_max):
+		if jump_count != 0: # air jumping
+			jump_dust_particles.restart()
 		jump_count += 1
 		coyote_jump_available = false
 		_skin.jump()
@@ -256,6 +254,14 @@ func on_coyote_jump_timer_timeout() -> void:
 func can_wall_slide() -> bool:
 	return wall_raycast.is_colliding() and not is_on_floor()
 
+func sprint() -> void:
+	move_speed = move_speed_sprint
+	_skin.animation_tree.set("parameters/TimeScale/scale", 1.25)
+
+func reset_sprint() -> void:
+	move_speed = move_speed_base
+	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
+
 func dash() -> void:
 	after_image_active = true
 	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -273,12 +279,19 @@ func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	velocity = _hit_impulse
 
 func create_after_image() -> void:
-	pass
-	# var after_image_scene: PackedScene = load("res://scenes/AfterImage.tscn")
-	# var lifetime: float = .25
-	# var after_image: AfterImage = after_image_scene.instantiate()
-	# after_image_parent.add_child(after_image)
-	# after_image.initialize(_skin)
+	var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
+	var skin_clone: SophiaSkin = _skin.duplicate()
+	after_image_parent.add_child(skin_clone)
+	skin_clone.animation_tree.active = false
 
-	# await get_tree().create_timer(lifetime).timeout
-	# after_image.queue_free()
+	skin_clone.mesh.set_surface_override_material(0,material_after_image)
+	skin_clone.mesh.set_surface_override_material(1,material_after_image)
+	skin_clone.mesh.set_surface_override_material(2,material_after_image)
+	skin_clone.mesh.set_surface_override_material(3,material_after_image)
+
+	skin_clone.global_position = _skin.mesh.global_position
+	skin_clone.global_rotation = _skin.global_rotation
+
+	var lifetime: float = .15
+	await get_tree().create_timer(lifetime).timeout
+	skin_clone.queue_free()
