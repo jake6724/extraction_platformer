@@ -292,6 +292,6 @@ func create_after_image() -> void:
 	skin_clone.global_position = _skin.mesh.global_position
 	skin_clone.global_rotation = _skin.global_rotation
 
-	var lifetime: float = .15
+	var lifetime: float = .3
 	await get_tree().create_timer(lifetime).timeout
 	skin_clone.queue_free()

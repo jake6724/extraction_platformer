@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dn78n48kdx6uf"]
+[gd_scene load_steps=19 format=3 uid="uid://dn78n48kdx6uf"]
 
 [ext_resource type="Script" uid="uid://bfpn0yp3rcb0m" path="res://scripts/enemies/bullet.gd" id="1_ecrck"]
 [ext_resource type="Material" uid="uid://cverkl30cr4j" path="res://materials/SpikeShaderMaterial.tres" id="2_urv78"]
@@ -72,12 +72,17 @@ material = SubResource("StandardMaterial3D_qu1gl")
 radius = 0.25
 height = 0.5
 
-[node name="Bullet" type="CharacterBody3D" node_paths=PackedStringArray("mesh", "collider", "trail_particles", "explode_particles")]
+[sub_resource type="SphereShape3D" id="SphereShape3D_xpvdg"]
+radius = 0.5041036
+
+[node name="Bullet" type="CharacterBody3D" node_paths=PackedStringArray("mesh", "collider", "area_player_detect", "collider_player_detect", "trail_particles", "explode_particles")]
 collision_layer = 0
 collision_mask = 4
 script = ExtResource("1_ecrck")
 mesh = NodePath("Mesh")
 collider = NodePath("CollisionShape3D")
+area_player_detect = NodePath("AreaPlayerDetect")
+collider_player_detect = NodePath("AreaPlayerDetect/ColliderPlayerDetect")
 trail_particles = NodePath("TrailParticles")
 explode_particles = NodePath("ExplodeParticles")
 
@@ -103,3 +108,11 @@ one_shot = true
 explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_xpvdg")
 draw_pass_1 = SubResource("SphereMesh_hnhsu")
+
+[node name="AreaPlayerDetect" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="ColliderPlayerDetect" type="CollisionShape3D" parent="AreaPlayerDetect"]
+shape = SubResource("SphereShape3D_xpvdg")
+debug_color = Color(0.83779925, 0.3863962, 0, 0.41960785)
