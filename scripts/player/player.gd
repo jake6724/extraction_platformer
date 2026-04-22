@@ -59,7 +59,7 @@ var after_image_spawn_time_count: float
 
 @export var wall_raycast: RayCast3D
 @export var wall_raycast_distance_y: float = .35
-@export var wall_push_power: float = 13
+@export var wall_push_power: float = 35
 @export var wall_jump_power: float = 12.0
 @export var wall_jump_move_disable_duration: float = .1
 var is_wall_sliding: bool = false

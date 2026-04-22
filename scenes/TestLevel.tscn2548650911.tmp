@@ -1,0 +1,103 @@
+[gd_scene load_steps=10 format=3 uid="uid://bfbpxodaug1w2"]
+
+[ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
+[ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
+[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_1fpmp"]
+[ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_d0gs8"]
+size = Vector3(83.91, 1, 152.76)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_1fpmp"]
+points = PackedVector3Array(41.946793, 0.5, 76.36504, 41.946793, -0.5, 76.36504, 41.946793, 0.5, -76.38, -41.955, 0.5, 76.36504, -41.955, -0.5, 76.36504, 41.946793, -0.5, -76.38, -41.955, 0.5, -76.38, -41.955, -0.5, -76.38)
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_i6x8u"]
+panorama = ExtResource("3_df0lk")
+
+[sub_resource type="Sky" id="Sky_8xg12"]
+sky_material = SubResource("PanoramaSkyMaterial_i6x8u")
+
+[sub_resource type="Environment" id="Environment_5n3yh"]
+background_mode = 2
+background_color = Color(1, 1, 1, 1)
+sky = SubResource("Sky_8xg12")
+ambient_light_source = 2
+ambient_light_color = Color(0.74558026, 0.7455802, 0.7455802, 1)
+ambient_light_energy = 1.5
+reflected_light_source = 2
+
+[node name="TestLevel" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
+script = ExtResource("1_i6x8u")
+player = NodePath("Player")
+left_boundary = NodePath("LevelBoundaries/Marker3D")
+right_boundary = NodePath("LevelBoundaries/Marker3D2")
+
+[node name="Player" parent="." instance=ExtResource("2_1fpmp")]
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0, 0.53533435, 31.599247)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.241449, 13.997885)
+
+[node name="Floor" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
+mesh = SubResource("BoxMesh_d0gs8")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("1_dojpo")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
+visible = false
+shape = SubResource("ConvexPolygonShape3D_1fpmp")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_5n3yh")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.28903174, 0.9573195, 0, -0.9573195, -0.28903174, 0, 454.56116, 227.96664)
+light_energy = 1.5
+shadow_enabled = true
+directional_shadow_mode = 1
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.000019, 17.22636)
+use_collision = true
+size = Vector3(3, 9, 7)
+material = ExtResource("1_dojpo")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5000191, 5.7263603)
+use_collision = true
+size = Vector3(3, 2, 2)
+material = ExtResource("1_dojpo")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, 10.22636)
+use_collision = true
+size = Vector3(3, 4, 7)
+material = ExtResource("1_dojpo")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, -22.77364)
+use_collision = true
+size = Vector3(3, 4, 7)
+material = ExtResource("1_dojpo")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -1.7736397)
+use_collision = true
+size = Vector3(3, 1, 7)
+material = ExtResource("1_dojpo")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -11.77364)
+use_collision = true
+size = Vector3(3, 1, 7)
+material = ExtResource("1_dojpo")
+
+[node name="LevelBoundaries" type="Node" parent="."]
+
+[node name="Marker3D" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
+
+[node name="Marker3D2" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
