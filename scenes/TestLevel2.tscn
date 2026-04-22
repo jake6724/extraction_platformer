@@ -1,0 +1,180 @@
+[gd_scene load_steps=12 format=3 uid="uid://hhb8pegw3s4j"]
+
+[ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_2mfes"]
+[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_gi74u"]
+[ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="3_gbniu"]
+[ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="4_bddin"]
+[ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_lwwg4"]
+[ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_qy88s"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_d0gs8"]
+size = Vector3(83.91, 1, 152.76)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_1fpmp"]
+points = PackedVector3Array(41.946793, 0.5, 76.36504, 41.946793, -0.5, 76.36504, 41.946793, 0.5, -76.38, -41.955, 0.5, 76.36504, -41.955, -0.5, 76.36504, 41.946793, -0.5, -76.38, -41.955, 0.5, -76.38, -41.955, -0.5, -76.38)
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_i6x8u"]
+panorama = ExtResource("4_bddin")
+
+[sub_resource type="Sky" id="Sky_8xg12"]
+sky_material = SubResource("PanoramaSkyMaterial_i6x8u")
+
+[sub_resource type="Environment" id="Environment_5n3yh"]
+background_mode = 2
+background_color = Color(1, 1, 1, 1)
+sky = SubResource("Sky_8xg12")
+ambient_light_source = 2
+ambient_light_color = Color(0.74558026, 0.7455802, 0.7455802, 1)
+ambient_light_energy = 1.5
+reflected_light_source = 2
+
+[node name="TestLevel" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
+script = ExtResource("1_2mfes")
+player = NodePath("Player")
+left_boundary = NodePath("LevelBoundaries/Marker3D")
+right_boundary = NodePath("LevelBoundaries/Marker3D2")
+
+[node name="Player" parent="." instance=ExtResource("2_gi74u")]
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0061433855, 0.7321458, 2.6063833)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.241449, 13.997885)
+collision_layer = 4
+collision_mask = 0
+
+[node name="Floor" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
+mesh = SubResource("BoxMesh_d0gs8")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("3_gbniu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
+visible = false
+shape = SubResource("ConvexPolygonShape3D_1fpmp")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_5n3yh")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.28903174, 0.9573195, 0, -0.9573195, -0.28903174, 0, 454.56116, 227.96664)
+light_energy = 1.5
+shadow_enabled = true
+directional_shadow_mode = 1
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 51.00002, 17.22636)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 57, 7)
+material = ExtResource("3_gbniu")
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 43.50002, 28.22636)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 72, 7)
+material = ExtResource("3_gbniu")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15.0836525, 5.7263603)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 29.167267, 2)
+material = ExtResource("3_gbniu")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, 10.22636)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_gbniu")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.409962, -22.77364)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 27.819885, 7)
+material = ExtResource("3_gbniu")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.725091, 18.41478)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 1, 5)
+material = ExtResource("3_gbniu")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 27.227283, -8.596819)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 1, 35.410156)
+material = ExtResource("3_gbniu")
+
+[node name="LevelBoundaries" type="Node" parent="."]
+
+[node name="Marker3D" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
+
+[node name="Marker3D2" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
+
+[node name="Enemies" type="Node" parent="."]
+
+[node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_lwwg4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, 0)
+
+[node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
+player = NodePath("../Player")
+
+[node name="Platform2" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 16)
+player = NodePath("../Player")
+
+[node name="Platform3" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 14)
+player = NodePath("../Player")
+
+[node name="Platform4" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 5.994404, -0.30852652)
+player = NodePath("../Player")
+
+[node name="Platform5" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 5.994404, -2.3085265)
+player = NodePath("../Player")
+
+[node name="Platform6" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 5.994404, -4.3085265)
+player = NodePath("../Player")
+
+[node name="Platform7" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 5.994404, -10.560507)
+player = NodePath("../Player")
+
+[node name="Platform8" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 5.994404, -12.560507)
+player = NodePath("../Player")
+
+[node name="Platform9" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 5.994404, -14.560507)
+player = NodePath("../Player")
+
+[node name="Platform10" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 12.021958, -5.476836)
+player = NodePath("../Player")
+
+[node name="Platform11" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 12.021958, -7.4768357)
+player = NodePath("../Player")
+
+[node name="Platform12" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_qy88s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.21184683, 12.021958, -9.476835)
+player = NodePath("../Player")

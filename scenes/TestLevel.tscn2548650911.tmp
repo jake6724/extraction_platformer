@@ -1,13 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=10 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_1fpmp"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
-[ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_8xg12"]
-[ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
-[ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
-[ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="8_g3y3g"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_d0gs8"]
 size = Vector3(83.91, 1, 152.76)
@@ -37,12 +33,10 @@ left_boundary = NodePath("LevelBoundaries/Marker3D")
 right_boundary = NodePath("LevelBoundaries/Marker3D2")
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0061433855, 0.53533435, 33.59924)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0, 0.53533435, 31.599247)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.241449, 13.997885)
-collision_layer = 4
-collision_mask = 0
 
 [node name="Floor" type="MeshInstance3D" parent="StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
@@ -65,67 +59,39 @@ shadow_enabled = true
 directional_shadow_mode = 1
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50.50002, 17.22636)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.000019, 17.22636)
 use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 58, 7)
-material = ExtResource("1_dojpo")
-
-[node name="CSGBox3D8" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50.50002, 28.22636)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 58, 7)
-material = ExtResource("1_dojpo")
-
-[node name="CSGBox3D9" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.501019, 22.642288)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 12, 2)
+size = Vector3(3, 9, 7)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5000191, 5.7263603)
 use_collision = true
-collision_layer = 4
-collision_mask = 0
 size = Vector3(3, 2, 2)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, 10.22636)
 use_collision = true
-collision_layer = 4
-collision_mask = 0
 size = Vector3(3, 4, 7)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D7" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, -22.77364)
 use_collision = true
-collision_layer = 4
-collision_mask = 0
 size = Vector3(3, 4, 7)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -2.7736397)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -1.7736397)
 use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 1, 5)
+size = Vector3(3, 1, 7)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -12.77364)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -11.77364)
 use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 1, 5)
+size = Vector3(3, 1, 7)
 material = ExtResource("1_dojpo")
 
 [node name="LevelBoundaries" type="Node" parent="."]
@@ -135,33 +101,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
 
 [node name="Marker3D2" type="Marker3D" parent="LevelBoundaries"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
-
-[node name="Enemies" type="Node" parent="."]
-
-[node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_8xg12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11, -50.787792)
-stop_duration = 0.3
-
-[node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
-player = NodePath("../Player")
-
-[node name="Platform2" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 16)
-player = NodePath("../Player")
-
-[node name="Platform3" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 14)
-player = NodePath("../Player")
-
-[node name="SpikePlatform" parent="." instance=ExtResource("7_0n17k")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 17)
-
-[node name="SpikePlatform2" parent="." instance=ExtResource("7_0n17k")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 15)
-
-[node name="SpikePlatform3" parent="." instance=ExtResource("7_0n17k")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 13)
-
-[node name="SpinTurrent" parent="." instance=ExtResource("8_g3y3g")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 6)

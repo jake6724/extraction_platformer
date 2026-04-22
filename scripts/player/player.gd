@@ -57,9 +57,9 @@ var after_image_spawn_time_count: float
 
 @export var wall_raycast: RayCast3D
 @export var wall_raycast_distance_y: float = .35
-@export var wall_push_power: float = 13
+@export var wall_push_power: float = 35
 @export var wall_jump_power: float = 12.0
-@export var wall_jump_move_disable_duration: float = .1
+@export var wall_jump_move_disable_duration: float = .2
 var is_on_wall: bool = false
 var wall_jump_timer: Timer = Timer.new()
 
@@ -208,7 +208,7 @@ func process_wall_slide(_move_direction: Vector3) -> void:
 		is_on_wall = true
 		velocity = Vector3.ZERO
 		gravity = gravity_wall_slide
-		jump_count = 0
+		jump_count = 1
 	elif not can_wall_slide() and is_on_wall: # JUST fell off wall
 		is_on_wall = false
 		gravity = gravity_default

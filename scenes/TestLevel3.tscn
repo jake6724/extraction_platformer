@@ -1,0 +1,296 @@
+[gd_scene load_steps=12 format=3 uid="uid://b1hhevpo6w0gi"]
+
+[ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_ydhrl"]
+[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_wgs22"]
+[ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="3_byxhg"]
+[ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="4_nk70o"]
+[ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_x08qt"]
+[ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_aarjr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_d0gs8"]
+size = Vector3(83.91, 1, 152.76)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_1fpmp"]
+points = PackedVector3Array(41.946793, 0.5, 76.36504, 41.946793, -0.5, 76.36504, 41.946793, 0.5, -76.38, -41.955, 0.5, 76.36504, -41.955, -0.5, 76.36504, 41.946793, -0.5, -76.38, -41.955, 0.5, -76.38, -41.955, -0.5, -76.38)
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_i6x8u"]
+panorama = ExtResource("4_nk70o")
+
+[sub_resource type="Sky" id="Sky_8xg12"]
+sky_material = SubResource("PanoramaSkyMaterial_i6x8u")
+
+[sub_resource type="Environment" id="Environment_5n3yh"]
+background_mode = 2
+background_color = Color(1, 1, 1, 1)
+sky = SubResource("Sky_8xg12")
+ambient_light_source = 2
+ambient_light_color = Color(0.74558026, 0.7455802, 0.7455802, 1)
+ambient_light_energy = 1.5
+reflected_light_source = 2
+
+[node name="TestLevel" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
+script = ExtResource("1_ydhrl")
+player = NodePath("Player")
+left_boundary = NodePath("LevelBoundaries/Marker3D")
+right_boundary = NodePath("LevelBoundaries/Marker3D2")
+
+[node name="Player" parent="." instance=ExtResource("2_wgs22")]
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0061433855, 0.53533435, 17.403456)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.241449, 13.997885)
+collision_layer = 4
+collision_mask = 0
+
+[node name="Floor" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
+mesh = SubResource("BoxMesh_d0gs8")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("3_byxhg")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
+visible = false
+shape = SubResource("ConvexPolygonShape3D_1fpmp")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_5n3yh")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.28903174, 0.9573195, 0, -0.9573195, -0.28903174, 0, 454.56116, 227.96664)
+light_energy = 1.5
+shadow_enabled = true
+directional_shadow_mode = 1
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 46.868164, -36.37923)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 92.87152, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42.686172, 24.453758)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 86.27136, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5000191, 5.7263603)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 2, 2)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, 10.22636)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076263905, 12.00294, 5.6389484)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076263905, 32.627113, -5.681052)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 13.799316)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076263905, 27.341835, 13.488825)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076263905, 61.677063, 1.8021593)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.69154024, 81.58342, 1.7829905)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 9.114746, 4.822754)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076263905, 52.795265, -19.75381)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076263905, 80.54308, -25.343079)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 16.363037)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, -22.77364)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 4, 7)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -2.7736397)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 1, 5)
+material = ExtResource("3_byxhg")
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -12.77364)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 1, 5)
+material = ExtResource("3_byxhg")
+
+[node name="LevelBoundaries" type="Node" parent="."]
+
+[node name="Marker3D" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
+
+[node name="Marker3D2" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
+
+[node name="Enemies" type="Node" parent="."]
+
+[node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_x08qt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, -52.03183)
+
+[node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
+player = NodePath("../Player")
+
+[node name="Platform2" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 16)
+player = NodePath("../Player")
+
+[node name="Platform3" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 14)
+player = NodePath("../Player")
+
+[node name="Platform4" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 16.219532, -10.940262)
+player = NodePath("../Player")
+
+[node name="Platform5" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 16.219532, -14.073484)
+player = NodePath("../Player")
+
+[node name="Platform6" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 16.219532, -17.206709)
+player = NodePath("../Player")
+
+[node name="Platform7" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 20.548866, 0.2734394)
+player = NodePath("../Player")
+
+[node name="Platform8" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 20.548866, -2.8597832)
+player = NodePath("../Player")
+
+[node name="Platform9" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 20.548866, -5.9930077)
+player = NodePath("../Player")
+
+[node name="Platform10" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 24.958216, -17.308886)
+player = NodePath("../Player")
+
+[node name="Platform11" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 24.958216, -20.442108)
+player = NodePath("../Player")
+
+[node name="Platform12" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 24.958216, -23.575333)
+player = NodePath("../Player")
+
+[node name="Platform13" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 39.849804, -21.190691)
+player = NodePath("../Player")
+
+[node name="Platform14" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 39.849804, -24.323914)
+player = NodePath("../Player")
+
+[node name="Platform15" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 39.849804, -27.457138)
+player = NodePath("../Player")
+
+[node name="Platform16" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 45.16317, -2.9008102)
+player = NodePath("../Player")
+
+[node name="Platform17" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 45.16317, -6.034033)
+player = NodePath("../Player")
+
+[node name="Platform18" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 45.16317, -9.167257)
+player = NodePath("../Player")
+
+[node name="Platform19" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 52.258797, 14.95689)
+player = NodePath("../Player")
+
+[node name="Platform20" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 52.258797, 11.823668)
+player = NodePath("../Player")
+
+[node name="Platform21" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 52.258797, 8.690443)
+player = NodePath("../Player")
+
+[node name="Platform22" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, -8.567217)
+player = NodePath("../Player")
+
+[node name="Platform23" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, -11.700439)
+player = NodePath("../Player")
+
+[node name="Platform24" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, -14.833664)
+player = NodePath("../Player")
+
+[node name="Platform25" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, 16.641085)
+player = NodePath("../Player")
+
+[node name="Platform26" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, 13.507862)
+player = NodePath("../Player")
+
+[node name="Platform27" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, 10.374638)
+player = NodePath("../Player")
