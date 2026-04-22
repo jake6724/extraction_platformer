@@ -15,6 +15,7 @@ var can_move: bool = true # Used to enable/disable move and jump input
 @export var move_speed_sprint: float = 10.0
 var move_speed: float 
 var move_speed_base: float 
+var is_moving_down: bool = false
 @export var acceleration: float = 70
 # @export var jump_power: float = 11.75 # Give jump height of ~2 meters. Slighly higher
 @export var jump_power: float = 15.0
@@ -39,6 +40,7 @@ var camera_limit_right: float
 var _camera_input_direction: Vector2 = Vector2.ZERO
 var _last_movement_direction: Vector3 = Vector3.BACK
 var _rotate_camera: bool = false
+var camera_look_ahead_offset: Vector3
 
 var zoom_target: float = 8
 
@@ -60,13 +62,15 @@ var after_image_spawn_time_count: float
 @export var wall_push_power: float = 13
 @export var wall_jump_power: float = 12.0
 @export var wall_jump_move_disable_duration: float = .1
-var is_on_wall: bool = false
+var is_wall_sliding: bool = false
+var is_allowed_wall_slide: bool = true
 var wall_jump_timer: Timer = Timer.new()
+var prevent_wall_slide_timer: Timer = Timer.new() # Used to prevent wall sliding after move_down out of wallslide
+var prevent_wall_slide_duration: float
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
 @export var jump_dust_particles: GPUParticles3D
-
 
 @export_group("Components")
 @export var player_hurtbox: PlayerHurtbox
@@ -86,6 +90,11 @@ func _ready():
 	wall_jump_timer.autostart = false
 	add_child(wall_jump_timer)
 	wall_jump_timer.timeout.connect(on_wall_jump_timer_timeout)
+
+	prevent_wall_slide_timer.one_shot = true
+	prevent_wall_slide_timer.autostart = false
+	add_child(prevent_wall_slide_timer)
+	prevent_wall_slide_timer.timeout.connect(on_prevent_wall_slide_timer_timeout)
 
 	initialize_camera()
 	dust_particles.visible = true
@@ -108,26 +117,26 @@ func _input(_event):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if Input.is_action_just_pressed("sprint"):
-		velocity.y = (jump_power * 1.5)
-		jump_dust_particles.restart()
-		#sprint()
-
-	if Input.is_action_just_released("sprint"):
-		pass
-
-	if Input.is_action_just_pressed("jump"):
-		if can_move:
-			jump()
-	if right_click_to_rotate_camera:
-		if Input.is_action_just_pressed("right_click"):
-			_rotate_camera = true
-		if Input.is_action_just_released("right_click"):
-			_rotate_camera = false
 	if Input.is_action_just_pressed("scroll_up"):
 		zoom_target -= zoom_step
 	if Input.is_action_just_pressed("scroll_down"):
 		zoom_target += zoom_step
+
+	if can_move:
+		if Input.is_action_just_pressed("sprint"):
+			velocity.y = (jump_power * 1.5)
+			jump_dust_particles.restart()
+		if Input.is_action_just_released("sprint"):
+			pass
+		if Input.is_action_just_pressed("jump"):
+			jump()
+		if Input.is_action_just_pressed("move_down"):
+			is_moving_down = true
+			reset_from_wall_slide()
+			is_allowed_wall_slide = false
+			prevent_wall_slide_timer.start(prevent_wall_slide_duration)
+		if Input.is_action_just_released("move_down"):
+			is_moving_down = false
 	
 func _process(delta):
 	process_camera_limits()
@@ -174,7 +183,7 @@ func _physics_process(delta: float) -> void:
 	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
 	
 	# Animate
-	if is_on_wall:
+	if is_wall_sliding:
 		_skin.wall_slide()
 	elif not is_on_floor() and velocity.y <= 0:
 		_skin.fall()
@@ -204,17 +213,15 @@ func process_camera_position(delta: float) -> void:
 	_camera.global_transform.origin.y = lerp(_camera.global_transform.origin.y, _camera_pivot.global_transform.origin.y, delta * CAMERA_FOLLOW_SPEED)
 
 func process_wall_slide(_move_direction: Vector3) -> void:
-	if can_wall_slide() and not is_on_wall and _move_direction != Vector3.ZERO: # Start wall slide
-		is_on_wall = true
+	if can_wall_slide() and not is_wall_sliding and _move_direction != Vector3.ZERO and is_allowed_wall_slide: # Start wall slide
+		is_wall_sliding = true
 		velocity = Vector3.ZERO
 		gravity = gravity_wall_slide
 		jump_count = 0
-	elif not can_wall_slide() and is_on_wall: # JUST fell off wall
-		is_on_wall = false
-		gravity = gravity_default
-	elif is_on_wall: # Is actively wall sliding
+	elif not can_wall_slide() and is_wall_sliding: # JUST fell off wall
+		reset_from_wall_slide()
+	elif is_wall_sliding: # Is actively wall sliding
 		gravity -= gravity_wall_slide_increment
-
 func process_dust_particles() -> void:
 	if not is_equal_approx(velocity.z, 0) and is_on_floor():
 		dust_particles.emitting = true
@@ -236,12 +243,11 @@ func jump() -> void:
 		coyote_jump_available = false
 		_skin.jump()
 		var _jump_power: float = jump_power
-		if is_on_wall:
+		if is_wall_sliding:
 			_jump_power = wall_jump_power 
 			velocity.z += (get_wall_normal().z * wall_push_power) # Push off away from wall if sliding
 			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
 
-			# Only disable input in
 			can_move = false
 			wall_jump_timer.start(wall_jump_move_disable_duration)
 
@@ -275,6 +281,9 @@ func dash() -> void:
 func on_wall_jump_timer_timeout() -> void:
 	can_move = true
 
+func on_prevent_wall_slide_timer_timeout() -> void:
+	is_allowed_wall_slide = true
+
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	velocity = _hit_impulse
 
@@ -295,3 +304,8 @@ func create_after_image() -> void:
 	var lifetime: float = .3
 	await get_tree().create_timer(lifetime).timeout
 	skin_clone.queue_free()
+
+## Reset to normal after wall slide completes
+func reset_from_wall_slide() -> void:
+	is_wall_sliding = false
+	gravity = gravity_default

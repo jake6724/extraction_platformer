@@ -9,9 +9,11 @@ extends StaticBody3D
 # TODO: Optimize by only calling this function when play moves, not physics tick
 
 func _physics_process(_delta):
-	if player.global_position.y >= global_position.y:
+	if player.global_position.y >= global_position.y and not player.is_moving_down:
 		var bodies: Array = area_body_detect.get_overlapping_bodies() # Don't turn on collider if player is still inside the platform
 		if bodies.size() == 0:
 			collider.set_deferred("disabled", false)
+	elif player.is_moving_down:
+		collider.set_deferred("disabled", true)
 	else:
 		collider.set_deferred("disabled", true)

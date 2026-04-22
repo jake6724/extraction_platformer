@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=12 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
@@ -8,12 +8,6 @@
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
 [ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
 [ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="8_g3y3g"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_d0gs8"]
-size = Vector3(83.91, 1, 152.76)
-
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_1fpmp"]
-points = PackedVector3Array(41.946793, 0.5, 76.36504, 41.946793, -0.5, 76.36504, 41.946793, 0.5, -76.38, -41.955, 0.5, 76.36504, -41.955, -0.5, 76.36504, 41.946793, -0.5, -76.38, -41.955, 0.5, -76.38, -41.955, -0.5, -76.38)
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_i6x8u"]
 panorama = ExtResource("3_df0lk")
@@ -38,22 +32,6 @@ right_boundary = NodePath("LevelBoundaries/Marker3D2")
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
 transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0061433855, 0.53533435, 33.59924)
-
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.241449, 13.997885)
-collision_layer = 4
-collision_mask = 0
-
-[node name="Floor" type="MeshInstance3D" parent="StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
-mesh = SubResource("BoxMesh_d0gs8")
-skeleton = NodePath("../..")
-surface_material_override/0 = ExtResource("1_dojpo")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.001226902, -7.24143, -13.973257)
-visible = false
-shape = SubResource("ConvexPolygonShape3D_1fpmp")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -89,7 +67,7 @@ size = Vector3(3, 12, 2)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5000191, 5.7263603)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4416599, 5.7263603)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
@@ -97,15 +75,23 @@ size = Vector3(3, 2, 2)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, 10.22636)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.44166, 10.22636)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(3, 4, 7)
 material = ExtResource("1_dojpo")
 
+[node name="CSGBox3D10" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.05834, -9.942158)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 7, 126.48816)
+material = ExtResource("1_dojpo")
+
 [node name="CSGBox3D7" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.500019, -22.77364)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.44166, -22.77364)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
@@ -139,7 +125,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_8xg12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 35.085114, -9.227291)
 stop_duration = 0.3
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
