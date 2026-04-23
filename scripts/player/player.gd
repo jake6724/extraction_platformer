@@ -22,13 +22,13 @@ var _move_speed: float
 @export_group("Jump")
 @export var jump_power: float = 15
 @export var jump_max: int = 2
+@export var timer_jump_coyote: Timer
 @export_range(0,1,.1) var jump_coyote_time: float = .25
 var _can_move: bool = true
 var is_moving_down: bool = false
 var _prev_is_on_floor: bool = true
 var _jump_count: int = 0
 var _coyote_jump_available: bool = true
-var coyote_jump_timer: Timer = Timer.new()
 
 @export_group("Gravity & Falling")
 ## Gravity applied to the player in most cases.
@@ -71,14 +71,17 @@ var _after_image_spawn_time_count: float
 @export_group("Wall Slide")
 @export var wall_push_power: float = 35
 @export var wall_jump_power: float = 12.0
+## Controls duration after wall jumping that all movement is disabled.
 @export var wall_jump_move_disable_duration: float = .1
 @export var wall_raycast: RayCast3D
+## Do not change this variable without a good reason. Controls the range that the wall slide raycast looks for a wall, and needs to fit with the player's capsule collider.
 @export var wall_raycast_distance_y: float = .35
+@export var timer_wall_slide: Timer
+@export var timer_prevent_wall_slide: Timer # Used to prevent wall sliding after move_down out of wallslide
+## How long player is unable to wall slide after falling (pressing down) off wall. Does not affecting ability to move, just the ability to lock onto the wall.
+@export_range(0.0,1.0,0.05) var prevent_wall_slide_duration: float = 0.2
 var _is_wall_sliding: bool = false
 var _wall_slide_allowed: bool = true
-var wall_jump_timer: Timer = Timer.new()
-var prevent_wall_slide_timer: Timer = Timer.new() # Used to prevent wall sliding after move_down out of wallslide
-var _prevent_wall_slide_duration: float = 0.2
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
@@ -89,40 +92,19 @@ var _prevent_wall_slide_duration: float = 0.2
 @export var _skin: Node3D
 
 func _ready():
-	# dust_particles.emitting = false
 	_gravity = gravity_default
 	_move_speed = move_speed_ground
 
-	coyote_jump_timer.one_shot = true
-	coyote_jump_timer.autostart = false
-	add_child(coyote_jump_timer)
-	coyote_jump_timer.timeout.connect(on_coyote_jump_timer_timeout)
-
-	wall_jump_timer.one_shot = true
-	wall_jump_timer.autostart = false
-	add_child(wall_jump_timer)
-	wall_jump_timer.timeout.connect(on_wall_jump_timer_timeout)
-
-	prevent_wall_slide_timer.one_shot = true
-	prevent_wall_slide_timer.autostart = false
-	add_child(prevent_wall_slide_timer)
-	prevent_wall_slide_timer.timeout.connect(on_prevent_wall_slide_timer_timeout)
+	timer_jump_coyote.timeout.connect(on_timer_jump_coyote_timeout)
+	timer_wall_slide.timeout.connect(on_timer_wall_slide_timeout)
+	timer_prevent_wall_slide.timeout.connect(on_timer_prevent_wall_slide_timeout)
 
 	initialize_camera()
+
 	dust_particles.visible = true
 	jump_dust_particles.visible = true
 
 	player_hurtbox.hit.connect(on_player_hurtbox_hit)
-
-func initialize_camera() -> void:
-	camera.global_transform.origin = camera_pivot.global_transform.origin
-	camera.rotation_degrees.y = 90
-	camera.position.x = _zoom_target
-
-## Called by parent Level
-func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
-	_camera_limit_left = left_limit.z
-	_camera_limit_right = right_limit.z
 
 func _input(_event):
 	if Input.is_action_just_pressed("left_click"):
@@ -146,7 +128,7 @@ func _input(_event):
 			is_moving_down = true
 			reset_from_wall_slide()
 			_wall_slide_allowed = false
-			prevent_wall_slide_timer.start(_prevent_wall_slide_duration)
+			timer_prevent_wall_slide.start(prevent_wall_slide_duration)
 		if Input.is_action_just_released("move_down"):
 			is_moving_down = false
 	
@@ -179,7 +161,7 @@ func _physics_process(delta: float) -> void:
 		wall_raycast.target_position.y = -wall_raycast_distance_y
 
 	if _prev_is_on_floor != is_on_floor() and not is_on_floor():
-		coyote_jump_timer.start(jump_coyote_time)
+		timer_jump_coyote.start(jump_coyote_time)
 	_prev_is_on_floor = is_on_floor()
 
 	process_wall_slide(move_direction)
@@ -191,10 +173,11 @@ func _physics_process(delta: float) -> void:
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
 		_last_movement_direction = move_direction
 
+	# Rotate skin (around the Y-axis) to face the move direction
 	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
 	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
 	
-	# Animate
+	# Set state
 	if _is_wall_sliding:
 		_skin.wall_slide()
 	elif not is_on_floor() and velocity.y <= 0:
@@ -203,13 +186,23 @@ func _physics_process(delta: float) -> void:
 		_skin.jump()
 	elif is_on_floor():
 		_coyote_jump_available = true
-		coyote_jump_timer.stop()
+		timer_jump_coyote.stop()
 		var ground_speed: float = velocity.length()
 		_jump_count = 0
 		if ground_speed > 1.0:
 			_skin.move()
 		else:
 			_skin.idle()
+
+func initialize_camera() -> void:
+	camera.global_transform.origin = camera_pivot.global_transform.origin
+	camera.rotation_degrees.y = 90
+	camera.position.x = _zoom_target
+
+## Called by parent Level
+func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
+	_camera_limit_left = left_limit.z
+	_camera_limit_right = right_limit.z
 
 func process_camera_zoom(delta: float) -> void:
 	if not is_equal_approx(camera.position.x, _zoom_target):
@@ -221,18 +214,12 @@ func process_camera_limits() -> void:
 
 ## MUST be called in `_physics_process` to avoid desyncing which causes jittering
 func process_camera_position(delta: float) -> void:
-
 	# var camera_look_ahead_offset_target = velocity.normalized() * velocity.length() * .5
-
 	# camera_look_ahead_offset = camera_look_ahead_offset.move_toward(camera_look_ahead_offset_target, delta*2)
-	# print("Cam offset: ", camera_look_ahead_offset)
-	# print("Vel len: ", velocity.length())
-
 	# var target: Vector3 = camera_pivot.global_transform.origin + camera_look_ahead_offset
 	var target: Vector3 = camera_pivot.global_transform.origin
 	camera.global_transform.origin = lerp(camera.global_transform.origin, target, delta * camera_follow_speed)
 	
-
 func process_wall_slide(_move_direction: Vector3) -> void:
 	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide
 		_is_wall_sliding = true
@@ -270,11 +257,10 @@ func jump() -> void:
 			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
 
 			_can_move = false
-			wall_jump_timer.start(wall_jump_move_disable_duration)
-
+			timer_wall_slide.start(wall_jump_move_disable_duration)
 		velocity.y = _jump_power
 
-func on_coyote_jump_timer_timeout() -> void:
+func on_timer_jump_coyote_timeout() -> void:
 	_coyote_jump_available = false
 
 ## Returns true if wall_raycast is colliding, and character is not on floor
@@ -300,10 +286,10 @@ func dash() -> void:
 	await get_tree().create_timer(.6).timeout
 	after_image_active = false
 
-func on_wall_jump_timer_timeout() -> void:
+func on_timer_wall_slide_timeout() -> void:
 	_can_move = true
 
-func on_prevent_wall_slide_timer_timeout() -> void:
+func on_timer_prevent_wall_slide_timeout() -> void:
 	_wall_slide_allowed = true
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:

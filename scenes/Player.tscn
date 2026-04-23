@@ -68,15 +68,17 @@ scale_curve = SubResource("CurveTexture_qu4a1")
 radius = 0.34765625
 height = 1.0080566
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera", "camera_pivot", "after_image_parent", "wall_raycast", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "after_image_parent", "wall_raycast", "timer_wall_slide", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
 collision_mask = 4
 script = ExtResource("1_v6fml")
+timer_jump_coyote = NodePath("TimeJumpCoyote")
 jump_coyote_time = 0.3
 camera = NodePath("Camera3D")
 camera_pivot = NodePath("CameraPivot")
 zoom_sensitivity = 6.0
 after_image_parent = NodePath("AfterImageParent")
 wall_raycast = NodePath("CollisionShape3D/RayCast3D")
+timer_wall_slide = NodePath("TimerWallSlide")
 dust_particles = NodePath("DustParticles")
 jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
@@ -131,3 +133,13 @@ script = ExtResource("3_3li8b")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64294434, 0)
 shape = SubResource("CapsuleShape3D_3li8b")
 debug_color = Color(0, 0.5565641, 0.33413175, 0.41960785)
+
+[node name="TimerWallSlide" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
+[node name="TimeJumpCoyote" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
+[node name="TimerPreventWallSlide" type="Timer" parent="."]
