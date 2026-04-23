@@ -8,12 +8,15 @@ extends Enemy
 @export var rotate_delay: float = .75
 @export var enabled: bool = true
 @export var spin_offset: float = 45
+@export var start_rotated: bool = false
 
 func _ready():
     shoot_timer.timeout.connect(on_shoot_timer_timeout)
     rotate_timer.timeout.connect(on_rotate_timer_timeout)
     if enabled:
         shoot_timer.start(shoot_delay)
+    if start_rotated:
+        rotation_degrees.x = spin_offset
 
 func on_shoot_timer_timeout() -> void:
     fire_shooters()

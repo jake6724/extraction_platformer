@@ -49,8 +49,12 @@ var _gravity: float
 @export_range(0, 1.0) var mouse_sensitivty: float = 0.25
 @export var camera: Camera3D
 @export var camera_pivot: Node3D
-@export var camera_zoom_min: float = 2
-@export var camera_zoom_max: float = 20
+## Controls camera zoom. This value is the camera's initial zoom (based on Camera3D's size property if orthographic), and it modified by zoom_step.
+@export var zoom_target: float = 16
+## Controls how close the camera can get to the player
+@export var zoom_min: float = 5
+## Controls how far the camera can get from the player
+@export var zoom_max: float = 30
 @export_range(1, 20, 1) var zoom_sensitivity: float = .5
 @export_range(.1, 10, .1) var zoom_step: float = 1
 ## Multiplier controlling the strength of the camera's lerp to player's position. Lower values will cause the camera to trail behind the player's current position more.
@@ -58,7 +62,8 @@ var _gravity: float
 var _camera_limit_left: float
 var _camera_limit_right: float 
 var _last_movement_direction: Vector3 = Vector3.BACK
-var _zoom_target: float = 8
+## Do not change; this does not affect zoom. For ortho Camera3D, zoom is controlled with size but the camera X still needs to start far enough away to avoid clipping forward into the world
+var _camera_x_position: float = 8.0
 const MOVE_DIRECTION_THRESHOLD: float = 0.2
 # var camera_look_ahead_offset: Vector3 = Vector3.ZERO
 
@@ -112,9 +117,9 @@ func _input(_event):
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("scroll_up"):
-		_zoom_target -= zoom_step
+		zoom_target -= zoom_step
 	if Input.is_action_just_pressed("scroll_down"):
-		_zoom_target += zoom_step
+		zoom_target += zoom_step
 
 	if _can_move:
 		if Input.is_action_just_pressed("sprint"):
@@ -197,7 +202,7 @@ func _physics_process(delta: float) -> void:
 func initialize_camera() -> void:
 	camera.global_transform.origin = camera_pivot.global_transform.origin
 	camera.rotation_degrees.y = 90
-	camera.position.x = _zoom_target
+	camera.position.x = _camera_x_position
 
 ## Called by parent Level
 func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
@@ -205,20 +210,20 @@ func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
 	_camera_limit_right = right_limit.z
 
 func process_camera_zoom(delta: float) -> void:
-	if not is_equal_approx(camera.position.x, _zoom_target):
-		_zoom_target = clamp(_zoom_target, camera_zoom_min, camera_zoom_max)
-		camera.position.x = lerp(camera.position.x, _zoom_target, zoom_sensitivity * delta)
+	if not is_equal_approx(camera.size, zoom_target):
+		zoom_target = clamp(zoom_target, zoom_min, zoom_max)
+		camera.size = lerp(camera.size, zoom_target, zoom_sensitivity * delta)
 
 func process_camera_limits() -> void:
 	camera.global_position.z = clamp(camera.global_position.z, _camera_limit_right, _camera_limit_left)
 
 ## MUST be called in `_physics_process` to avoid desyncing which causes jittering
 func process_camera_position(delta: float) -> void:
-	# var camera_look_ahead_offset_target = velocity.normalized() * velocity.length() * .5
-	# camera_look_ahead_offset = camera_look_ahead_offset.move_toward(camera_look_ahead_offset_target, delta*2)
-	# var target: Vector3 = camera_pivot.global_transform.origin + camera_look_ahead_offset
-	var target: Vector3 = camera_pivot.global_transform.origin
-	camera.global_transform.origin = lerp(camera.global_transform.origin, target, delta * camera_follow_speed)
+	# Do not update X-axis, just Y and Z based on camera_pivot's transform
+	var target_z: float = camera_pivot.global_transform.origin.z
+	var target_y: float = camera_pivot.global_transform.origin.y
+	camera.global_transform.origin.z = lerp(camera.global_transform.origin.z, target_z, delta * camera_follow_speed)
+	camera.global_transform.origin.y = lerp(camera.global_transform.origin.y, target_y, delta * camera_follow_speed)
 	
 func process_wall_slide(_move_direction: Vector3) -> void:
 	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide
@@ -258,6 +263,7 @@ func jump() -> void:
 
 			_can_move = false
 			timer_wall_slide.start(wall_jump_move_disable_duration)
+
 		velocity.y = _jump_power
 
 func on_timer_jump_coyote_timeout() -> void:
