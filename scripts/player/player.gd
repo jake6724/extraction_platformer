@@ -24,7 +24,7 @@ var _move_speed: float
 @export var jump_max: int = 2
 @export_range(0,1,.1) var jump_coyote_time: float = .25
 var _can_move: bool = true
-var _is_moving_down: bool = false
+var is_moving_down: bool = false
 var _prev_is_on_floor: bool = true
 var _jump_count: int = 0
 var _coyote_jump_available: bool = true
@@ -69,11 +69,11 @@ const MOVE_DIRECTION_THRESHOLD: float = 0.2
 var _after_image_spawn_time_count: float 
 
 @export_group("Wall Slide")
-@export var wall_raycast: RayCast3D
-@export var wall_raycast_distance_y: float = .35
 @export var wall_push_power: float = 35
 @export var wall_jump_power: float = 12.0
 @export var wall_jump_move_disable_duration: float = .1
+@export var wall_raycast: RayCast3D
+@export var wall_raycast_distance_y: float = .35
 var _is_wall_sliding: bool = false
 var _wall_slide_allowed: bool = true
 var wall_jump_timer: Timer = Timer.new()
@@ -143,12 +143,12 @@ func _input(_event):
 		if Input.is_action_just_pressed("jump"):
 			jump()
 		if Input.is_action_just_pressed("move_down"):
-			_is_moving_down = true
+			is_moving_down = true
 			reset_from_wall_slide()
 			_wall_slide_allowed = false
 			prevent_wall_slide_timer.start(_prevent_wall_slide_duration)
 		if Input.is_action_just_released("move_down"):
-			_is_moving_down = false
+			is_moving_down = false
 	
 func _process(delta):
 	process_camera_limits()

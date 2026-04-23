@@ -68,10 +68,12 @@ scale_curve = SubResource("CurveTexture_qu4a1")
 radius = 0.34765625
 height = 1.0080566
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("after_image_parent", "wall_raycast", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("camera", "camera_pivot", "after_image_parent", "wall_raycast", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
 collision_mask = 4
 script = ExtResource("1_v6fml")
 jump_coyote_time = 0.3
+camera = NodePath("Camera3D")
+camera_pivot = NodePath("CameraPivot")
 zoom_sensitivity = 6.0
 after_image_parent = NodePath("AfterImageParent")
 wall_raycast = NodePath("CollisionShape3D/RayCast3D")
