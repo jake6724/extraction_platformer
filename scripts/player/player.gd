@@ -5,7 +5,7 @@ extends CharacterBody3D
 Variables that start with _ (such as _move_speed) are internal variables that keep track of something at runtime and aren't intended to be edited.
 Anything that starts with @export can be modified to change player stats.
 
-Some internal variables have a corresponding @export var which control their initial value (example: _gravity and gravity_default)
+Some internal variables have a corresponding @export var which controls their initial value (example: _gravity and gravity_default)
 """
 
 @export_category("Player Settings")
@@ -83,10 +83,15 @@ var _after_image_spawn_time_count: float
 @export var wall_raycast_distance_y: float = .35
 @export var timer_wall_slide: Timer
 @export var timer_prevent_wall_slide: Timer # Used to prevent wall sliding after move_down out of wallslide
+@export var timer_wall_jump_coyote: Timer
+@export_range(0.0,1.0,0.05) var wall_jump_coyote_time: float = 0.15
 ## How long player is unable to wall slide after falling (pressing down) off wall. Does not affecting ability to move, just the ability to lock onto the wall.
 @export_range(0.0,1.0,0.05) var prevent_wall_slide_duration: float = 0.2
 var _is_wall_sliding: bool = false
 var _wall_slide_allowed: bool = true
+var _coyote_wall_jump_available: bool = false
+## Set each time the player starts wall_slide, remains available to allow for wall jump coyote time
+var _wall_slide_normal: Vector3
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
@@ -103,6 +108,7 @@ func _ready():
 	timer_jump_coyote.timeout.connect(on_timer_jump_coyote_timeout)
 	timer_wall_slide.timeout.connect(on_timer_wall_slide_timeout)
 	timer_prevent_wall_slide.timeout.connect(on_timer_prevent_wall_slide_timeout)
+	timer_wall_jump_coyote.timeout.connect(on_timer_wall_jump_coyote_timeout)
 
 	initialize_camera()
 
@@ -231,10 +237,14 @@ func process_wall_slide(_move_direction: Vector3) -> void:
 		velocity = Vector3.ZERO
 		_gravity = gravity_wall_slide
 		_jump_count = 0
+		_wall_slide_normal = get_wall_normal()
 	elif not can_wall_slide() and _is_wall_sliding: # JUST fell off wall
 		reset_from_wall_slide()
+		_coyote_wall_jump_available = true
+		timer_wall_jump_coyote.start(wall_jump_coyote_time)
 	elif _is_wall_sliding: # Is actively wall sliding
 		_gravity -= gravity_wall_slide_increment
+
 func process_dust_particles() -> void:
 	if not is_equal_approx(velocity.z, 0) and is_on_floor():
 		dust_particles.emitting = true
@@ -256,11 +266,12 @@ func jump() -> void:
 		_coyote_jump_available = false
 		_skin.jump()
 		var _jump_power: float = jump_power
-		if _is_wall_sliding:
+		# Can wall jump if currently wall sliding, or wall jump coyote avaiable AND input is moving away from wall
+		if _is_wall_sliding or (_coyote_wall_jump_available and (_last_movement_direction.z == _wall_slide_normal.z)): 
+			_coyote_wall_jump_available = false
 			_jump_power = wall_jump_power 
-			velocity.z += (get_wall_normal().z * wall_push_power) # Push off away from wall if sliding
+			velocity.z += (_wall_slide_normal.z * wall_push_power) # Push off away from wall if sliding
 			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
-
 			_can_move = false
 			timer_wall_slide.start(wall_jump_move_disable_duration)
 
@@ -297,6 +308,9 @@ func on_timer_wall_slide_timeout() -> void:
 
 func on_timer_prevent_wall_slide_timeout() -> void:
 	_wall_slide_allowed = true
+
+func on_timer_wall_jump_coyote_timeout() -> void:
+	_coyote_wall_jump_available = false
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	velocity = _hit_impulse

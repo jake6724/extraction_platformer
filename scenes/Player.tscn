@@ -68,7 +68,7 @@ scale_curve = SubResource("CurveTexture_qu4a1")
 radius = 0.34765625
 height = 1.0080566
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "after_image_parent", "wall_raycast", "timer_wall_slide", "timer_prevent_wall_slide", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "after_image_parent", "wall_raycast", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
 collision_mask = 4
 script = ExtResource("1_v6fml")
 timer_jump_coyote = NodePath("TimeJumpCoyote")
@@ -80,6 +80,7 @@ after_image_parent = NodePath("AfterImageParent")
 wall_raycast = NodePath("CollisionShape3D/RayCast3D")
 timer_wall_slide = NodePath("TimerWallSlide")
 timer_prevent_wall_slide = NodePath("TimerPreventWallSlide")
+timer_wall_jump_coyote = NodePath("TimerWallJumpCoyote")
 dust_particles = NodePath("DustParticles")
 jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
@@ -98,8 +99,6 @@ collision_mask = 4
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1704572, 0)
-
-[node name="AfterImageParent" type="Node" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(7.54979e-08, 3.5527135e-15, -1, 0, 1, 3.5527135e-15, 1, -2.682224e-22, 7.54979e-08, 8, 1.17, 0)
@@ -135,12 +134,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64294434, 0)
 shape = SubResource("CapsuleShape3D_3li8b")
 debug_color = Color(0, 0.5565641, 0.33413175, 0.41960785)
 
-[node name="TimerWallSlide" type="Timer" parent="."]
-process_callback = 0
-one_shot = true
-
 [node name="TimeJumpCoyote" type="Timer" parent="."]
 process_callback = 0
 one_shot = true
 
+[node name="TimerWallSlide" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
 [node name="TimerPreventWallSlide" type="Timer" parent="."]
+
+[node name="TimerWallJumpCoyote" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
+[node name="AfterImageParent" type="Node" parent="."]
