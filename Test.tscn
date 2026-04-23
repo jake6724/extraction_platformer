@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3 uid="uid://d24rfpq1supxv"]
+
+[sub_resource type="Gradient" id="Gradient_rvu7i"]
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_myinc"]
+gradient = SubResource("Gradient_rvu7i")
+fill_from = Vector2(0.82905984, 0.56837606)
+
+[sub_resource type="Gradient" id="Gradient_njov2"]
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_2au82"]
+gradient = SubResource("Gradient_njov2")
+fill_from = Vector2(0.517094, 0.9529914)
+fill_to = Vector2(0.89316237, 0.5555556)
+
+[sub_resource type="Gradient" id="Gradient_8tn2x"]
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_aq4fw"]
+gradient = SubResource("Gradient_8tn2x")
+fill_from = Vector2(0.43589744, 0.7051282)
+fill_to = Vector2(0.54273504, 0.53418803)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.03170097)
+texture = SubResource("GradientTexture2D_myinc")
+
+[node name="Sprite3D2" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.011963546, 0.07164976)
+texture = SubResource("GradientTexture2D_2au82")
+
+[node name="Sprite3D3" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.11331779)
+texture = SubResource("GradientTexture2D_aq4fw")

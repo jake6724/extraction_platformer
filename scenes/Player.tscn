@@ -68,19 +68,17 @@ scale_curve = SubResource("CurveTexture_qu4a1")
 radius = 0.34765625
 height = 1.0080566
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("_camera", "_camera_pivot", "_skin", "after_image_parent", "wall_raycast", "dust_particles", "jump_dust_particles", "player_hurtbox")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("after_image_parent", "wall_raycast", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin")]
 collision_mask = 4
 script = ExtResource("1_v6fml")
-zoom_sensitivity = 6.0
 jump_coyote_time = 0.3
-_camera = NodePath("Camera3D")
-_camera_pivot = NodePath("CameraPivot")
-_skin = NodePath("SophiaSkin")
+zoom_sensitivity = 6.0
 after_image_parent = NodePath("AfterImageParent")
 wall_raycast = NodePath("CollisionShape3D/RayCast3D")
 dust_particles = NodePath("DustParticles")
 jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
+_skin = NodePath("SophiaSkin")
 
 [node name="SophiaSkin" parent="." instance=ExtResource("1_p0vlq")]
 
@@ -102,7 +100,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1704572, 0)
 transform = Transform3D(7.54979e-08, 3.5527135e-15, -1, 0, 1, 3.5527135e-15, 1, -2.682224e-22, 7.54979e-08, -2, 1.1704574, 7.985509e-09)
 top_level = true
 projection = 1
-size = 10.0
+size = 16.0
 
 [node name="DustParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14138544, 0)

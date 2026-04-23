@@ -5,13 +5,13 @@
 [ext_resource type="PackedScene" uid="uid://dac0md3embuq4" path="res://scenes/environment/Spike.tscn" id="3_6jbe4"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_6jbe4"]
-size = Vector3(1, 0.25, 2)
+size = Vector3(3, 0.25, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_dq0pl"]
-size = Vector3(1, 0.1, 2)
+size = Vector3(3, 0.1, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6jbe4"]
-size = Vector3(1, 0.25241327, 2.0041409)
+size = Vector3(3, 0.252, 2.004)
 
 [sub_resource type="Shader" id="Shader_6jbe4"]
 code = "shader_type spatial;
@@ -285,61 +285,61 @@ transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0
 mesh = SubResource("CylinderMesh_6jbe4")
 
 [node name="Spike" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, 0.8329789)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3706253, 0.2505434, 0.8329789)
 skeleton = NodePath("")
 
 [node name="Spike3" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, 0.8329789)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0234346, 0.2505434, 0.8329789)
 skeleton = NodePath("")
 
 [node name="Spike2" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, 0.8329789)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6780759, 0.2505434, 0.8329789)
 skeleton = NodePath("")
 
 [node name="Spike4" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, 0.4281035)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3706253, 0.2505434, 0.4281035)
 skeleton = NodePath("")
 
 [node name="Spike5" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, 0.4281035)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0234346, 0.2505434, 0.4281035)
 skeleton = NodePath("")
 
 [node name="Spike6" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, 0.4281035)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6780759, 0.2505434, 0.4281035)
 skeleton = NodePath("")
 
 [node name="Spike7" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, -0.00047928095)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3706253, 0.2505434, -0.00047928095)
 skeleton = NodePath("")
 
 [node name="Spike8" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, -0.00047928095)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0234346, 0.2505434, -0.00047928095)
 skeleton = NodePath("")
 
 [node name="Spike9" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, -0.00047928095)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6780759, 0.2505434, -0.00047928095)
 skeleton = NodePath("")
 
 [node name="Spike10" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, -0.40337068)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3706253, 0.2505434, -0.40337068)
 skeleton = NodePath("")
 
 [node name="Spike11" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, -0.40337068)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0234346, 0.2505434, -0.40337068)
 skeleton = NodePath("")
 
 [node name="Spike12" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, -0.40337068)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6780759, 0.2505434, -0.40337068)
 skeleton = NodePath("")
 
 [node name="Spike13" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.34989297, 0.2505434, -0.7960583)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3706253, 0.2505434, -0.7960583)
 skeleton = NodePath("")
 
 [node name="Spike14" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0027023554, 0.2505434, -0.7960583)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0234346, 0.2505434, -0.7960583)
 skeleton = NodePath("")
 
 [node name="Spike15" parent="." instance=ExtResource("3_6jbe4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.34265637, 0.2505434, -0.7960583)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6780759, 0.2505434, -0.7960583)
 skeleton = NodePath("")

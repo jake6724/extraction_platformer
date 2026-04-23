@@ -31,7 +31,7 @@ left_boundary = NodePath("LevelBoundaries/Marker3D")
 right_boundary = NodePath("LevelBoundaries/Marker3D2")
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0061433855, 0.53533435, 33.59924)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 1.1732888, 3.92492, 2.3046715)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -66,36 +66,12 @@ collision_mask = 0
 size = Vector3(3, 12, 2)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D6" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4416599, 5.7263603)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 2, 2)
-material = ExtResource("1_dojpo")
-
-[node name="CSGBox3D3" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.44166, 10.22636)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 4, 7)
-material = ExtResource("1_dojpo")
-
 [node name="CSGBox3D10" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.05834, -9.942158)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.29418, -9.942158)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(3, 7, 126.48816)
-material = ExtResource("1_dojpo")
-
-[node name="CSGBox3D7" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.44166, -22.77364)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(3, 4, 7)
+size = Vector3(3, 31.47168, 126.48816)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="."]
@@ -125,7 +101,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_8xg12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 35.085114, -9.227291)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 91.407745, -124.57468)
 stop_duration = 0.3
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
@@ -151,3 +127,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 13)
 
 [node name="SpinTurrent" parent="." instance=ExtResource("8_g3y3g")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 6)
+enabled = false
