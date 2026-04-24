@@ -8,6 +8,8 @@ Anything that starts with @export can be modified to change player stats.
 Some internal variables have a corresponding @export var which controls their initial value (example: _gravity and gravity_default)
 """
 
+#TODO: Split the camera stuff into a separate class
+
 @export_category("Player Settings")
 @export_group("Movement")
 @export var move_speed_ground: float = 8.0
