@@ -8,8 +8,6 @@ Anything that starts with @export can be modified to change player stats.
 Some internal variables have a corresponding @export var which controls their initial value (example: _gravity and gravity_default)
 """
 
-#TODO: Split the camera stuff into a separate class
-
 @export_category("Player Settings")
 @export_group("Movement")
 @export var move_speed_ground: float = 8.0
@@ -48,26 +46,12 @@ var _coyote_jump_available: bool = true
 var _gravity: float
 
 @export_group("Camera & Mouse")
+## NOTE: Most of the camera settings are in player_camera.gd, or the inspector panel of the player's camera in Player.tscn
 @export_range(0, 1.0) var mouse_sensitivty: float = 0.25
-@export var camera: Camera3D
+@export var camera: PlayerCamera
 @export var camera_pivot: Node3D
-## Controls camera zoom. This value is the camera's initial zoom (based on Camera3D's size property if orthographic), and it modified by zoom_step.
-@export var zoom_target: float = 16
-## Controls how close the camera can get to the player
-@export var zoom_min: float = 5
-## Controls how far the camera can get from the player
-@export var zoom_max: float = 30
-@export_range(1, 20, 1) var zoom_sensitivity: float = .5
-@export_range(.1, 10, .1) var zoom_step: float = 1
-## Multiplier controlling the strength of the camera's lerp to player's position. Lower values will cause the camera to trail behind the player's current position more.
-@export var camera_follow_speed: float = 15
-var _camera_limit_left: float
-var _camera_limit_right: float 
 var _last_movement_direction: Vector3 = Vector3.BACK
-## Do not change; this does not affect zoom. For ortho Camera3D, zoom is controlled with size but the camera X still needs to start far enough away to avoid clipping forward into the world
-var _camera_x_position: float = 8.0
 const MOVE_DIRECTION_THRESHOLD: float = 0.2
-# var camera_look_ahead_offset: Vector3 = Vector3.ZERO
 
 @export_group("After Image")
 @export var after_image_parent: Node
@@ -112,7 +96,7 @@ func _ready():
 	timer_prevent_wall_slide.timeout.connect(on_timer_prevent_wall_slide_timeout)
 	timer_wall_jump_coyote.timeout.connect(on_timer_wall_jump_coyote_timeout)
 
-	initialize_camera()
+	camera.initialize()
 
 	dust_particles.visible = true
 	jump_dust_particles.visible = true
@@ -125,9 +109,9 @@ func _input(_event):
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_just_pressed("scroll_up"):
-		zoom_target -= zoom_step
+		camera.zoom_target -= camera.zoom_step
 	if Input.is_action_just_pressed("scroll_down"):
-		zoom_target += zoom_step
+		camera.zoom_target += camera.zoom_step
 
 	if _can_move:
 		if Input.is_action_just_pressed("sprint"):
@@ -146,8 +130,6 @@ func _input(_event):
 			is_moving_down = false
 	
 func _process(delta):
-	process_camera_limits()
-	process_camera_zoom(delta)
 	process_after_image(delta)
 
 func _physics_process(delta: float) -> void:
@@ -178,8 +160,9 @@ func _physics_process(delta: float) -> void:
 	_prev_is_on_floor = is_on_floor()
 
 	process_wall_slide(move_direction)
-	process_camera_position(delta)
 	process_dust_particles()
+	camera.update(delta)
+
 	move_and_slide()
 
 	# Ensure that character look direction does not update when there is no input
@@ -206,32 +189,6 @@ func _physics_process(delta: float) -> void:
 			_skin.move()
 		else:
 			_skin.idle()
-
-func initialize_camera() -> void:
-	camera.global_transform.origin = camera_pivot.global_transform.origin
-	camera.rotation_degrees.y = 90
-	camera.position.x = _camera_x_position
-
-## Called by parent Level
-func set_camera_limits(left_limit: Vector3, right_limit: Vector3) -> void:
-	_camera_limit_left = left_limit.z
-	_camera_limit_right = right_limit.z
-
-func process_camera_zoom(delta: float) -> void:
-	if not is_equal_approx(camera.size, zoom_target):
-		zoom_target = clamp(zoom_target, zoom_min, zoom_max)
-		camera.size = lerp(camera.size, zoom_target, zoom_sensitivity * delta)
-
-func process_camera_limits() -> void:
-	camera.global_position.z = clamp(camera.global_position.z, _camera_limit_right, _camera_limit_left)
-
-## MUST be called in `_physics_process` to avoid desyncing which causes jittering
-func process_camera_position(delta: float) -> void:
-	# Do not update X-axis, just Y and Z based on camera_pivot's transform
-	var target_z: float = camera_pivot.global_transform.origin.z
-	var target_y: float = camera_pivot.global_transform.origin.y
-	camera.global_transform.origin.z = lerp(camera.global_transform.origin.z, target_z, delta * camera_follow_speed)
-	camera.global_transform.origin.y = lerp(camera.global_transform.origin.y, target_y, delta * camera_follow_speed)
 	
 func process_wall_slide(_move_direction: Vector3) -> void:
 	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide

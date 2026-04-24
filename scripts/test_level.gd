@@ -6,4 +6,4 @@ extends Node3D
 @export var right_boundary: Marker3D
 
 func _ready():
-	player.set_camera_limits(left_boundary.global_position, right_boundary.global_position)
+	player.camera.set_limits(left_boundary.global_position, right_boundary.global_position)
