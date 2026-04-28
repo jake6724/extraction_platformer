@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=22 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="PackedScene" uid="uid://prh35jb6tjtd" path="res://scenes/SophiaSkin.tscn" id="1_p0vlq"]
 [ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://d0qdrvq5s3xvp" path="res://scripts/state_machine/state_machine.gd" id="7_cw2d6"]
 [ext_resource type="Script" uid="uid://n0chcfhyvjv2" path="res://scripts/player/states/movement/player_state_run.gd" id="8_khinc"]
 [ext_resource type="Script" uid="uid://dvrref1deghqt" path="res://scripts/player/states/movement/player_state_idle.gd" id="9_bruh7"]
+[ext_resource type="Script" uid="uid://btasxlkdb0ivx" path="res://scripts/player/states/action/player_state_inactive.gd" id="10_d3wef"]
+[ext_resource type="Script" uid="uid://dj7g62yqdhfgn" path="res://scripts/player/states/movement/player_state_air_move.gd" id="10_o4126"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p0vlq"]
 radius = 0.34765625
@@ -178,13 +180,26 @@ explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_70d11")
 draw_pass_1 = SubResource("SphereMesh_v6fml")
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+[node name="StateMachineMovement" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("7_cw2d6")
 initial_state = NodePath("PlayerStateIdle")
 metadata/_custom_type_script = "uid://d0qdrvq5s3xvp"
 
-[node name="PlayerStateRun" type="Node" parent="StateMachine"]
+[node name="PlayerStateRun" type="Node" parent="StateMachineMovement"]
 script = ExtResource("8_khinc")
 
-[node name="PlayerStateIdle" type="Node" parent="StateMachine"]
+[node name="PlayerStateIdle" type="Node" parent="StateMachineMovement"]
 script = ExtResource("9_bruh7")
+
+[node name="PlayerStateAirMove" type="Node" parent="StateMachineMovement"]
+script = ExtResource("10_o4126")
+metadata/_custom_type_script = "uid://dj7g62yqdhfgn"
+
+[node name="StateMachineAction" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("7_cw2d6")
+initial_state = NodePath("PlayerStateInactive")
+metadata/_custom_type_script = "uid://d0qdrvq5s3xvp"
+
+[node name="PlayerStateInactive" type="Node" parent="StateMachineAction"]
+script = ExtResource("10_d3wef")
+metadata/_custom_type_script = "uid://btasxlkdb0ivx"

@@ -7,11 +7,14 @@ class_name StateMachine extends Node
 ).call()
 
 func _ready() -> void:
+	await owner.ready # Ensure player is available, this will allow State.initialize() to reference player components
 	for state_node: State in find_children("*", "State"):
 		state_node.finished.connect(_transition_to_next_state)
-		
-	await owner.ready
+		state_node.initialize()
 	state.enter("")
+
+func connect_to_input_signals() -> void:
+	owner.input_handler.jump_triggered.connect(_unhandled_input)
 
 func _unhandled_input(event: InputEvent) -> void:
 	state.handle_input(event)

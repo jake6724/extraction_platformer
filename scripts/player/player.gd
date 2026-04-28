@@ -24,7 +24,7 @@ var _move_speed: float
 @export var jump_max: int = 2
 @export var timer_jump_coyote: Timer
 @export_range(0,1,.1) var jump_coyote_time: float = .25
-var _can_move: bool = true
+var can_move: bool = true
 var is_moving_down: bool = false
 var _prev_is_on_floor: bool = true
 var _jump_count: int = 0
@@ -118,14 +118,14 @@ func _input(_event):
 	if Input.is_action_just_pressed("scroll_down"):
 		camera.zoom_target += camera.zoom_step
 
-	if _can_move:
+	if can_move:
 		if Input.is_action_just_pressed("sprint"):
 			velocity.y = (jump_power * 1.5)
 			jump_dust_particles.restart()
 		if Input.is_action_just_released("sprint"):
 			pass
-		if Input.is_action_just_pressed("jump"):
-			jump()
+		# if Input.is_action_just_pressed("jump"):
+		# 	jump()
 		if Input.is_action_just_pressed("move_down"):
 			is_moving_down = true
 			reset_from_wall_slide()
@@ -136,40 +136,11 @@ func _input(_event):
 	
 func _process(delta):
 	process_after_image(delta)
+	process_dust_particles()
 
 func _physics_process(delta: float) -> void:
-	var move_direction: Vector3
-	if _can_move: move_direction = input_handler.move_direction
 
-	_move_speed = move_speed_ground if is_on_floor() else move_speed_air
-
-	var y_velocity = velocity.y
-	velocity.y = 0.0
-	velocity = velocity.move_toward(move_direction * _move_speed, acceleration * delta) # Apply horizontal movement
-	velocity.y = clampf((y_velocity + (_gravity * (gravity_scale * delta))), min_y_velocity, max_y_velocity) # Apply vertical movement
-
-	if move_direction.z < 0:
-		wall_raycast.target_position.y = wall_raycast_distance_y
-	elif move_direction.z > 0:
-		wall_raycast.target_position.y = -wall_raycast_distance_y
-
-	if _prev_is_on_floor != is_on_floor() and not is_on_floor():
-		timer_jump_coyote.start(jump_coyote_time)
-	_prev_is_on_floor = is_on_floor()
-
-	process_wall_slide(move_direction)
-	process_dust_particles()
-	camera.update(delta)
-
-	move_and_slide()
-
-	# Ensure that character look direction does not update when there is no input
-	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
-		_last_movement_direction = move_direction
-
-	# Rotate skin (around the Y-axis) to face the move direction
-	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
-	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
+	# _move_speed = move_speed_ground if is_on_floor() else move_speed_air
 	
 	# Set state
 	if _is_wall_sliding:
@@ -188,6 +159,35 @@ func _physics_process(delta: float) -> void:
 		else:
 			_skin.idle()
 	
+func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: float) -> void:
+	var y_velocity = velocity.y
+	velocity.y = 0.0
+	velocity = velocity.move_toward(move_direction * state_move_speed, acceleration * delta) # Apply horizontal movement
+	velocity.y = clampf((y_velocity + (_gravity * (gravity_scale * delta))), min_y_velocity, max_y_velocity) # Apply vertical movement
+
+	if _prev_is_on_floor != is_on_floor() and not is_on_floor():
+		timer_jump_coyote.start(jump_coyote_time)
+	_prev_is_on_floor = is_on_floor()
+
+func update_character(delta: float, move_direction: Vector3) -> void:
+	camera.update(delta)
+
+	# Set WallRaycast direction
+	if move_direction.z < 0:
+		wall_raycast.target_position.y = wall_raycast_distance_y
+	elif move_direction.z > 0:
+		wall_raycast.target_position.y = -wall_raycast_distance_y
+
+	# Ensure that character look direction does not update when there is no input
+	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
+		_last_movement_direction = move_direction
+
+	# Rotate skin (around the Y-axis) to face the move direction
+	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
+	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
+
+	process_wall_slide(move_direction)
+
 func process_wall_slide(_move_direction: Vector3) -> void:
 	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide
 		_is_wall_sliding = true
@@ -216,7 +216,7 @@ func jump() -> void:
 			_jump_power = wall_jump_power 
 			velocity.z += (_wall_slide_normal.z * wall_push_power) # Push off away from wall if sliding
 			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
-			_can_move = false
+			can_move = false
 			timer_wall_slide.start(wall_jump_move_disable_duration)
 
 		velocity.y = _jump_power
@@ -248,7 +248,7 @@ func dash() -> void:
 	after_image_active = false
 
 func on_timer_wall_slide_timeout() -> void:
-	_can_move = true
+	can_move = true
 
 func on_timer_prevent_wall_slide_timeout() -> void:
 	_wall_slide_allowed = true
