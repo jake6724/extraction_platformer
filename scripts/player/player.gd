@@ -139,8 +139,6 @@ func _process(delta):
 	process_dust_particles()
 
 func _physics_process(delta: float) -> void:
-
-	# _move_speed = move_speed_ground if is_on_floor() else move_speed_air
 	
 	# Set state
 	if _is_wall_sliding:

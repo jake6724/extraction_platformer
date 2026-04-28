@@ -10,7 +10,6 @@ var movement_state_debug_strings: Dictionary[String, String] = {
 }
 
 const ACTION_INACTIVE = "PlayerStateInactive"
-
 var action_state_debug_stings: Dictionary[String, String] = {
     ACTION_INACTIVE: "Inactive",
 }
