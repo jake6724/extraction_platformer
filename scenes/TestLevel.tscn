@@ -31,7 +31,7 @@ left_boundary = NodePath("LevelBoundaries/Marker3D")
 right_boundary = NodePath("LevelBoundaries/Marker3D2")
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 1.1732888, 3.92492, 2.3046715)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, -0.12811664, 0.44165993, 2.308669)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")

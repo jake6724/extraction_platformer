@@ -86,6 +86,11 @@ var _wall_slide_normal: Vector3
 @export_group("Components")
 @export var player_hurtbox: PlayerHurtbox
 @export var _skin: Node3D
+@export var input_handler: InputHandler
+
+@export_group("Debug")
+@export var state_movement_label: Label3D
+@export var state_action_label: Label3D
 
 func _ready():
 	_gravity = gravity_default
@@ -133,15 +138,8 @@ func _process(delta):
 	process_after_image(delta)
 
 func _physics_process(delta: float) -> void:
-	# For a sidescroller we only need the right direction
-	var raw_input: Vector2 = Vector2.ZERO
-	var move_direction: Vector3 = Vector3.ZERO
-	var right_direction: Vector3 = camera.global_basis.x
-	if _can_move:
-		raw_input = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-		move_direction = (right_direction * raw_input.x)
-		move_direction.y = 0.0 # Player will never give up-and-down move input. Jumping and falling with handle this
-		move_direction = move_direction.normalized() # This is just intended to be a direction vector so it needs to be normalized
+	var move_direction: Vector3
+	if _can_move: move_direction = input_handler.move_direction
 
 	_move_speed = move_speed_ground if is_on_floor() else move_speed_air
 
@@ -203,19 +201,6 @@ func process_wall_slide(_move_direction: Vector3) -> void:
 		timer_wall_jump_coyote.start(wall_jump_coyote_time)
 	elif _is_wall_sliding: # Is actively wall sliding
 		_gravity -= gravity_wall_slide_increment
-
-func process_dust_particles() -> void:
-	if not is_equal_approx(velocity.z, 0) and is_on_floor():
-		dust_particles.emitting = true
-	else:
-		dust_particles.emitting = false
-
-func process_after_image(delta) -> void:
-	if after_image_active:
-		_after_image_spawn_time_count += delta
-		if _after_image_spawn_time_count >= after_image_spawn_time_max:
-			create_after_image()
-			_after_image_spawn_time_count = 0
 
 func jump() -> void:
 	if is_on_floor() or _coyote_jump_available or (_jump_count < jump_max):
@@ -291,6 +276,19 @@ func create_after_image() -> void:
 	var lifetime: float = .3
 	await get_tree().create_timer(lifetime).timeout
 	skin_clone.queue_free()
+
+func process_dust_particles() -> void:
+	if not is_equal_approx(velocity.z, 0) and is_on_floor():
+		dust_particles.emitting = true
+	else:
+		dust_particles.emitting = false
+
+func process_after_image(delta) -> void:
+	if after_image_active:
+		_after_image_spawn_time_count += delta
+		if _after_image_spawn_time_count >= after_image_spawn_time_max:
+			create_after_image()
+			_after_image_spawn_time_count = 0
 
 ## Reset to normal after wall slide completes
 func reset_from_wall_slide() -> void:

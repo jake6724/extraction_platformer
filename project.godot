@@ -13,7 +13,7 @@ config_version=5
 config/name="extraction_platformer"
 run/main_scene="uid://bfbpxodaug1w2"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://c46tvte2oxmw0"
 
 [input]
 
