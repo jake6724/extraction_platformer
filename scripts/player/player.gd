@@ -138,8 +138,8 @@ func _process(delta):
 	process_after_image(delta)
 	process_dust_particles()
 
-func _physics_process(delta: float) -> void:
-	
+func _physics_process(_delta: float) -> void:
+
 	# Set state
 	if _is_wall_sliding:
 		_skin.wall_slide()
