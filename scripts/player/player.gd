@@ -88,6 +88,9 @@ var _wall_slide_normal: Vector3
 @export var hitbox_down: CollisionShape3D
 @onready var hitboxes: Dictionary[Attack, CollisionShape3D] = {Attack.FORWARD: hitbox_forward, Attack.DOWN: hitbox_down}
 @export var pogo_power: float = 17
+@export var attack_down_power: float = 10
+@export var attack_forward_power: float = 10
+var curr_attack_type: Attack
 enum Attack {FORWARD, DOWN}
 
 @export_group("Particles")
@@ -209,8 +212,8 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 		_last_movement_direction = move_direction
 
 	# Flip skin on Y-axis to face move direction
-	var target_angle: float = Vector3.RIGHT.signed_angle_to(_last_movement_direction, Vector3.UP)
-	_skin.global_rotation.y = target_angle
+	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
+	global_rotation.y = target_angle
 	_skin.mirror_mesh(_last_movement_direction.z == 1)
 
 	process_wall_slide(move_direction)
@@ -254,11 +257,13 @@ func set_state() -> void:
 			_jump_count = 0
 
 			# Cancel pogo and disable hitbox
-			_skin.cancel_attack_down()
+			_skin.canel_attack_down()
 			hitbox_down.set_deferred("disabled", true)
 
-		var ground_speed: float = velocity.length()
+		if curr_state == State.FALL or curr_state == State.JUMP:
+			_skin.land()
 
+		var ground_speed: float = velocity.length()
 		if ground_speed > 1.0:
 			if curr_state != State.RUN:
 				curr_state = State.RUN
@@ -276,6 +281,7 @@ func jump() -> void:
 		_coyote_jump_available = false
 		_skin.jump()
 		var _jump_power: float = jump_power
+
 		# Can wall jump if currently wall sliding, or wall jump coyote avaiable AND input is moving away from wall
 		if _is_wall_sliding or (_coyote_wall_jump_available and (_last_movement_direction.z == _wall_slide_normal.z)): 
 			_coyote_wall_jump_available = false
@@ -284,6 +290,7 @@ func jump() -> void:
 			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
 			can_move = false
 			timer_wall_slide.start(wall_jump_move_disable_duration)
+			_skin.wall_jump()
 
 		velocity.y = _jump_power
 
@@ -314,21 +321,47 @@ func dash() -> void:
 	await get_tree().create_timer(.6).timeout
 	after_image_active = false
 
+func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
+	velocity = _hit_impulse
+	camera.apply_shake(.1)
+	disable_all_hitboxes()
+	_skin.hurt()
+
+func disable_all_hitboxes() -> void:
+	hitbox_forward.set_deferred("disabled", true)
+	hitbox_down.set_deferred("disabled", true)
+
 func trigger_skin_attack() -> void:
-	if is_on_floor():
-		_skin.attack()
-	else:
-		_skin.attack_down()
-	_move_speed = move_speed_attack
-	# min_y_velocity = -4
-	timer_attack_slow.start(.5)
+	if _skin.is_attack_available():
+		if is_on_floor():
+			curr_attack_type = Attack.FORWARD
+			_skin.attack()
+		else:
+			curr_attack_type = Attack.DOWN
+			_skin.attack_down()
+		_move_speed = move_speed_attack
+		# min_y_velocity = -4 # More needs to be fixed, specifically how move_speed is used and ground and air speeds
+		# timer_attack_slow.start(.5)
 
 func on_attack_area_entered(_intruder: Area3D) -> void:
+	print(_intruder.owner)
 	var enemy: Enemy = _intruder.owner as Enemy
 	if enemy:
-		var direction_to_enemy: Vector3 = global_transform.origin.direction_to(enemy.global_transform.origin)
-		_intruder.owner.take_damage(direction_to_enemy, 15)
+		var _direction: Vector3
+		var _power: float
+		match curr_attack_type:
+			Attack.FORWARD: 
+				_direction = Vector3.FORWARD * sign(transform.origin - enemy.transform.origin) # Knock away from player
+				_power = attack_forward_power
+			Attack.DOWN:
+				_direction = Vector3.DOWN
+				_power = attack_down_power
+				pogo()
+		_intruder.owner.take_damage(_direction, _power)
+
+	elif _intruder.owner is SpikePlatform:
 		pogo()
+
 	else:
 		push_warning("Player attack targeting non-enemy")
 
@@ -343,11 +376,6 @@ func on_timer_prevent_wall_slide_timeout() -> void:
 
 func on_timer_wall_jump_coyote_timeout() -> void:
 	_coyote_wall_jump_available = false
-
-func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
-	velocity = _hit_impulse
-	camera.apply_shake(.1)
-	_skin.hurt()
 
 func pogo() -> void:
 	velocity.y = pogo_power

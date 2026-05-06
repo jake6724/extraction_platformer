@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://l3kpcfyvnwvf"]
+[gd_scene load_steps=11 format=3 uid="uid://l3kpcfyvnwvf"]
 
 [ext_resource type="Script" uid="uid://b4njhxcuh6luu" path="res://scripts/environment/spike_platform.gd" id="1_33f0h"]
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="2_ivx78"]
@@ -12,6 +12,9 @@ size = Vector3(3, 0.1, 2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6jbe4"]
 size = Vector3(3, 0.252, 2.004)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_js1s2"]
+size = Vector3(3, 1.1147461, 2.099121)
 
 [sub_resource type="Shader" id="Shader_6jbe4"]
 code = "shader_type spatial;
@@ -279,6 +282,14 @@ collision_mask = 8
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3609094, -0.001950264)
 shape = SubResource("BoxShape3D_6jbe4")
 debug_color = Color(0.99904376, 0, 0.13815239, 0.41960785)
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.057373047, 0.007080078)
+shape = SubResource("BoxShape3D_js1s2")
 
 [node name="Axis" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)

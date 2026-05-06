@@ -37,6 +37,14 @@ func mirror_mesh(_value: bool) -> void:
 	else:
 		mesh_parent.scale.z = 1
 
+func is_attack_available() -> bool:
+	var res: bool = true
+	if animation_tree["parameters/AttackDownOneShot/active"]: res = false
+	for attack_name in attack_names:
+		var _one_shot_string: String = "parameters/%s/active" % attack_name
+		if animation_tree[_one_shot_string]: res = false
+	print(res)
+	return res
 
 func attack() -> void:
 	# print("Attack called")
@@ -54,20 +62,35 @@ func attack() -> void:
 func attack_down() -> void:
 	animation_tree["parameters/AttackDownOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
-func cancel_attack_down() -> void:
+func canel_attack_down() -> void:
 	animation_tree["parameters/AttackDownOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+
+func cancel_attacks() -> void:
+	animation_tree["parameters/AttackDownOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	animation_tree["parameters/Attack1OneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	animation_tree["parameters/Attack2OneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	animation_tree["parameters/Attack3OneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
 
 func on_attack_combo_timer_timeout() -> void:
 	attack_combo_index = 0
 
 func hurt(): 
+	cancel_attacks()
 	animation_tree["parameters/HurtOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+
+func land():
+	animation_tree["parameters/LandOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+
+func wall_jump(): 
+	animation_tree["parameters/WallJumpOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 func idle():
 	state_machine.travel("Idle")
 
 func run():
-	state_machine.travel("Run")
+	# Cancel land animation just in case
+	animation_tree["parameters/LandOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	state_machine.travel("Run2")
 
 func fall():
 	state_machine.travel("Fall")
