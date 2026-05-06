@@ -43,7 +43,7 @@ func is_attack_available() -> bool:
 	for attack_name in attack_names:
 		var _one_shot_string: String = "parameters/%s/active" % attack_name
 		if animation_tree[_one_shot_string]: res = false
-	print(res)
+
 	return res
 
 func attack() -> void:

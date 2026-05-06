@@ -154,9 +154,9 @@ func _input(_event):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if Input.is_action_just_pressed("escape"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if Input.is_action_just_pressed("scroll_up"):
+	if Input.is_action_pressed("scroll_up"):
 		camera.zoom_target -= camera.zoom_step
-	if Input.is_action_just_pressed("scroll_down"):
+	if Input.is_action_pressed("scroll_down"):
 		camera.zoom_target += camera.zoom_step
 
 	if can_move:
@@ -324,7 +324,7 @@ func disable_all_hitboxes() -> void:
 	hitbox_down.set_deferred("disabled", true)
 
 func trigger_skin_attack() -> void:
-	if _skin.is_attack_available():
+	if _skin.is_attack_available() and not _is_wall_sliding:
 		if is_on_floor():
 			curr_attack_type = Attack.FORWARD
 			_skin.attack()
