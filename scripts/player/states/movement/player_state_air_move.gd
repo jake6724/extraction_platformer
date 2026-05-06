@@ -14,7 +14,9 @@ func physics_update(delta: float) -> void:
 	if move_direction.is_equal_approx(Vector3.ZERO) or not player.can_move:
 		finished.emit(MOVEMENT_IDLE, {})
 	elif player.is_on_floor():
-		finished.emit(MOVEMENT_RUN, {})
+		finished.emit(MOVEMENT_RUN, {})	
+	elif player._is_wall_sliding:
+		finished.emit(MOVEMENT_WALL_SLIDE, {})
 
 func handle_input(event: InputEvent) -> void:
 	if event.is_action("jump") and event.is_pressed() and not event.is_echo():

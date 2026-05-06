@@ -37,7 +37,7 @@ transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, 
 environment = SubResource("Environment_5n3yh")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -0.28903174, 0.9573195, 0, -0.9573195, -0.28903174, 0, 454.56116, 227.96664)
+transform = Transform3D(-0.1374445, 0.8508079, 0.50718325, 0, -0.5120428, 0.8589599, 0.99050945, 0.118059315, 0.07037747, 0, 454.56116, 227.96664)
 light_energy = 1.5
 shadow_enabled = true
 directional_shadow_mode = 1

@@ -2,6 +2,7 @@ class_name PlayerStateRun extends PlayerState
 
 func enter(_previous_state_path: String, _data := {}) -> void:
 	set_movement_state_label()
+	player._skin.run()
 
 func physics_update(delta: float) -> void:
 	var move_direction: Vector3
@@ -15,6 +16,8 @@ func physics_update(delta: float) -> void:
 		finished.emit(MOVEMENT_IDLE, {})
 	elif not player.is_on_floor():
 		finished.emit(MOVEMENT_AIR_MOVE, {})
+	elif player._is_wall_sliding:
+		finished.emit(MOVEMENT_WALL_SLIDE, {})
 
 func handle_input(event: InputEvent) -> void:
 	if event.is_action("jump") and event.is_pressed() and not event.is_echo():

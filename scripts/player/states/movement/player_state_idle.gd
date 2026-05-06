@@ -2,6 +2,7 @@ class_name PlayerStateIdle extends PlayerState
 
 func enter(_previous_state_path: String, _data := {}) -> void:
 	set_movement_state_label()
+	player._skin.idle()
 
 func physics_update(delta: float) -> void:
 	player.move_and_fall(delta, Vector3.ZERO, player.move_speed_ground)

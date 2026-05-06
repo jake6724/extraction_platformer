@@ -3,15 +3,19 @@ class_name PlayerState extends State
 const MOVEMENT_IDLE = "PlayerStateIdle"
 const MOVEMENT_RUN = "PlayerStateRun"
 const MOVEMENT_AIR_MOVE = "PlayerStateAirMove"
+const MOVEMENT_WALL_SLIDE = "PlayerStateWallSlide"
 var movement_state_debug_strings: Dictionary[String, String] = {
-    MOVEMENT_IDLE: "Idle",
-    MOVEMENT_RUN: "Run",
-    MOVEMENT_AIR_MOVE: "AirMove"
+	MOVEMENT_IDLE: "Idle",
+	MOVEMENT_RUN: "Run",
+	MOVEMENT_AIR_MOVE: "AirMove",
+	MOVEMENT_WALL_SLIDE: "WallSlide",
 }
 
 const ACTION_INACTIVE = "PlayerStateInactive"
+const ACTION_ATTACK = "PlayerStateAttack"
 var action_state_debug_stings: Dictionary[String, String] = {
-    ACTION_INACTIVE: "Inactive",
+	ACTION_INACTIVE: "Inactive",
+	ACTION_ATTACK: "Attack"
 }
 
 var player: Player

@@ -13,6 +13,7 @@ Some internal variables have a corresponding @export var which controls their in
 @export var move_speed_ground: float = 8.0
 @export var move_speed_air: float = 8.0
 @export var move_speed_sprint: float = 16.0
+@export var move_speed_attack: float = 2.5
 ## Multiplier controlling how quickly the player reaches their intended velocity. Lowering this value will make the character appear more slippery.
 @export var acceleration: float = 70
 ## Multipler controlling how quickly the player mesh rotates to face the forward direction. In a sidescroller, only affects speed the player changes from left to right.
@@ -79,13 +80,21 @@ var _coyote_wall_jump_available: bool = false
 ## Set each time the player starts wall_slide, remains available to allow for wall jump coyote time
 var _wall_slide_normal: Vector3
 
+@export_group("Combat")
+@export var timer_attack_slow: Timer
+@export var area_attack: Area3D
+@export var hitbox_1: CollisionShape3D
+@export var hitbox_2: CollisionShape3D
+@export var hitbox_3: CollisionShape3D
+@onready var hitboxes: Array[CollisionShape3D] = [hitbox_1, hitbox_2, hitbox_3]
+
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
 @export var jump_dust_particles: GPUParticles3D
 
 @export_group("Components")
 @export var player_hurtbox: PlayerHurtbox
-@export var _skin: Node3D
+@export var _skin: PlayerSkin
 @export var input_handler: InputHandler
 
 @export_group("Debug")
@@ -100,6 +109,7 @@ func _ready():
 	timer_wall_slide.timeout.connect(on_timer_wall_slide_timeout)
 	timer_prevent_wall_slide.timeout.connect(on_timer_prevent_wall_slide_timeout)
 	timer_wall_jump_coyote.timeout.connect(on_timer_wall_jump_coyote_timeout)
+	timer_attack_slow.timeout.connect(on_timer_attack_slow_timeout)
 
 	camera.initialize()
 
@@ -107,6 +117,19 @@ func _ready():
 	jump_dust_particles.visible = true
 
 	player_hurtbox.hit.connect(on_player_hurtbox_hit)
+
+	for hitbox: CollisionShape3D in hitboxes:
+		hitbox.disabled = true
+
+	input_handler.jump_triggered.connect(on_jump_triggered)
+
+func on_jump_triggered() -> void:
+	jump()
+	
+func on_timer_attack_slow_timeout() -> void:
+	move_speed_ground = 8
+	move_speed_air = 8
+	min_y_velocity = -15
 
 func _input(_event):
 	if Input.is_action_just_pressed("left_click"):
@@ -124,8 +147,6 @@ func _input(_event):
 			jump_dust_particles.restart()
 		if Input.is_action_just_released("sprint"):
 			pass
-		# if Input.is_action_just_pressed("jump"):
-		# 	jump()
 		if Input.is_action_just_pressed("move_down"):
 			is_moving_down = true
 			reset_from_wall_slide()
@@ -133,29 +154,39 @@ func _input(_event):
 			timer_prevent_wall_slide.start(prevent_wall_slide_duration)
 		if Input.is_action_just_released("move_down"):
 			is_moving_down = false
-	
+
 func _process(delta):
 	process_after_image(delta)
 	process_dust_particles()
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 
-	# Set state
-	if _is_wall_sliding:
-		_skin.wall_slide()
-	elif not is_on_floor() and velocity.y <= 0:
-		_skin.fall()
-	elif not is_on_floor() and velocity.y > 0:
-		_skin.jump()
-	elif is_on_floor():
-		_coyote_jump_available = true
-		timer_jump_coyote.stop()
-		var ground_speed: float = velocity.length()
-		_jump_count = 0
-		if ground_speed > 1.0:
-			_skin.move()
-		else:
-			_skin.idle()
+	var move_direction: Vector3
+	if can_move: move_direction = input_handler.move_direction
+
+	move_and_fall(delta, move_direction, move_speed_ground)
+	update_character(delta, move_direction)
+	move_and_slide()
+
+
+	pass
+	# # Set state
+	# if _is_wall_sliding:
+	# 	_skin.wall_slide()
+	# elif not is_on_floor() and velocity.y <= 0:
+	# 	_skin.fall()
+	# elif not is_on_floor() and velocity.y > 0:
+	# 	_skin.jump()
+	# elif is_on_floor():
+	# 	_coyote_jump_available = true
+	# 	timer_jump_coyote.stop()
+	# 	var ground_speed: float = velocity.length()
+	# 	_jump_count = 0
+
+		# if ground_speed > 1.0:
+		# 	_skin.run()
+		# else:
+		# 	_skin.idle()
 	
 func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: float) -> void:
 	var y_velocity = velocity.y
@@ -183,6 +214,7 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 	# Rotate skin (around the Y-axis) to face the move direction
 	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
 	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
+	_skin.mirror_mesh(_last_movement_direction.z == 1)
 
 	process_wall_slide(move_direction)
 
@@ -245,6 +277,13 @@ func dash() -> void:
 	await get_tree().create_timer(.6).timeout
 	after_image_active = false
 
+func attack() -> void:
+	_skin.attack()
+	move_speed_ground = move_speed_attack
+	move_speed_air = move_speed_attack
+	min_y_velocity = -4
+	timer_attack_slow.start(.5)
+
 func on_timer_wall_slide_timeout() -> void:
 	can_move = true
 
@@ -259,7 +298,7 @@ func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 
 func create_after_image() -> void:
 	var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
-	var skin_clone: SophiaSkin = _skin.duplicate()
+	var skin_clone: PlayerSkin = _skin.duplicate()
 	after_image_parent.add_child(skin_clone)
 	skin_clone.animation_tree.active = false
 
@@ -276,6 +315,7 @@ func create_after_image() -> void:
 	skin_clone.queue_free()
 
 func process_dust_particles() -> void:
+	## TODO: Disable if character is attacking/moving slow
 	if not is_equal_approx(velocity.z, 0) and is_on_floor():
 		dust_particles.emitting = true
 	else:
@@ -292,3 +332,6 @@ func process_after_image(delta) -> void:
 func reset_from_wall_slide() -> void:
 	_is_wall_sliding = false
 	_gravity = gravity_default
+
+func disable_attack_hitbox(_index: int, _disabled: bool) -> void:
+	hitboxes[_index].set_deferred("disabled", _disabled)

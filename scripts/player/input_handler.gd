@@ -4,10 +4,14 @@ var right_direction: Vector3 = Vector3.FORWARD
 var move_direction: Vector3
 
 signal jump_triggered
+signal attack_triggered
 
 func _input(event):
 	if event.is_action("jump") and event.is_pressed() and not event.is_echo():
 		jump_triggered.emit()
+
+	if event.is_action("attack") and event.is_pressed() and not event.is_echo():
+		attack_triggered.emit()
 
 func _physics_process(_delta):
 	var raw_input: Vector2 = Vector2.ZERO
