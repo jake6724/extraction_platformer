@@ -84,12 +84,11 @@ var _wall_slide_normal: Vector3
 @export_group("Combat")
 @export var timer_attack_slow: Timer
 @export var area_attack: Area3D
-@export var hitbox_1: CollisionShape3D
-@export var hitbox_2: CollisionShape3D
-@export var hitbox_3: CollisionShape3D
-@export var hitbox_4: CollisionShape3D
-@onready var hitboxes: Array[CollisionShape3D] = [hitbox_1, hitbox_2, hitbox_3, hitbox_4]
+@export var hitbox_forward: CollisionShape3D
+@export var hitbox_down: CollisionShape3D
+@onready var hitboxes: Dictionary[Attack, CollisionShape3D] = {Attack.FORWARD: hitbox_forward, Attack.DOWN: hitbox_down}
 @export var pogo_power: float = 17
+enum Attack {FORWARD, DOWN}
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
@@ -129,13 +128,13 @@ func _ready():
 
 
 
-	for hitbox: CollisionShape3D in hitboxes:
+	for hitbox: CollisionShape3D in hitboxes.values():
 		hitbox.disabled = true
 	
 	area_attack.area_entered.connect(on_attack_area_entered)
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
-	input_handler.attack_triggered.connect(attack)
+	input_handler.attack_triggered.connect(trigger_skin_attack)
 
 	_skin.hitbox_disable_requested.connect(disable_attack_hitbox)
 
@@ -254,6 +253,10 @@ func set_state() -> void:
 			timer_jump_coyote.stop()
 			_jump_count = 0
 
+			# Cancel pogo and disable hitbox
+			_skin.cancel_attack_down()
+			hitbox_down.set_deferred("disabled", true)
+
 		var ground_speed: float = velocity.length()
 
 		if ground_speed > 1.0:
@@ -311,8 +314,7 @@ func dash() -> void:
 	await get_tree().create_timer(.6).timeout
 	after_image_active = false
 
-func attack() -> void:
-	# print("Player attack")
+func trigger_skin_attack() -> void:
 	if is_on_floor():
 		_skin.attack()
 	else:
@@ -322,11 +324,16 @@ func attack() -> void:
 	timer_attack_slow.start(.5)
 
 func on_attack_area_entered(_intruder: Area3D) -> void:
-	print(_intruder)
-	print(_intruder.owner)
-	_intruder.owner.take_damage()
-	print("Hit an enemy!")
-	pogo()
+	var enemy: Enemy = _intruder.owner as Enemy
+	if enemy:
+		var direction_to_enemy: Vector3 = global_transform.origin.direction_to(enemy.global_transform.origin)
+		_intruder.owner.take_damage(direction_to_enemy, 15)
+		pogo()
+	else:
+		push_warning("Player attack targeting non-enemy")
+
+func disable_attack_hitbox(_attack: Attack, _disabled: bool) -> void:
+	hitboxes[_attack].set_deferred("disabled", _disabled)
 
 func on_timer_wall_slide_timeout() -> void:
 	can_move = true
@@ -339,6 +346,8 @@ func on_timer_wall_jump_coyote_timeout() -> void:
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	velocity = _hit_impulse
+	camera.apply_shake(.1)
+	_skin.hurt()
 
 func pogo() -> void:
 	velocity.y = pogo_power
@@ -379,9 +388,6 @@ func process_after_image(delta) -> void:
 func reset_from_wall_slide() -> void:
 	_is_wall_sliding = false
 	_gravity = gravity_default
-
-func disable_attack_hitbox(_index: int, _disabled: bool) -> void:
-	hitboxes[_index].set_deferred("disabled", _disabled)
 
 func print_state_change() -> void:
 	var text: String

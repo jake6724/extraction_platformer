@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=27 format=3 uid="uid://mnexgmj80x4h"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=29 format=3 uid="uid://mnexgmj80x4h"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e801p"]
 animation = &"Attack2"
@@ -8,6 +8,9 @@ animation = &"Attack3"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8k8h3"]
 animation = &"AttackDown"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tvjqd"]
+animation = &"Hurt"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_quhyi"]
 animation = &"Attack1"
@@ -19,6 +22,8 @@ animation = &"Attack1"
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_y6h4r"]
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_weakf"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_wclfu"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_sboow"]
 animation = &"Fall"
@@ -79,24 +84,28 @@ transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition
 graph_offset = Vector2(-16, -81)
 
 [resource]
-graph_offset = Vector2(-89.08133, -67.45914)
-nodes/output/position = Vector2(1340, 180)
+graph_offset = Vector2(640.6122, 23.938324)
+nodes/output/position = Vector2(1660, 140)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_vrqe7")
-nodes/StateMachine/position = Vector2(0, 140)
+nodes/StateMachine/position = Vector2(120, 140)
 nodes/Attack1OneShot/node = SubResource("AnimationNodeOneShot_e801p")
-nodes/Attack1OneShot/position = Vector2(280, 160)
+nodes/Attack1OneShot/position = Vector2(380, 140)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_quhyi")
-nodes/Animation/position = Vector2(89.75057, 387.60522)
+nodes/Animation/position = Vector2(380, 420)
 nodes/Attack2OneShot/node = SubResource("AnimationNodeOneShot_8k8h3")
-nodes/Attack2OneShot/position = Vector2(500, 260)
+nodes/Attack2OneShot/position = Vector2(580, 140)
 nodes/Attack3OneShot/node = SubResource("AnimationNodeOneShot_y6h4r")
 nodes/Attack3OneShot/position = Vector2(780, 140)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_e801p")
-"nodes/Animation 2/position" = Vector2(280, 580)
+"nodes/Animation 2/position" = Vector2(580, 420)
 "nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_x4iup")
-"nodes/Animation 3/position" = Vector2(640, 580)
+"nodes/Animation 3/position" = Vector2(780, 420)
 nodes/AttackDownOneShot/node = SubResource("AnimationNodeOneShot_weakf")
-nodes/AttackDownOneShot/position = Vector2(1060, 340)
+nodes/AttackDownOneShot/position = Vector2(980, 140)
 "nodes/Animation 4/node" = SubResource("AnimationNodeAnimation_8k8h3")
-"nodes/Animation 4/position" = Vector2(880, 580)
-node_connections = [&"output", 0, &"AttackDownOneShot", &"Attack1OneShot", 0, &"StateMachine", &"Attack1OneShot", 1, &"Animation", &"Attack2OneShot", 0, &"Attack1OneShot", &"Attack2OneShot", 1, &"Animation 2", &"Attack3OneShot", 0, &"Attack2OneShot", &"Attack3OneShot", 1, &"Animation 3", &"AttackDownOneShot", 0, &"Attack3OneShot", &"AttackDownOneShot", 1, &"Animation 4"]
+"nodes/Animation 4/position" = Vector2(980, 420)
+nodes/HurtOneShot/node = SubResource("AnimationNodeOneShot_wclfu")
+nodes/HurtOneShot/position = Vector2(1220, 140)
+"nodes/Animation 5/node" = SubResource("AnimationNodeAnimation_tvjqd")
+"nodes/Animation 5/position" = Vector2(1220, 420)
+node_connections = [&"output", 0, &"HurtOneShot", &"Attack1OneShot", 0, &"StateMachine", &"Attack1OneShot", 1, &"Animation", &"Attack2OneShot", 0, &"Attack1OneShot", &"Attack2OneShot", 1, &"Animation 2", &"Attack3OneShot", 0, &"Attack2OneShot", &"Attack3OneShot", 1, &"Animation 3", &"AttackDownOneShot", 0, &"Attack3OneShot", &"AttackDownOneShot", 1, &"Animation 4", &"HurtOneShot", 0, &"AttackDownOneShot", &"HurtOneShot", 1, &"Animation 5"]

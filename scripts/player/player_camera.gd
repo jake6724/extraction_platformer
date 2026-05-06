@@ -18,6 +18,12 @@ var camera_limit_right: float
 var _camera_x_position: float = 8.0
 const MOVE_DIRECTION_THRESHOLD: float = 0.2
 
+var curr_power: float
+var shake_offset: Vector2 = Vector2.ZERO
+@export var power: float = 5
+@export var decay: float = 20
+
+
 func initialize() -> void:
 	global_transform.origin = camera_pivot.global_transform.origin
 	rotation_degrees.y = 90
@@ -32,6 +38,7 @@ func update(delta: float) -> void:
 	process_position(delta)
 	process_zoom(delta)
 	process_limits()
+	process_shake(delta)
 
 ## MUST be called in `_physics_process` to avoid desyncing which causes jittering
 func process_position(delta: float) -> void:
@@ -48,3 +55,26 @@ func process_zoom(delta: float) -> void:
 
 func process_limits() -> void:
 	global_position.z = clamp(global_position.z, camera_limit_right, camera_limit_left)
+
+func process_shake(delta: float) -> void:
+	# Handle camera shake if power left
+	if curr_power > .1:
+		curr_power = snappedf(lerpf(curr_power, 0, decay * delta), 0.01)
+		shake_offset = get_random_offset()
+	else:
+		shake_offset = Vector2.ZERO
+
+	h_offset = shake_offset.x
+	v_offset = shake_offset.y
+
+func get_random_offset() -> Vector2:
+	return Vector2(randf_range(-curr_power, curr_power), randf_range(-curr_power, curr_power))
+
+func apply_shake(power_scale: float) -> void:
+	var new_power: float = power * power_scale
+	if new_power >= curr_power:
+		curr_power = new_power
+
+# func _input(event):
+# 	if Input.is_action_just_pressed("x"):
+# 		apply_shake(.05)

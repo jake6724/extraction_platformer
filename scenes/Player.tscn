@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=19 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
 [ext_resource type="PackedScene" uid="uid://blrnsi1w8wjwh" path="res://scenes/PlayerSkin.tscn" id="2_d3wef"]
@@ -71,38 +71,55 @@ scale_max = 1.25
 scale_curve = SubResource("CurveTexture_qu4a1")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_o4126"]
-radius = 0.33447266
-height = 1.839447
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lkdrv"]
-radius = 0.39453125
-height = 2.4711304
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p7iby"]
-radius = 0.40478516
-height = 1.8966064
+radius = 0.46435547
+height = 1.7145138
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_lkdrv"]
 radius = 0.9838653
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack", "hitbox_1", "hitbox_2", "hitbox_3", "hitbox_4", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack", "hitbox_forward", "hitbox_down", "hitbox_3", "hitbox_4", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
 collision_layer = 3
 collision_mask = 4
 script = ExtResource("1_v6fml")
+move_speed_ground = null
+move_speed_air = null
+move_speed_sprint = null
+move_speed_attack = null
+acceleration = null
+rotation_speed = null
+jump_power = null
+jump_max = null
 timer_jump_coyote = NodePath("TimeJumpCoyote")
+jump_coyote_time = null
+gravity_default = null
+gravity_wall_slide = null
+gravity_wall_slide_increment = null
+gravity_scale = null
+min_y_velocity = null
+max_y_velocity = null
+mouse_sensitivty = null
 camera = NodePath("Camera3D")
 camera_pivot = NodePath("CameraPivot")
+after_image_spawn_time_max = null
+after_image_active = null
+wall_push_power = null
+wall_jump_power = null
+wall_jump_move_disable_duration = null
 wall_raycast_top = NodePath("CharacterCollider/WallRaycastTop")
 wall_raycast_bottom = NodePath("CharacterCollider/WallRaycastBottom")
+wall_raycast_distance_y = null
 timer_wall_slide = NodePath("TimerWallSlide")
 timer_prevent_wall_slide = NodePath("TimerPreventWallSlide")
 timer_wall_jump_coyote = NodePath("TimerWallJumpCoyote")
+wall_jump_coyote_time = null
+prevent_wall_slide_duration = null
 timer_attack_slow = NodePath("TimerAttackSlow")
 area_attack = NodePath("AreaAttack")
-hitbox_1 = NodePath("AreaAttack/Attack1Hitbox")
-hitbox_2 = NodePath("AreaAttack/Attack2Hitbox")
-hitbox_3 = NodePath("AreaAttack/Attack3Hitbox")
-hitbox_4 = NodePath("AreaAttack/AttackDownHitbox")
+hitbox_forward = NodePath("AreaAttack/HitboxForward")
+hitbox_down = NodePath("AreaAttack/HitboxDown")
+hitbox_3 = NodePath("")
+hitbox_4 = NodePath("AreaAttack/HitboxDown")
+pogo_power = null
 dust_particles = NodePath("DustParticles")
 jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
@@ -111,6 +128,65 @@ input_handler = NodePath("PlayerInput")
 state_movement_label = NodePath("MovementState")
 state_action_label = NodePath("ActionState")
 metadata/_custom_type_script = "uid://dt7jxbev3kpcq"
+
+[node name="PlayerSkin" parent="." instance=ExtResource("2_d3wef")]
+
+[node name="Skeleton3D" parent="PlayerSkin/Char_Player/ArmaturePlayer" index="0"]
+bones/1/position = Vector3(-0.39411524, 0.4287014, 0.16771042)
+bones/1/rotation = Quaternion(-0.7069542, -0.07171151, -0.32105008, 0.62609917)
+bones/1/scale = Vector3(1, 1, 0.99999994)
+bones/2/rotation = Quaternion(0.9209188, -0.048166517, -0.01594973, -0.38643783)
+bones/3/rotation = Quaternion(-0.08043778, 1.800814e-07, 0.007644474, 0.9967303)
+bones/4/position = Vector3(-1.4901167e-08, -2.8726673e-08, 1.3190097e-08)
+bones/4/rotation = Quaternion(-0.57116216, 8.774768e-08, -5.6518978e-08, 0.82083726)
+bones/5/position = Vector3(-0.46616125, 1.0556488, 0.24403642)
+bones/5/rotation = Quaternion(-0.9381837, 0.34578928, -0.014529901, 0.0054851775)
+bones/8/position = Vector3(-0.05692723, 0.6982188, -0.020531453)
+bones/8/rotation = Quaternion(-0.8033539, 0.17440656, -0.050740927, 0.56712455)
+bones/9/position = Vector3(2.063733e-08, 0.0241167, -0.17510052)
+bones/10/rotation = Quaternion(0.06066344, 0.004596387, -0.00033124746, 0.9981477)
+bones/11/rotation = Quaternion(0.1718805, -0.18779941, 0.008256665, 0.9670163)
+bones/12/rotation = Quaternion(-0.20723289, 0.3023978, -0.051039316, 0.92898077)
+bones/15/rotation = Quaternion(-0.54484546, 0.48449653, 0.3335665, 0.59761196)
+bones/16/rotation = Quaternion(0.57657105, 0.4845007, 0.25845984, -0.6049987)
+bones/17/position = Vector3(-0.20862228, 0.43593448, -0.17294027)
+bones/17/rotation = Quaternion(0.77747166, -0.23945886, -0.43439054, -0.38665515)
+bones/18/rotation = Quaternion(-0.06572995, 0.006165533, 0.03644507, 0.9971526)
+bones/19/rotation = Quaternion(0.8328373, 0.19624892, 0.4499962, -0.25567904)
+bones/20/rotation = Quaternion(-0.069143936, -0.0012720699, -0.018924333, 0.99742645)
+bones/23/position = Vector3(0.156622, 0.21290502, -0.008260507)
+bones/23/rotation = Quaternion(0.4736376, 0.16024064, 0.74349344, -0.44408095)
+bones/24/rotation = Quaternion(0.5368094, 0.00036228032, -0.07648785, 0.84022933)
+bones/25/position = Vector3(-0.15662201, 0.21290486, -0.008260484)
+bones/25/rotation = Quaternion(-0.40972066, 0.47021556, 0.7811862, -0.02783002)
+bones/26/rotation = Quaternion(0.47126812, -0.0003792094, 0.06714898, 0.87943006)
+bones/27/rotation = Quaternion(0.72667396, -0.29875675, 0.10706379, 0.6092838)
+bones/28/rotation = Quaternion(0.7628159, 1.1428796e-07, 1.03757294e-07, 0.64661586)
+bones/29/rotation = Quaternion(0.9330052, 0.33575633, -0.104021266, -0.07712729)
+bones/30/rotation = Quaternion(0.4889831, 9.770501e-08, 6.957923e-08, 0.8722933)
+bones/31/position = Vector3(-0.075011775, 0.054873094, 0.24545912)
+bones/31/rotation = Quaternion(-0.04449139, 0.21194072, -0.2827259, 0.9344345)
+bones/32/position = Vector3(-0.0110013, -0.011864614, -0.16769111)
+bones/33/position = Vector3(0.2561376, -0.06975137, -0.16605766)
+bones/33/rotation = Quaternion(0.84513855, -0.2611124, 0.103598565, 0.45478404)
+bones/34/position = Vector3(-0.24390371, -0.072641104, -0.07327182)
+bones/34/rotation = Quaternion(0.6043773, 0.21613513, 0.015270111, 0.76666844)
+bones/35/position = Vector3(0.022518843, 0.24401563, -0.2356296)
+bones/35/rotation = Quaternion(-0.67736644, 0.20291552, 0.20291552, 0.67736644)
+bones/35/scale = Vector3(1, 1, 1)
+bones/36/rotation = Quaternion(0.9209188, 0.048166543, 0.015949728, -0.38643783)
+bones/37/rotation = Quaternion(-0.08043781, -1.4683975e-07, -0.007644436, 0.9967303)
+bones/39/position = Vector3(0.5563466, 0.7494489, 0.1869023)
+bones/39/rotation = Quaternion(-0.6874136, 0.5460394, 0.3169124, 0.35898492)
+bones/40/rotation = Quaternion(-0.24711958, -0.68033475, 0.68686616, -0.0655088)
+bones/41/rotation = Quaternion(-0.09259686, -0.67838675, 0.72407126, -0.0832954)
+bones/42/position = Vector3(-0.6591131, 0.6091998, 0.75591874)
+bones/43/position = Vector3(-0.41486865, 0.7309668, 0.24979758)
+bones/44/position = Vector3(0.26478392, 0.45266578, 0.5145928)
+bones/45/position = Vector3(-0.57950586, 1.0912247, -0.6313801)
+
+[node name="BoneAttachment3D" parent="PlayerSkin/Char_Player/ArmaturePlayer/Skeleton3D" index="1"]
+transform = Transform3D(0.16536132, -0.9782432, -0.12528245, -0.11931346, -0.14594144, 0.9820719, -0.97898936, -0.14744884, -0.14085068, 0.56181955, 0.632788, 0.21833941)
 
 [node name="CharacterCollider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.765625, 0)
@@ -209,28 +285,15 @@ draw_pass_1 = SubResource("SphereMesh_v6fml")
 collision_layer = 0
 collision_mask = 16
 
-[node name="Attack1Hitbox" type="CollisionShape3D" parent="AreaAttack"]
-transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665766, 0.84374356, 1.0676159)
+[node name="HitboxForward" type="CollisionShape3D" parent="AreaAttack"]
+transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665768, 0.84254223, 1.2007463)
 shape = SubResource("CapsuleShape3D_o4126")
-disabled = true
 debug_color = Color(0.89702433, 0, 0.07988889, 0.41960785)
 
-[node name="Attack2Hitbox" type="CollisionShape3D" parent="AreaAttack"]
-transform = Transform3D(1, 0, 0, 0, 0.78046316, 0.6252018, 0, -0.6252018, 0.78046316, 0, 0.84575766, 1.1057537)
-shape = SubResource("CapsuleShape3D_lkdrv")
-disabled = true
-debug_color = Color(0.7977675, 0.2904509, 9.62615e-08, 0.41960785)
-
-[node name="Attack3Hitbox" type="CollisionShape3D" parent="AreaAttack"]
-transform = Transform3D(1, 0, 0, 0, -0.041300155, -0.99914676, 0, 0.99914676, -0.041300155, 0, 0.84274477, 1.1017616)
-shape = SubResource("CapsuleShape3D_p7iby")
-disabled = true
-debug_color = Color(0.7182386, 0.48141748, 0, 0.41960785)
-
-[node name="AttackDownHitbox" type="CollisionShape3D" parent="AreaAttack"]
+[node name="HitboxDown" type="CollisionShape3D" parent="AreaAttack"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25148714, 0)
 shape = SubResource("SphereShape3D_lkdrv")
 disabled = true
 debug_color = Color(0.43057388, 0.32833165, 1, 0.41960785)
 
-[node name="PlayerSkin" parent="." instance=ExtResource("2_d3wef")]
+[editable path="PlayerSkin"]

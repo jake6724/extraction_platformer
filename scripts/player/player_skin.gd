@@ -37,6 +37,7 @@ func mirror_mesh(_value: bool) -> void:
 	else:
 		mesh_parent.scale.z = 1
 
+
 func attack() -> void:
 	# print("Attack called")
 	attack_combo_timer.start(combo_duration)
@@ -53,8 +54,14 @@ func attack() -> void:
 func attack_down() -> void:
 	animation_tree["parameters/AttackDownOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
+func cancel_attack_down() -> void:
+	animation_tree["parameters/AttackDownOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+
 func on_attack_combo_timer_timeout() -> void:
 	attack_combo_index = 0
+
+func hurt(): 
+	animation_tree["parameters/HurtOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 func idle():
 	state_machine.travel("Idle")
@@ -74,5 +81,5 @@ func jump():
 func wall_slide():
 	state_machine.start("WallSlide")
 
-func request_disable_hitbox(_index: int, _disable: bool) -> void:
-	hitbox_disable_requested.emit(_index, _disable)
+func request_disable_hitbox(_attack: Player.Attack, _disable: bool) -> void:
+	hitbox_disable_requested.emit(_attack, _disable)
