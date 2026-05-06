@@ -1,4 +1,4 @@
-class_name PlayerState extends State
+class_name PlayerState extends StateOld
 
 const MOVEMENT_IDLE = "PlayerStateIdle"
 const MOVEMENT_RUN = "PlayerStateRun"

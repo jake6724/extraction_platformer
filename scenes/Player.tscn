@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=28 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
 [ext_resource type="PackedScene" uid="uid://blrnsi1w8wjwh" path="res://scenes/PlayerSkin.tscn" id="2_d3wef"]
@@ -6,7 +6,7 @@
 [ext_resource type="Material" uid="uid://ioi0p4q0f70j" path="res://materials/outline_material.tres" id="3_mdl7e"]
 [ext_resource type="Script" uid="uid://buj65w2r2owws" path="res://scripts/player/player_camera.gd" id="3_qu4a1"]
 [ext_resource type="Script" uid="uid://bw3yn2gwobtti" path="res://scripts/player/input_handler.gd" id="5_70d11"]
-[ext_resource type="Script" uid="uid://d0qdrvq5s3xvp" path="res://scripts/state_machine/state_machine.gd" id="7_cw2d6"]
+[ext_resource type="Script" path="res://scripts/state_machine/state_machine.gd" id="7_cw2d6"]
 [ext_resource type="Script" uid="uid://n0chcfhyvjv2" path="res://scripts/player/states/movement/player_state_run.gd" id="8_khinc"]
 [ext_resource type="Script" uid="uid://dvrref1deghqt" path="res://scripts/player/states/movement/player_state_idle.gd" id="9_bruh7"]
 [ext_resource type="Script" uid="uid://btasxlkdb0ivx" path="res://scripts/player/states/action/player_state_inactive.gd" id="10_d3wef"]
@@ -82,14 +82,17 @@ radius = 0.33447266
 height = 1.839447
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lkdrv"]
-radius = 0.34179688
-height = 2.3631592
+radius = 0.39453125
+height = 2.4711304
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p7iby"]
 radius = 0.40478516
 height = 1.8966064
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "hitbox_1", "hitbox_2", "hitbox_3", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
+[sub_resource type="SphereShape3D" id="SphereShape3D_lkdrv"]
+radius = 0.9838653
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "hitbox_1", "hitbox_2", "hitbox_3", "hitbox_4", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
 collision_mask = 4
 script = ExtResource("1_v6fml")
 timer_jump_coyote = NodePath("TimeJumpCoyote")
@@ -103,6 +106,7 @@ timer_attack_slow = NodePath("TimerAttackSlow")
 hitbox_1 = NodePath("AreaAttack/Attack1Hitbox")
 hitbox_2 = NodePath("AreaAttack/Attack2Hitbox")
 hitbox_3 = NodePath("AreaAttack/Attack3Hitbox")
+hitbox_4 = NodePath("AreaAttack/AttackDownHitbox")
 dust_particles = NodePath("DustParticles")
 jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
@@ -111,8 +115,6 @@ input_handler = NodePath("PlayerInput")
 state_movement_label = NodePath("MovementState")
 state_action_label = NodePath("ActionState")
 metadata/_custom_type_script = "uid://dt7jxbev3kpcq"
-
-[node name="PlayerSkin" parent="." instance=ExtResource("2_d3wef")]
 
 [node name="CharacterCollider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.765625, 0)
@@ -170,6 +172,7 @@ one_shot = true
 
 [node name="MovementState" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.170704, 0)
+visible = false
 billboard = 1
 text = "Movement State"
 font_size = 64
@@ -177,6 +180,7 @@ uppercase = true
 
 [node name="ActionState" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.628349, 0)
+visible = false
 billboard = 1
 text = "Action State"
 font_size = 64
@@ -237,16 +241,25 @@ metadata/_custom_type_script = "uid://p0h7g1x08i86"
 [node name="Attack1Hitbox" type="CollisionShape3D" parent="AreaAttack"]
 transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665766, 0.84374356, 1.0676159)
 shape = SubResource("CapsuleShape3D_o4126")
+disabled = true
 debug_color = Color(0.89702433, 0, 0.07988889, 0.41960785)
 
 [node name="Attack2Hitbox" type="CollisionShape3D" parent="AreaAttack"]
-transform = Transform3D(1, 0, 0, 0, 0.78046316, 0.6252018, 0, -0.6252018, 0.78046316, 0, 0.8878914, 1.0720018)
+transform = Transform3D(1, 0, 0, 0, 0.78046316, 0.6252018, 0, -0.6252018, 0.78046316, 0, 0.84575766, 1.1057537)
 shape = SubResource("CapsuleShape3D_lkdrv")
+disabled = true
 debug_color = Color(0.7977675, 0.2904509, 9.62615e-08, 0.41960785)
 
 [node name="Attack3Hitbox" type="CollisionShape3D" parent="AreaAttack"]
 transform = Transform3D(1, 0, 0, 0, -0.041300155, -0.99914676, 0, 0.99914676, -0.041300155, 0, 0.84274477, 1.1017616)
 shape = SubResource("CapsuleShape3D_p7iby")
+disabled = true
 debug_color = Color(0.7182386, 0.48141748, 0, 0.41960785)
 
-[editable path="PlayerSkin"]
+[node name="AttackDownHitbox" type="CollisionShape3D" parent="AreaAttack"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25148714, 0)
+shape = SubResource("SphereShape3D_lkdrv")
+disabled = true
+debug_color = Color(0.43057388, 0.32833165, 1, 0.41960785)
+
+[node name="PlayerSkin" parent="." instance=ExtResource("2_d3wef")]

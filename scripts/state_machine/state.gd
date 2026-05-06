@@ -1,6 +1,6 @@
 ## Virtual base class for all states.
 ## Extend this class and override its methods to implement a state.
-class_name State extends Node
+class_name StateOld extends Node
 
 ## Emitted when the state finishes and wants to transition to another state.
 signal finished(next_state_path: String, data: Dictionary)

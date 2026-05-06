@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://d13aehtbq06rs"]
+
+[ext_resource type="Script" uid="uid://bqhjx2m4yrrre" path="res://scripts/enemies/enemy_dummy.gd" id="1_ja824"]
+[ext_resource type="Material" uid="uid://70pptvcbxqup" path="res://materials/material_placeholder_enemy.tres" id="2_kqp3b"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ja824"]
+radius = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_ja824"]
+material = ExtResource("2_kqp3b")
+radius = 1.0
+height = 2.0
+
+[node name="EnemyDummy" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 4
+script = ExtResource("1_ja824")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_ja824")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_ja824")

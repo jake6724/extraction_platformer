@@ -16,17 +16,19 @@ var attack_names: Array[String] = ["Attack1OneShot", "Attack2OneShot", "Attack3O
 
 var player_is_on_wall: bool
 
+signal hitbox_disable_requested
+
 func _ready():
 	animation_tree.active = true
 	attack_combo_timer.timeout.connect(on_attack_combo_timer_timeout)
 	
 	animation_tree.animation_finished.connect(on_animation_tree_animation_finished)
 
-func _process(delta):
-	print(state_machine.get_current_node())
+# func _process(delta):
+# 	print(state_machine.get_current_node())
 
 func on_animation_tree_animation_finished(_anim_name) -> void:
-	print(_anim_name)
+	# print(_anim_name)
 	pass
 
 func mirror_mesh(_value: bool) -> void:
@@ -36,6 +38,7 @@ func mirror_mesh(_value: bool) -> void:
 		mesh_parent.scale.z = 1
 
 func attack() -> void:
+	print("Attack called")
 	attack_combo_timer.start(combo_duration)
 
 	print(attack_combo_index)
@@ -46,6 +49,9 @@ func attack() -> void:
 	attack_combo_index += 1
 	if attack_combo_index > 2:
 		attack_combo_index = 0
+
+func attack_down() -> void:
+	animation_tree["parameters/AttackDownOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 func on_attack_combo_timer_timeout() -> void:
 	attack_combo_index = 0
@@ -67,3 +73,6 @@ func jump():
 
 func wall_slide():
 	state_machine.start("WallSlide")
+
+func request_disable_hitbox(_index: int, _disable: bool) -> void:
+	hitbox_disable_requested.emit(_index, _disable)

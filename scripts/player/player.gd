@@ -86,7 +86,8 @@ var _wall_slide_normal: Vector3
 @export var hitbox_1: CollisionShape3D
 @export var hitbox_2: CollisionShape3D
 @export var hitbox_3: CollisionShape3D
-@onready var hitboxes: Array[CollisionShape3D] = [hitbox_1, hitbox_2, hitbox_3]
+@export var hitbox_4: CollisionShape3D
+@onready var hitboxes: Array[CollisionShape3D] = [hitbox_1, hitbox_2, hitbox_3, hitbox_4]
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
@@ -100,6 +101,12 @@ var _wall_slide_normal: Vector3
 @export_group("Debug")
 @export var state_movement_label: Label3D
 @export var state_action_label: Label3D
+
+enum State {IDLE, RUN, JUMP, FALL, WALL_SLIDE,}
+var curr_state: State:
+	set(value):
+		curr_state = value
+		#print_state_change()
 
 func _ready():
 	_gravity = gravity_default
@@ -122,6 +129,9 @@ func _ready():
 		hitbox.disabled = true
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
+	input_handler.attack_triggered.connect(attack)
+
+	_skin.hitbox_disable_requested.connect(disable_attack_hitbox)
 
 func on_jump_triggered() -> void:
 	jump()
@@ -160,33 +170,13 @@ func _process(delta):
 	process_dust_particles()
 
 func _physics_process(delta: float) -> void:
-
 	var move_direction: Vector3
 	if can_move: move_direction = input_handler.move_direction
 
 	move_and_fall(delta, move_direction, move_speed_ground)
 	update_character(delta, move_direction)
 	move_and_slide()
-
-
-	pass
-	# # Set state
-	# if _is_wall_sliding:
-	# 	_skin.wall_slide()
-	# elif not is_on_floor() and velocity.y <= 0:
-	# 	_skin.fall()
-	# elif not is_on_floor() and velocity.y > 0:
-	# 	_skin.jump()
-	# elif is_on_floor():
-	# 	_coyote_jump_available = true
-	# 	timer_jump_coyote.stop()
-	# 	var ground_speed: float = velocity.length()
-	# 	_jump_count = 0
-
-		# if ground_speed > 1.0:
-		# 	_skin.run()
-		# else:
-		# 	_skin.idle()
+	set_state()
 	
 func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: float) -> void:
 	var y_velocity = velocity.y
@@ -211,9 +201,9 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
 		_last_movement_direction = move_direction
 
-	# Rotate skin (around the Y-axis) to face the move direction
-	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
-	_skin.global_rotation.y = lerp_angle(_skin.global_rotation.y, target_angle, rotation_speed * delta)
+	# Flip skin on Y-axis to face move direction
+	var target_angle: float = Vector3.RIGHT.signed_angle_to(_last_movement_direction, Vector3.UP)
+	_skin.global_rotation.y = target_angle
 	_skin.mirror_mesh(_last_movement_direction.z == 1)
 
 	process_wall_slide(move_direction)
@@ -231,6 +221,39 @@ func process_wall_slide(_move_direction: Vector3) -> void:
 		timer_wall_jump_coyote.start(wall_jump_coyote_time)
 	elif _is_wall_sliding: # Is actively wall sliding
 		_gravity -= gravity_wall_slide_increment
+
+func set_state() -> void:
+	if _is_wall_sliding:
+		if curr_state != State.WALL_SLIDE:
+			_skin.wall_slide()
+			curr_state = State.WALL_SLIDE
+
+	elif not is_on_floor():
+		_move_speed = move_speed_air
+
+		if velocity.y <= 0:
+			if curr_state != State.FALL:
+				curr_state = State.FALL
+				_skin.fall()
+		else:
+			if curr_state != State.JUMP:
+				curr_state = State.JUMP
+				_skin.jump()
+
+	elif is_on_floor():
+		_coyote_jump_available = true
+		timer_jump_coyote.stop()
+		var ground_speed: float = velocity.length()
+		_jump_count = 0
+
+		if ground_speed > 1.0:
+			if curr_state != State.RUN:
+				curr_state = State.RUN
+				_skin.run()
+		else:
+			if curr_state != State.IDLE:
+				curr_state = State.IDLE
+				_skin.idle()
 
 func jump() -> void:
 	if is_on_floor() or _coyote_jump_available or (_jump_count < jump_max):
@@ -256,6 +279,7 @@ func on_timer_jump_coyote_timeout() -> void:
 
 ## Returns true if wall_raycast is colliding, and character is not on floor
 func can_wall_slide() -> bool:
+	# TODO: Use 2 raycast to define a range, and check that both are colliding
 	return wall_raycast.is_colliding() and not is_on_floor()
 
 func sprint() -> void:
@@ -278,7 +302,11 @@ func dash() -> void:
 	after_image_active = false
 
 func attack() -> void:
-	_skin.attack()
+	print("Player attack")
+	if is_on_floor():
+		_skin.attack()
+	else:
+		_skin.attack_down()
 	move_speed_ground = move_speed_attack
 	move_speed_air = move_speed_attack
 	min_y_velocity = -4
@@ -335,3 +363,13 @@ func reset_from_wall_slide() -> void:
 
 func disable_attack_hitbox(_index: int, _disabled: bool) -> void:
 	hitboxes[_index].set_deferred("disabled", _disabled)
+
+func print_state_change() -> void:
+	var text: String
+	match curr_state:
+		State.IDLE: text = "Idle"
+		State.RUN: text = "Run"
+		State.FALL: text = "Fall"
+		State.WALL_SLIDE: text = "Wall Slide"
+		State.JUMP: text = "Jump"
+	print("Changed current state to: ", text)
