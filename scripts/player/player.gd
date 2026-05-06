@@ -199,14 +199,6 @@ func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: floa
 func update_character(delta: float, move_direction: Vector3) -> void:
 	camera.update(delta)
 
-	# Set WallRaycast direction
-	if move_direction.z < 0:
-		wall_raycast_top.target_position.y = wall_raycast_distance_y
-		wall_raycast_bottom.target_position.y = wall_raycast_distance_y
-	elif move_direction.z > 0:
-		wall_raycast_top.target_position.y = -wall_raycast_distance_y
-		wall_raycast_bottom.target_position.y = -wall_raycast_distance_y
-
 	# Ensure that character look direction does not update when there is no input
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
 		_last_movement_direction = move_direction
