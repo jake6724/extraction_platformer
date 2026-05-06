@@ -38,12 +38,12 @@ func mirror_mesh(_value: bool) -> void:
 		mesh_parent.scale.z = 1
 
 func attack() -> void:
-	print("Attack called")
+	# print("Attack called")
 	attack_combo_timer.start(combo_duration)
 
-	print(attack_combo_index)
+	# print(attack_combo_index)
 	var _one_shot_string: String = "parameters/%s/request" % attack_names[attack_combo_index]
-	print(_one_shot_string)
+	# print(_one_shot_string)
 	animation_tree[_one_shot_string] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 	attack_combo_index += 1

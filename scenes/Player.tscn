@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=21 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
 [ext_resource type="PackedScene" uid="uid://blrnsi1w8wjwh" path="res://scenes/PlayerSkin.tscn" id="2_d3wef"]
@@ -6,13 +6,6 @@
 [ext_resource type="Material" uid="uid://ioi0p4q0f70j" path="res://materials/outline_material.tres" id="3_mdl7e"]
 [ext_resource type="Script" uid="uid://buj65w2r2owws" path="res://scripts/player/player_camera.gd" id="3_qu4a1"]
 [ext_resource type="Script" uid="uid://bw3yn2gwobtti" path="res://scripts/player/input_handler.gd" id="5_70d11"]
-[ext_resource type="Script" path="res://scripts/state_machine/state_machine.gd" id="7_cw2d6"]
-[ext_resource type="Script" uid="uid://n0chcfhyvjv2" path="res://scripts/player/states/movement/player_state_run.gd" id="8_khinc"]
-[ext_resource type="Script" uid="uid://dvrref1deghqt" path="res://scripts/player/states/movement/player_state_idle.gd" id="9_bruh7"]
-[ext_resource type="Script" uid="uid://btasxlkdb0ivx" path="res://scripts/player/states/action/player_state_inactive.gd" id="10_d3wef"]
-[ext_resource type="Script" uid="uid://dj7g62yqdhfgn" path="res://scripts/player/states/movement/player_state_air_move.gd" id="10_o4126"]
-[ext_resource type="Script" uid="uid://dau3fd8wjp7ps" path="res://scripts/player/states/movement/player_state_wall_slide.gd" id="11_lkdrv"]
-[ext_resource type="Script" uid="uid://p0h7g1x08i86" path="res://scripts/player/states/action/player_state_attack.gd" id="12_o4126"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_p0vlq"]
 radius = 0.34765625
@@ -92,17 +85,20 @@ height = 1.8966064
 [sub_resource type="SphereShape3D" id="SphereShape3D_lkdrv"]
 radius = 0.9838653
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "hitbox_1", "hitbox_2", "hitbox_3", "hitbox_4", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack", "hitbox_1", "hitbox_2", "hitbox_3", "hitbox_4", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
+collision_layer = 3
 collision_mask = 4
 script = ExtResource("1_v6fml")
 timer_jump_coyote = NodePath("TimeJumpCoyote")
 camera = NodePath("Camera3D")
 camera_pivot = NodePath("CameraPivot")
-wall_raycast = NodePath("CharacterCollider/WallRaycast")
+wall_raycast_top = NodePath("CharacterCollider/WallRaycastTop")
+wall_raycast_bottom = NodePath("CharacterCollider/WallRaycastBottom")
 timer_wall_slide = NodePath("TimerWallSlide")
 timer_prevent_wall_slide = NodePath("TimerPreventWallSlide")
 timer_wall_jump_coyote = NodePath("TimerWallJumpCoyote")
 timer_attack_slow = NodePath("TimerAttackSlow")
+area_attack = NodePath("AreaAttack")
 hitbox_1 = NodePath("AreaAttack/Attack1Hitbox")
 hitbox_2 = NodePath("AreaAttack/Attack2Hitbox")
 hitbox_3 = NodePath("AreaAttack/Attack3Hitbox")
@@ -120,8 +116,13 @@ metadata/_custom_type_script = "uid://dt7jxbev3kpcq"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.765625, 0)
 shape = SubResource("CapsuleShape3D_p0vlq")
 
-[node name="WallRaycast" type="RayCast3D" parent="CharacterCollider"]
+[node name="WallRaycastTop" type="RayCast3D" parent="CharacterCollider"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.65, 0)
+target_position = Vector3(0, 0.356, 0)
+collision_mask = 4
+
+[node name="WallRaycastBottom" type="RayCast3D" parent="CharacterCollider"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -0.23609483, 0)
 target_position = Vector3(0, 0.356, 0)
 collision_mask = 4
 
@@ -148,7 +149,7 @@ collision_mask = 0
 script = ExtResource("3_3li8b")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerHurtbox"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.76776123, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8073914, 0)
 shape = SubResource("CapsuleShape3D_3li8b")
 debug_color = Color(0, 0.5565641, 0.33413175, 0.41960785)
 
@@ -204,39 +205,9 @@ explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_70d11")
 draw_pass_1 = SubResource("SphereMesh_v6fml")
 
-[node name="StateMachineMovement" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
-script = ExtResource("7_cw2d6")
-active = false
-initial_state = NodePath("PlayerStateIdle")
-metadata/_custom_type_script = "uid://d0qdrvq5s3xvp"
-
-[node name="PlayerStateRun" type="Node" parent="StateMachineMovement"]
-script = ExtResource("8_khinc")
-
-[node name="PlayerStateIdle" type="Node" parent="StateMachineMovement"]
-script = ExtResource("9_bruh7")
-
-[node name="PlayerStateAirMove" type="Node" parent="StateMachineMovement"]
-script = ExtResource("10_o4126")
-metadata/_custom_type_script = "uid://dj7g62yqdhfgn"
-
-[node name="PlayerStateWallSlide" type="Node" parent="StateMachineMovement"]
-script = ExtResource("11_lkdrv")
-
-[node name="StateMachineAction" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
-script = ExtResource("7_cw2d6")
-initial_state = NodePath("PlayerStateInactive")
-metadata/_custom_type_script = "uid://d0qdrvq5s3xvp"
-
-[node name="PlayerStateInactive" type="Node" parent="StateMachineAction"]
-script = ExtResource("10_d3wef")
-metadata/_custom_type_script = "uid://btasxlkdb0ivx"
-
-[node name="PlayerStateAttack" type="Node" parent="StateMachineAction"]
-script = ExtResource("12_o4126")
-metadata/_custom_type_script = "uid://p0h7g1x08i86"
-
 [node name="AreaAttack" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 16
 
 [node name="Attack1Hitbox" type="CollisionShape3D" parent="AreaAttack"]
 transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665766, 0.84374356, 1.0676159)

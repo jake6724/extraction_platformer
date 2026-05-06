@@ -65,7 +65,8 @@ var _after_image_spawn_time_count: float
 @export var wall_jump_power: float = 12.0
 ## Controls duration after wall jumping that all movement is disabled.
 @export var wall_jump_move_disable_duration: float = .1
-@export var wall_raycast: RayCast3D
+@export var wall_raycast_top: RayCast3D
+@export var wall_raycast_bottom: RayCast3D
 ## Do not change this variable without a good reason. Controls the range that the wall slide raycast looks for a wall, and needs to fit with the player's capsule collider.
 @export var wall_raycast_distance_y: float = .35
 @export var timer_wall_slide: Timer
@@ -88,6 +89,7 @@ var _wall_slide_normal: Vector3
 @export var hitbox_3: CollisionShape3D
 @export var hitbox_4: CollisionShape3D
 @onready var hitboxes: Array[CollisionShape3D] = [hitbox_1, hitbox_2, hitbox_3, hitbox_4]
+@export var pogo_power: float = 17
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
@@ -125,8 +127,12 @@ func _ready():
 
 	player_hurtbox.hit.connect(on_player_hurtbox_hit)
 
+
+
 	for hitbox: CollisionShape3D in hitboxes:
 		hitbox.disabled = true
+	
+	area_attack.area_entered.connect(on_attack_area_entered)
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
 	input_handler.attack_triggered.connect(attack)
@@ -193,9 +199,11 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 
 	# Set WallRaycast direction
 	if move_direction.z < 0:
-		wall_raycast.target_position.y = wall_raycast_distance_y
+		wall_raycast_top.target_position.y = wall_raycast_distance_y
+		wall_raycast_bottom.target_position.y = wall_raycast_distance_y
 	elif move_direction.z > 0:
-		wall_raycast.target_position.y = -wall_raycast_distance_y
+		wall_raycast_top.target_position.y = -wall_raycast_distance_y
+		wall_raycast_bottom.target_position.y = -wall_raycast_distance_y
 
 	# Ensure that character look direction does not update when there is no input
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
@@ -241,10 +249,12 @@ func set_state() -> void:
 				_skin.jump()
 
 	elif is_on_floor():
-		_coyote_jump_available = true
-		timer_jump_coyote.stop()
+		if curr_state != State.RUN or curr_state != State.IDLE:
+			_coyote_jump_available = true
+			timer_jump_coyote.stop()
+			_jump_count = 0
+
 		var ground_speed: float = velocity.length()
-		_jump_count = 0
 
 		if ground_speed > 1.0:
 			if curr_state != State.RUN:
@@ -280,7 +290,7 @@ func on_timer_jump_coyote_timeout() -> void:
 ## Returns true if wall_raycast is colliding, and character is not on floor
 func can_wall_slide() -> bool:
 	# TODO: Use 2 raycast to define a range, and check that both are colliding
-	return wall_raycast.is_colliding() and not is_on_floor()
+	return wall_raycast_top.is_colliding() and wall_raycast_bottom.is_colliding() and not is_on_floor()
 
 func sprint() -> void:
 	_move_speed = move_speed_sprint
@@ -302,15 +312,21 @@ func dash() -> void:
 	after_image_active = false
 
 func attack() -> void:
-	print("Player attack")
+	# print("Player attack")
 	if is_on_floor():
 		_skin.attack()
 	else:
 		_skin.attack_down()
-	move_speed_ground = move_speed_attack
-	move_speed_air = move_speed_attack
-	min_y_velocity = -4
+	_move_speed = move_speed_attack
+	# min_y_velocity = -4
 	timer_attack_slow.start(.5)
+
+func on_attack_area_entered(_intruder: Area3D) -> void:
+	print(_intruder)
+	print(_intruder.owner)
+	_intruder.owner.take_damage()
+	print("Hit an enemy!")
+	pogo()
 
 func on_timer_wall_slide_timeout() -> void:
 	can_move = true
@@ -323,6 +339,9 @@ func on_timer_wall_jump_coyote_timeout() -> void:
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	velocity = _hit_impulse
+
+func pogo() -> void:
+	velocity.y = pogo_power
 
 func create_after_image() -> void:
 	var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")

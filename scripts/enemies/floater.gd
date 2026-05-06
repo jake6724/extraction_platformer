@@ -2,7 +2,7 @@ class_name EnemyFloater
 extends Enemy
 
 @export var area_detect_player: Area3D
-@export var area_attack: Area3D
+# @export var area_attack: Area3D
 
 var player: Player
 ## Move speed when chasing the player
@@ -15,7 +15,7 @@ var stop_timer: Timer = Timer.new()
 
 ## How long to stop after hitting the player. 0 is allowed, enemy will not stop after hitting
 @export_range(0,2,.1) var stop_duration: float = 1.0
-var attack_power: float = 30.0
+# var attack_power: float = 30.0
 
 var start_point: Vector3
 var end_point: Vector3
@@ -26,7 +26,8 @@ var target_direction: Vector3
 @export var patrol_raycast: RayCast3D
 
 func _ready():
-	area_attack.area_entered.connect(on_area_attack_area_entered)
+	super()
+	
 	area_detect_player.body_entered.connect(on_area_detect_player_body_entered)
 
 	stop_timer.one_shot = false
@@ -70,7 +71,7 @@ func chase(delta: float, _player: Player ) -> void:
 	var _direction: Vector3 = global_position.direction_to(_player.global_position)
 	global_position += (_direction * chase_speed) * delta
 
-## Attack
+## Attack (overrides parent's basic implementation)
 func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void: 
 	if _player_hurtbox:
 		_player_hurtbox.take_damage(global_position, attack_power)

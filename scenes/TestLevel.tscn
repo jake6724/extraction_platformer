@@ -1,10 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=12 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_1fpmp"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
-[ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_8xg12"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
 [ext_resource type="PackedScene" uid="uid://d13aehtbq06rs" path="res://scenes/enemies/EnemyDummy.tscn" id="6_6e24c"]
 [ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
@@ -32,7 +31,7 @@ left_boundary = NodePath("LevelBoundaries/Marker3D")
 right_boundary = NodePath("LevelBoundaries/Marker3D2")
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, -0.12811664, 0.44165993, 2.308669)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 1.1217462, 0.44165993, 2.3048298)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -101,12 +100,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 
 [node name="Enemies" type="Node" parent="."]
 
-[node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_8xg12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 91.407745, -124.57468)
-stop_duration = 0.3
-
 [node name="EnemyDummy" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.6647787, 7.485609)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8980373, 3.2888489, 4.5158653)
+
+[node name="EnemyDummy2" parent="Enemies" instance=ExtResource("6_6e24c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.084357, 7.4130864, 8.510511)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
