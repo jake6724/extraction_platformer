@@ -42,48 +42,51 @@ light_energy = 1.5
 shadow_enabled = true
 directional_shadow_mode = 1
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50.50002, 17.22636)
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 2.6142738, 0, 0, 0)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.3825154, 0, 50.50002, 6.5893483)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(3, 58, 7)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D8" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50.50002, 28.22636)
+[node name="CSGBox3D8" type="CSGBox3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.3825154, 0, 50.50002, 10.797017)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(3, 58, 7)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D9" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.501019, 22.642288)
+[node name="CSGBox3D9" type="CSGBox3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.3825154, 0, 10.501019, 8.661024)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(3, 12, 2)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D10" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.29418, -9.942158)
+[node name="CSGBox3D10" type="CSGBox3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.3825154, 0, -15.29418, -3.8030283)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(3, 31.47168, 126.48816)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D4" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -2.7736397)
+[node name="CSGBox3D4" type="CSGBox3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.3825154, 0, 5.0500193, -1.0609599)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(3, 1, 5)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -12.77364)
+[node name="CSGBox3D5" type="CSGBox3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.3825154, 0, 5.0500193, -4.886114)
 use_collision = true
 collision_layer = 4
 collision_mask = 0

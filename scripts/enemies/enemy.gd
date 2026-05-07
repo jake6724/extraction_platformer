@@ -21,10 +21,8 @@ func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void:
 		_player_hurtbox.take_damage(global_position, attack_power)
 		
 func take_damage(_direction, _power) -> void:
-	
 	velocity = _direction * _power
 	flash_mesh()
-
 
 func flash_mesh() -> void:
 	var flash_tween: Tween = get_tree().create_tween()

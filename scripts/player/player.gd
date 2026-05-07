@@ -83,10 +83,13 @@ var _wall_slide_normal: Vector3
 
 @export_group("Combat")
 @export var timer_attack_slow: Timer
-@export var area_attack: Area3D
+@export var area_attack_forward: Area3D
+@export var area_attack_down: Area3D
 @export var hitbox_forward: CollisionShape3D
-@export var hitbox_down: CollisionShape3D
-@onready var hitboxes: Dictionary[Attack, CollisionShape3D] = {Attack.FORWARD: hitbox_forward, Attack.DOWN: hitbox_down}
+@export var hitbox_down1: CollisionShape3D
+@export var hitbox_down2: CollisionShape3D
+@export var hitbox_down3: CollisionShape3D
+@onready var attack_areas: Dictionary[Attack, Area3D] = {Attack.FORWARD: area_attack_forward, Attack.DOWN: area_attack_down}
 @export var pogo_power: float = 17
 @export var attack_down_power: float = 10
 @export var attack_forward_power: float = 10
@@ -129,12 +132,12 @@ func _ready():
 
 	player_hurtbox.hit.connect(on_player_hurtbox_hit)
 
-
-
-	for hitbox: CollisionShape3D in hitboxes.values():
-		hitbox.disabled = true
+	# for hitbox: CollisionShape3D in hitboxes.values():
+	# 	hitbox.disabled = true
 	
-	area_attack.area_entered.connect(on_attack_area_entered)
+	area_attack_forward.area_entered.connect(on_attack_area_entered)
+	area_attack_down.area_entered.connect(on_attack_area_entered)
+	disable_all_hitboxes()
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
 	input_handler.attack_triggered.connect(trigger_skin_attack)
@@ -250,7 +253,7 @@ func set_state() -> void:
 
 			# Cancel pogo and disable hitbox
 			_skin.canel_attack_down()
-			hitbox_down.set_deferred("disabled", true)
+			disable_attack_hitbox(Attack.DOWN, true)
 
 		if curr_state == State.FALL or curr_state == State.JUMP:
 			_skin.land()
@@ -320,8 +323,8 @@ func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	_skin.hurt()
 
 func disable_all_hitboxes() -> void:
-	hitbox_forward.set_deferred("disabled", true)
-	hitbox_down.set_deferred("disabled", true)
+	disable_attack_hitbox(Attack.FORWARD, true)
+	disable_attack_hitbox(Attack.DOWN, true)
 
 func trigger_skin_attack() -> void:
 	if _skin.is_attack_available() and not _is_wall_sliding:
@@ -335,7 +338,7 @@ func trigger_skin_attack() -> void:
 		# min_y_velocity = -4 # More needs to be fixed, specifically how move_speed is used and ground and air speeds
 		# timer_attack_slow.start(.5)
 
-func on_attack_area_entered(_intruder: Area3D) -> void:
+func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each area, doesn't seem necessary rn
 	print(_intruder.owner)
 	var enemy: Enemy = _intruder.owner as Enemy
 	if enemy:
@@ -353,12 +356,19 @@ func on_attack_area_entered(_intruder: Area3D) -> void:
 
 	elif _intruder.owner is SpikePlatform:
 		pogo()
+		_intruder.owner.flip()
+
+	elif _intruder.owner is SpinTurret:
+		print("Hit a turret")
+		pogo()
+		_intruder.owner.spin_out()
 
 	else:
 		push_warning("Player attack targeting non-enemy")
 
 func disable_attack_hitbox(_attack: Attack, _disabled: bool) -> void:
-	hitboxes[_attack].set_deferred("disabled", _disabled)
+	for hitbox in attack_areas[_attack].get_children():
+		hitbox.set_deferred("disabled", _disabled)
 
 func on_timer_wall_slide_timeout() -> void:
 	can_move = true

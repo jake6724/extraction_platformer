@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bodsvsc1dnh3i"]
+[gd_scene load_steps=8 format=3 uid="uid://bodsvsc1dnh3i"]
 
 [ext_resource type="Script" uid="uid://cr7yi2hxhrchc" path="res://scripts/enemies/floater.gd" id="1_w35ln"]
 
@@ -19,14 +19,19 @@ radius = 8.0
 [sub_resource type="SphereShape3D" id="SphereShape3D_ej4nl"]
 radius = 1.0
 
-[node name="EnemyFloater" type="CharacterBody3D" node_paths=PackedStringArray("area_detect_player", "area_attack", "chase_timer", "patrol_raycast")]
+[sub_resource type="SphereShape3D" id="SphereShape3D_rdqr8"]
+radius = 1.05
+
+[node name="EnemyFloater" type="CharacterBody3D" node_paths=PackedStringArray("area_detect_player", "chase_timer", "patrol_raycast", "mesh", "area_attack")]
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_w35ln")
 area_detect_player = NodePath("AreaPlayerDetect")
-area_attack = NodePath("AreaAttack")
+chase_speed = 6.0
 chase_timer = NodePath("ChaseTimer")
 patrol_raycast = NodePath("PatrolRaycast")
+mesh = NodePath("MeshInstance3D")
+area_attack = NodePath("AreaAttack")
 metadata/_custom_type_script = "uid://cr7yi2hxhrchc"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -60,3 +65,11 @@ collision_mask = 4
 [node name="ChaseTimer" type="Timer" parent="."]
 process_callback = 0
 one_shot = true
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+shape = SubResource("SphereShape3D_rdqr8")
+debug_color = Color(0.84474784, 0.0010305756, 0.9136193, 0.41960785)

@@ -4673,6 +4673,9 @@ parameters/LandOneShot/request = 0
 parameters/WallJumpOneShot/active = false
 parameters/WallJumpOneShot/internal_active = false
 parameters/WallJumpOneShot/request = 0
+parameters/TimeScale/scale = 2.0
+"parameters/TimeScale 2/scale" = 2.0
+"parameters/TimeScale 3/scale" = 2.0
 
 [node name="TimerAttackCombo" type="Timer" parent="."]
 process_callback = 0

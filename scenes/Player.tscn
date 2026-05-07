@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=20 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
 [ext_resource type="PackedScene" uid="uid://blrnsi1w8wjwh" path="res://scenes/PlayerSkin.tscn" id="2_d3wef"]
@@ -75,9 +75,13 @@ radius = 0.46435547
 height = 1.7145138
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_lkdrv"]
-radius = 0.9838653
+radius = 1.0709678
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack", "hitbox_forward", "hitbox_down", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_70d11"]
+radius = 0.71875
+height = 2.2944336
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack_forward", "area_attack_down", "hitbox_forward", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
 collision_layer = 3
 collision_mask = 4
 script = ExtResource("1_v6fml")
@@ -90,9 +94,9 @@ timer_wall_slide = NodePath("TimerWallSlide")
 timer_prevent_wall_slide = NodePath("TimerPreventWallSlide")
 timer_wall_jump_coyote = NodePath("TimerWallJumpCoyote")
 timer_attack_slow = NodePath("TimerAttackSlow")
-area_attack = NodePath("AreaAttack")
-hitbox_forward = NodePath("AreaAttack/HitboxForward")
-hitbox_down = NodePath("AreaAttack/HitboxDown")
+area_attack_forward = NodePath("AreaAttackForward")
+area_attack_down = NodePath("AreaAttackDown")
+hitbox_forward = NodePath("AreaAttackForward/HitboxForward")
 dust_particles = NodePath("DustParticles")
 jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
@@ -199,17 +203,30 @@ explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_70d11")
 draw_pass_1 = SubResource("SphereMesh_v6fml")
 
-[node name="AreaAttack" type="Area3D" parent="."]
+[node name="AreaAttackForward" type="Area3D" parent="."]
 collision_layer = 0
 collision_mask = 16
 
-[node name="HitboxForward" type="CollisionShape3D" parent="AreaAttack"]
+[node name="HitboxForward" type="CollisionShape3D" parent="AreaAttackForward"]
 transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665768, 0.84254223, 1.2007463)
 shape = SubResource("CapsuleShape3D_o4126")
 debug_color = Color(0.89702433, 0, 0.07988889, 0.41960785)
 
-[node name="HitboxDown" type="CollisionShape3D" parent="AreaAttack"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25148714, 0)
+[node name="AreaAttackDown" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 16
+
+[node name="HitboxDown1" type="CollisionShape3D" parent="AreaAttackDown"]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, -0.0003798604, 0)
 shape = SubResource("SphereShape3D_lkdrv")
-disabled = true
 debug_color = Color(1, 0, 0.16470589, 0.41960785)
+
+[node name="HitboxDown2" type="CollisionShape3D" parent="AreaAttackDown"]
+transform = Transform3D(1, 0, 0, 0, 0.74330837, -0.6689491, 0, 0.6689491, 0.74330837, 0, 0.13206767, 0.86964476)
+shape = SubResource("CapsuleShape3D_70d11")
+debug_color = Color(0.96696335, 0, 0.48024678, 0.41960785)
+
+[node name="HitboxDown3" type="CollisionShape3D" parent="AreaAttackDown"]
+transform = Transform3D(1, 0, 0, 0, 0.74314487, 0.6691307, 0, -0.6691307, 0.74314487, 0, 0.13206767, -0.7551033)
+shape = SubResource("CapsuleShape3D_70d11")
+debug_color = Color(0.96696335, 0, 0.48024678, 0.41960785)

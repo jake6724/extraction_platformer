@@ -56,9 +56,11 @@ func _physics_process(delta: float) -> void:
 			chase(delta, player)
 		else:
 			patrol(delta)
+	move_and_slide()
 
 func patrol(delta) -> void:
-	global_position += (target_direction * patrol_speed) * delta
+	velocity = velocity.move_toward(target_direction * patrol_speed, delta)
+	# velocity += (target_direction * patrol_speed) * delta
 	if global_position.is_equal_approx(target_point):
 		if target_point == end_point:
 			target_point = start_point
@@ -69,7 +71,8 @@ func patrol(delta) -> void:
 
 func chase(delta: float, _player: Player ) -> void:
 	var _direction: Vector3 = global_position.direction_to(_player.global_position)
-	global_position += (_direction * chase_speed) * delta
+	velocity = velocity.move_toward(_direction * chase_speed, delta * 10)
+	# velocity += (_direction * chase_speed) * delta
 
 ## Attack (overrides parent's basic implementation)
 func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void: 
