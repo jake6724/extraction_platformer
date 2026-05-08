@@ -1,6 +1,7 @@
-[gd_scene load_steps=20 format=3 uid="uid://dvr2kvvvboiwv"]
+[gd_scene load_steps=23 format=3 uid="uid://dvr2kvvvboiwv"]
 
 [ext_resource type="Script" uid="uid://dt7jxbev3kpcq" path="res://scripts/player/player.gd" id="1_v6fml"]
+[ext_resource type="PackedScene" uid="uid://vb7pcgy0yok8" path="res://scenes/Scent.tscn" id="2_cw2d6"]
 [ext_resource type="PackedScene" uid="uid://blrnsi1w8wjwh" path="res://scenes/PlayerSkin.tscn" id="2_d3wef"]
 [ext_resource type="Script" uid="uid://dmetde2fqpryq" path="res://scripts/player/player_hurtbox.gd" id="3_3li8b"]
 [ext_resource type="Material" uid="uid://ioi0p4q0f70j" path="res://materials/outline_material.tres" id="3_mdl7e"]
@@ -81,19 +82,24 @@ radius = 1.0709678
 radius = 0.71875
 height = 2.2944336
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack_forward", "area_attack_down", "hitbox_forward", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "state_movement_label", "state_action_label")]
+[sub_resource type="SphereMesh" id="SphereMesh_70d11"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cw2d6"]
+albedo_color = Color(0.6958272, 0.29175738, 0, 1)
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack_forward", "area_attack_down", "hitbox_forward", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "tracker", "timer_spawn_scent", "scent_parent", "state_movement_label", "state_action_label")]
 collision_layer = 3
 collision_mask = 4
 script = ExtResource("1_v6fml")
-timer_jump_coyote = NodePath("TimeJumpCoyote")
+timer_jump_coyote = NodePath("Timers/TimeJumpCoyote")
 camera = NodePath("Camera3D")
 camera_pivot = NodePath("CameraPivot")
 wall_raycast_top = NodePath("CharacterCollider/WallRaycastTop")
 wall_raycast_bottom = NodePath("CharacterCollider/WallRaycastBottom")
-timer_wall_slide = NodePath("TimerWallSlide")
-timer_prevent_wall_slide = NodePath("TimerPreventWallSlide")
-timer_wall_jump_coyote = NodePath("TimerWallJumpCoyote")
-timer_attack_slow = NodePath("TimerAttackSlow")
+timer_wall_slide = NodePath("Timers/TimerWallSlide")
+timer_prevent_wall_slide = NodePath("Timers/TimerPreventWallSlide")
+timer_wall_jump_coyote = NodePath("Timers/TimerWallJumpCoyote")
+timer_attack_slow = NodePath("Timers/TimerAttackSlow")
 area_attack_forward = NodePath("AreaAttackForward")
 area_attack_down = NodePath("AreaAttackDown")
 hitbox_forward = NodePath("AreaAttackForward/HitboxForward")
@@ -102,6 +108,10 @@ jump_dust_particles = NodePath("JumpDustParticles")
 player_hurtbox = NodePath("PlayerHurtbox")
 _skin = NodePath("PlayerSkin")
 input_handler = NodePath("PlayerInput")
+tracker = NodePath("Tracker")
+timer_spawn_scent = NodePath("Timers/TimerSpawnScent")
+scent_scene = ExtResource("2_cw2d6")
+scent_parent = NodePath("ScentParent")
 state_movement_label = NodePath("MovementState")
 state_action_label = NodePath("ActionState")
 metadata/_custom_type_script = "uid://dt7jxbev3kpcq"
@@ -151,21 +161,28 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8073914, 0)
 shape = SubResource("CapsuleShape3D_3li8b")
 debug_color = Color(0, 0.5565641, 0.33413175, 0.41960785)
 
-[node name="TimeJumpCoyote" type="Timer" parent="."]
+[node name="Timers" type="Node" parent="."]
+
+[node name="TimeJumpCoyote" type="Timer" parent="Timers"]
 process_callback = 0
 one_shot = true
 
-[node name="TimerWallSlide" type="Timer" parent="."]
+[node name="TimerWallSlide" type="Timer" parent="Timers"]
 process_callback = 0
 one_shot = true
 
-[node name="TimerPreventWallSlide" type="Timer" parent="."]
+[node name="TimerPreventWallSlide" type="Timer" parent="Timers"]
 
-[node name="TimerWallJumpCoyote" type="Timer" parent="."]
+[node name="TimerWallJumpCoyote" type="Timer" parent="Timers"]
 process_callback = 0
 one_shot = true
 
-[node name="TimerAttackSlow" type="Timer" parent="."]
+[node name="TimerAttackSlow" type="Timer" parent="Timers"]
+
+[node name="TimerSpawnScent" type="Timer" parent="Timers"]
+process_callback = 0
+wait_time = 0.4
+autostart = true
 
 [node name="AfterImageParent" type="Node" parent="."]
 
@@ -230,3 +247,13 @@ debug_color = Color(0.96696335, 0, 0.48024678, 0.41960785)
 transform = Transform3D(1, 0, 0, 0, 0.74314487, 0.6691307, 0, -0.6691307, 0.74314487, 0, 0.13206767, -0.7551033)
 shape = SubResource("CapsuleShape3D_70d11")
 debug_color = Color(0.96696335, 0, 0.48024678, 0.41960785)
+
+[node name="Tracker" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3204218, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Tracker"]
+visible = false
+mesh = SubResource("SphereMesh_70d11")
+surface_material_override/0 = SubResource("StandardMaterial3D_cw2d6")
+
+[node name="ScentParent" type="Node" parent="."]

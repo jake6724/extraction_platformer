@@ -1,6 +1,8 @@
 class_name SpinTurret
 extends CharacterBody3D
 
+#TODO: Hitting a turret should never knock it off axis (should always be at 45 or 0 angles)
+
 @export var shooters: Array[Shooter]
 @export var shoot_timer: Timer
 @export var shoot_delay: float = 2.0

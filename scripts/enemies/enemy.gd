@@ -5,6 +5,7 @@ extends CharacterBody3D
 @export var area_attack: Area3D
 var attack_power: float = 15.0
 var base_color: Color
+@export var gravity_default: float = -30
 
 func _ready():
 	base_color = mesh.get_active_material(0).albedo_color

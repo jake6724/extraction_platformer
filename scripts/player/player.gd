@@ -104,6 +104,13 @@ enum Attack {FORWARD, DOWN}
 @export var player_hurtbox: PlayerHurtbox
 @export var _skin: PlayerSkin
 @export var input_handler: InputHandler
+@export var tracker: Node3D
+
+@export_group("Scents")
+@export var timer_spawn_scent: Timer
+@export var scent_scene: PackedScene = load("res://scenes/Scent.tscn")
+@export var scent_parent: Node
+var scents: Array[Scent] = []
 
 @export_group("Debug")
 @export var state_movement_label: Label3D
@@ -124,6 +131,7 @@ func _ready():
 	timer_prevent_wall_slide.timeout.connect(on_timer_prevent_wall_slide_timeout)
 	timer_wall_jump_coyote.timeout.connect(on_timer_wall_jump_coyote_timeout)
 	timer_attack_slow.timeout.connect(on_timer_attack_slow_timeout)
+	timer_spawn_scent.timeout.connect(on_timer_spawn_scent_timeout)
 
 	camera.initialize()
 
@@ -339,7 +347,7 @@ func trigger_skin_attack() -> void:
 		# timer_attack_slow.start(.5)
 
 func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each area, doesn't seem necessary rn
-	print(_intruder.owner)
+	# print(_intruder.owner)
 	var enemy: Enemy = _intruder.owner as Enemy
 	if enemy:
 		var _direction: Vector3
@@ -359,7 +367,6 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 		_intruder.owner.flip()
 
 	elif _intruder.owner is SpinTurret:
-		print("Hit a turret")
 		pogo()
 		_intruder.owner.spin_out()
 
@@ -402,7 +409,7 @@ func create_after_image() -> void:
 
 func process_dust_particles() -> void:
 	## TODO: Disable if character is attacking/moving slow
-	if not is_equal_approx(velocity.z, 0) and is_on_floor():
+	if not is_equal_approx(velocity.z, 0) and is_on_floor() and abs(velocity.z) > 7:
 		dust_particles.emitting = true
 	else:
 		dust_particles.emitting = false
@@ -428,3 +435,20 @@ func print_state_change() -> void:
 		State.WALL_SLIDE: text = "Wall Slide"
 		State.JUMP: text = "Jump"
 	print("Changed current state to: ", text)
+
+func on_timer_spawn_scent_timeout() -> void:
+	spawn_scent()
+
+func spawn_scent() -> void:
+	var new_scent = scent_scene.instantiate()
+	scent_parent.add_child(new_scent)
+	new_scent.global_transform.origin = tracker.global_transform.origin
+	scents.push_front(new_scent)
+
+	new_scent.scent_expired.connect(on_scent_expired)
+
+	new_scent.start_despawn(10)
+
+func on_scent_expired(expired_scent: Scent) -> void:
+	scents.erase(expired_scent)
+	expired_scent.queue_free()

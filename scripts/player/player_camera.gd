@@ -7,7 +7,7 @@ extends Camera3D
 ## Controls how close the camera can get to the player
 @export var zoom_min: float = 5
 ## Controls how far the camera can get from the player
-@export var zoom_max: float = 30
+@export var zoom_max: float = 45
 @export_range(1, 20, 1) var zoom_sensitivity: float = 3
 @export_range(.1, 10, .1) var zoom_step: float = 1
 ## Multiplier controlling the strength of the camera's lerp to player's position. Lower values will cause the camera to trail behind the player's current position more.

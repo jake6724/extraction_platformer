@@ -1,0 +1,53 @@
+[gd_scene load_steps=7 format=3 uid="uid://d01c7ugxu20qw"]
+
+[ext_resource type="Script" uid="uid://c0vmpp55n5606" path="res://scripts/enemies/enemy_jumper.gd" id="1_h3c4m"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_h3c4m"]
+radius = 5.692749
+
+[sub_resource type="SphereMesh" id="SphereMesh_h3c4m"]
+radius = 1.0
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6hreo"]
+albedo_color = Color(0.89080036, 0, 0.04400021, 1)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ql82d"]
+radius = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_6hreo"]
+radius = 1.0
+
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("jump_timer", "area_detect_player", "mesh", "area_attack")]
+collision_layer = 2
+collision_mask = 4
+script = ExtResource("1_h3c4m")
+jump_timer = NodePath("Timer")
+area_detect_player = NodePath("Area3D")
+mesh = NodePath("MeshInstance3D")
+area_attack = NodePath("AreaAttack")
+metadata/_custom_type_script = "uid://c0vmpp55n5606"
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_h3c4m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_h3c4m")
+surface_material_override/0 = SubResource("StandardMaterial3D_6hreo")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_ql82d")
+
+[node name="AreaAttack" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AreaAttack"]
+shape = SubResource("SphereShape3D_6hreo")
+debug_color = Color(0.8123125, 0.41055724, 0, 0.41960785)
+
+[node name="Timer" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
