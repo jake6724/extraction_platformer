@@ -9,6 +9,7 @@ var base_color: Color
 
 func _ready():
 	base_color = mesh.get_active_material(0).albedo_color
+	print(base_color)
 	area_attack.area_entered.connect(on_area_attack_area_entered)
 
 func _physics_process(delta):

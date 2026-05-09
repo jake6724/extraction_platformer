@@ -260,7 +260,7 @@ bottom_radius = 0.1
 height = 1.1
 
 [node name="SpikePlatform" type="AnimatableBody3D" node_paths=PackedStringArray("spike_area")]
-collision_layer = 4
+collision_layer = 32
 collision_mask = 0
 script = ExtResource("1_33f0h")
 spike_area = NodePath("SpikeArea")

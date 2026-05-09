@@ -89,7 +89,7 @@ albedo_color = Color(0.6958272, 0.29175738, 0, 1)
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack_forward", "area_attack_down", "hitbox_forward", "dust_particles", "jump_dust_particles", "player_hurtbox", "_skin", "input_handler", "tracker", "timer_spawn_scent", "scent_parent", "state_movement_label", "state_action_label")]
 collision_layer = 3
-collision_mask = 4
+collision_mask = 36
 script = ExtResource("1_v6fml")
 timer_jump_coyote = NodePath("Timers/TimeJumpCoyote")
 camera = NodePath("Camera3D")

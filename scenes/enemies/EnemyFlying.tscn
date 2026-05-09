@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cceo475cxqqlf"]
+[gd_scene load_steps=11 format=3 uid="uid://cceo475cxqqlf"]
 
 [ext_resource type="Script" uid="uid://bhegt4y07ydw8" path="res://scripts/enemies/enemy_flying.gd" id="1_ayqf6"]
 
@@ -15,6 +15,11 @@ radius = 1.0
 [sub_resource type="SphereShape3D" id="SphereShape3D_ayqf6"]
 radius = 1.0
 
+[sub_resource type="SphereMesh" id="SphereMesh_2xq3x"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fadmd"]
+albedo_color = Color(0.10505509, 0.53636235, 3.85046e-07, 1)
+
 [sub_resource type="SphereMesh" id="SphereMesh_wlpcq"]
 radius = 0.2
 height = 0.4
@@ -22,17 +27,17 @@ height = 0.4
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2xq3x"]
 albedo_color = Color(1, 0.13337156, 0.49801546, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_2xq3x"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_wlpcq"]
+radius = 1.05
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fadmd"]
-albedo_color = Color(0.10505509, 0.53636235, 3.85046e-07, 1)
-
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("move_indicator", "raycast_player_detect", "last_seen_player_position_indicator", "timer_spot_player", "mesh", "area_attack")]
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("move_indicator", "raycast_player_detect_top", "raycast_player_detect_center", "raycast_player_detect_bottom", "last_seen_player_position_indicator", "timer_spot_player", "mesh", "area_attack")]
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_ayqf6")
 move_indicator = NodePath("MoveIndicator")
-raycast_player_detect = NodePath("RaycastPlayerDetect")
+raycast_player_detect_top = NodePath("RaycastPlayerDetectTop")
+raycast_player_detect_center = NodePath("RaycastPlayerDetectCenter")
+raycast_player_detect_bottom = NodePath("RayCastPlayerDetectBottom")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
 timer_spot_player = NodePath("TimerSpotPlayer")
 mesh = NodePath("MeshInstance3D")
@@ -54,21 +59,37 @@ collision_mask = 8
 shape = SubResource("SphereShape3D_ayqf6")
 debug_color = Color(0.8123125, 0.41055724, 0, 0.41960785)
 
-[node name="MoveIndicator" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.719862, 0.3875122, 0)
-mesh = SubResource("SphereMesh_wlpcq")
-surface_material_override/0 = SubResource("StandardMaterial3D_2xq3x")
-
-[node name="RaycastPlayerDetect" type="RayCast3D" parent="."]
+[node name="RaycastPlayerDetectTop" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_mask = 4
 hit_from_inside = true
 collide_with_areas = true
+
+[node name="RayCastPlayerDetectBottom" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+collision_mask = 4
+
+[node name="RaycastPlayerDetectCenter" type="RayCast3D" parent="."]
+collision_mask = 4
 
 [node name="LastSeenPlayerPositionIndicator" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0039067, 0)
 mesh = SubResource("SphereMesh_2xq3x")
 surface_material_override/0 = SubResource("StandardMaterial3D_fadmd")
 
+[node name="MoveIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.719862, 0.3875122, 0)
+mesh = SubResource("SphereMesh_wlpcq")
+surface_material_override/0 = SubResource("StandardMaterial3D_2xq3x")
+
 [node name="TimerSpotPlayer" type="Timer" parent="."]
 process_callback = 0
 one_shot = true
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+shape = SubResource("SphereShape3D_wlpcq")
+debug_color = Color(0.53122216, 0.4128699, 1, 0.41960785)

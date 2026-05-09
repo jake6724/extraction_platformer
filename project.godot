@@ -15,6 +15,10 @@ run/main_scene="uid://bfbpxodaug1w2"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="uid://c46tvte2oxmw0"
 
+[debug]
+
+gdscript/warnings/integer_division=0
+
 [input]
 
 left_click={
@@ -104,6 +108,7 @@ attack={
 3d_physics/layer_3="terrain"
 3d_physics/layer_4="player_hurtbox"
 3d_physics/layer_5="enemy_hurtbox"
+3d_physics/layer_6="platform"
 
 [rendering]
 

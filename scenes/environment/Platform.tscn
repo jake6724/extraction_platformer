@@ -13,7 +13,7 @@ size = Vector3(3, 0.25, 2)
 size = Vector3(3, 0.1, 2)
 
 [node name="Platform" type="StaticBody3D" node_paths=PackedStringArray("collider", "area_body_detect")]
-collision_layer = 4
+collision_layer = 32
 collision_mask = 0
 script = ExtResource("1_e3m2c")
 collider = NodePath("CollisionShape3D")
