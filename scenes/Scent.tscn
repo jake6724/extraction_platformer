@@ -3,14 +3,17 @@
 [ext_resource type="Script" uid="uid://c882t77q0mnxv" path="res://scripts/player/scent.gd" id="1_1sm85"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_1sm85"]
-radius = 0.1
-height = 0.2
+resource_local_to_scene = true
+radius = 0.3
+height = 0.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1sm85"]
+resource_local_to_scene = true
 albedo_color = Color(0.94909626, 0.8389806, 3.85046e-07, 1)
 
-[node name="Scent" type="Node3D"]
+[node name="Scent" type="Node3D" node_paths=PackedStringArray("mesh")]
 script = ExtResource("1_1sm85")
+mesh = NodePath("MeshInstance3D")
 metadata/_custom_type_script = "uid://c882t77q0mnxv"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
