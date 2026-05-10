@@ -129,13 +129,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyDummy" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8980373, 6.3179655, 4.5158653)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8980373, 30.559044, -12.947756)
 
 [node name="EnemyDummy2" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.084357, 7.4130864, 8.510511)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.084357, 31.654165, -5.8589125)
 
 [node name="EnemyDummy3" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.990251, 1.702424)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 33.23133, -20.388489)
 
 [node name="EnemyFlying" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("6_5ycvo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.74258375, 13.371456, -9.914822)

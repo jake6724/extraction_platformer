@@ -59,6 +59,7 @@ func _physics_process(delta):
 
 	var move_direction: Vector3 = get_move_direction()
 	velocity = velocity.move_toward(move_direction * speed, delta * acceleration)
+	velocity.x = 0
 
 	move_and_slide()
 
