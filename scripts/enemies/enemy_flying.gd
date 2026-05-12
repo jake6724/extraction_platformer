@@ -13,6 +13,8 @@ class_name EnemyFlying extends Enemy
 @export var move_indicator: MeshInstance3D
 @export var last_seen_player_position_indicator: MeshInstance3D
 
+@export var skin: EnemyCellBatSkin
+
 # Direction
 var directions: Array[Vector3] = [] # Generated based on num_directions
 var num_directions: float = 128.0
@@ -29,6 +31,14 @@ var last_seen_player_position_reached_threshold: float = .5
 # Scents
 var ignore_scents: Dictionary[Scent, Variant] = {}
 var scent_reached_threshold: float = 2.0 # Could try diff values still
+
+func _input(event):
+	if Input.is_action_just_pressed("x"):
+		var flash_tween: Tween = get_tree().create_tween()
+		var surface = skin.mesh.get_surface_override_material(0)
+		print(surface)
+		# var mesh_material: StandardMaterial3D = skin.get_active_material(0)
+		# flash_tween.tween_property(mesh_material, "albedo_color", base_color, .25).from(Color.YELLOW)
 
 func _ready():
 	super()
@@ -61,6 +71,12 @@ func _physics_process(delta):
 	velocity = velocity.move_toward(move_direction * speed, delta * acceleration)
 	velocity.x = 0
 
+	#move_direction = move_direction.normalized()
+	# print(move_direction)
+	var target_angle: float = Vector3.BACK.signed_angle_to(move_direction, Vector3.UP)
+	global_rotation.y = target_angle
+	# skin.mirror_mesh(move_direction.z == 1)
+
 	move_and_slide()
 
 	# Update debug indicators
@@ -70,7 +86,7 @@ func _physics_process(delta):
 		last_seen_player_position_reached = true
 		last_seen_player_position_indicator.get_surface_override_material(0).albedo_color = Color.DARK_GREEN
 
-	print(ignore_scents.size())
+	# print(ignore_scents.size())
 
 func get_move_target_point() -> Vector3:
 	var _move_target_point: Vector3

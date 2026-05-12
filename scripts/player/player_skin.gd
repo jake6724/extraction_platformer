@@ -4,7 +4,7 @@ extends Node3D
 @export var animation_tree: AnimationTree
 @onready var state_machine : AnimationNodeStateMachinePlayback = animation_tree.get("parameters/StateMachine/playback")
 @export var animation_player: AnimationPlayer
-@export var weapon: Node3D
+@export var weapon: Chainsaw
 @export var mesh_parent: Node3D
 
 @export var mesh: MeshInstance3D
@@ -79,10 +79,15 @@ func hurt():
 	animation_tree["parameters/HurtOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 func land():
+	weapon.particles_sparks.emitting = false
 	animation_tree["parameters/LandOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 func wall_jump(): 
 	animation_tree["parameters/WallJumpOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+
+func skid(): 
+	animation_tree["parameters/SkidOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	animation_tree["parameters/SkidOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
 func idle():
 	state_machine.travel("Idle")
@@ -93,15 +98,15 @@ func run():
 	state_machine.travel("Run2")
 
 func fall():
+	weapon.particles_sparks.emitting = false
 	state_machine.travel("Fall")
 
 func jump():
+	weapon.particles_sparks.emitting = false
 	state_machine.travel("Jump")
 
-# func edge_grab():
-# 	state_machine.travel("EdgeGrab")
-
 func wall_slide():
+	weapon.particles_sparks.emitting = true
 	state_machine.start("WallSlide")
 
 func request_disable_hitbox(_attack: Player.Attack, _disable: bool) -> void:

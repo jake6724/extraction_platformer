@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://d18vlw8symap8"]
+
+[ext_resource type="Script" uid="uid://hw3uyyshsv50" path="res://scripts/player/chainsaw.gd" id="1_dp2ne"]
+[ext_resource type="PackedScene" uid="uid://bijxdkrq8utw2" path="res://assets/character/Weapon_Chainsaw.glb" id="2_ub1rd"]
+
+[sub_resource type="Curve" id="Curve_ub1rd"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.5465687, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -3.1433458, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_e5a6r"]
+curve = SubResource("Curve_ub1rd")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ub1rd"]
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 0.25
+initial_velocity_max = 3.0
+gravity = Vector3(0, 0, 0)
+scale_curve = SubResource("CurveTexture_e5a6r")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ub1rd"]
+albedo_color = Color(0.99999994, 0.83589244, 0.5290037, 1)
+metallic = 1.0
+metallic_specular = 1.0
+roughness = 0.73
+emission_enabled = true
+emission = Color(0.75613064, 0.57575, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ub1rd"]
+material = SubResource("StandardMaterial3D_ub1rd")
+size = Vector3(0.1, 0.1, 0.1)
+
+[node name="Chainsaw" type="Node3D" node_paths=PackedStringArray("particles_sparks")]
+script = ExtResource("1_dp2ne")
+particles_sparks = NodePath("ParticlesSparks")
+metadata/_custom_type_script = "uid://hw3uyyshsv50"
+
+[node name="Weapon_Chainsaw" parent="." instance=ExtResource("2_ub1rd")]
+
+[node name="ParticlesSparks" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.57165325)
+emitting = false
+amount = 64
+lifetime = 0.2
+randomness = 0.4
+process_material = SubResource("ParticleProcessMaterial_ub1rd")
+draw_pass_1 = SubResource("BoxMesh_ub1rd")

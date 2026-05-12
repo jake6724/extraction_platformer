@@ -212,12 +212,21 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 
 	# Ensure that character look direction does not update when there is no input
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
-		_last_movement_direction = move_direction
+		if curr_state == State.RUN:
+			if move_direction != _last_movement_direction:
+				_skin.skid()
+				await get_tree().create_timer(.333).timeout
+				# Flip skin on Y-axis to face move direction
+				var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
+				global_rotation.y = target_angle
+				_skin.mirror_mesh(_last_movement_direction.z == 1)
+				
+		else:
+			var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
+			global_rotation.y = target_angle
+			_skin.mirror_mesh(_last_movement_direction.z == 1)
 
-	# Flip skin on Y-axis to face move direction
-	var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
-	global_rotation.y = target_angle
-	_skin.mirror_mesh(_last_movement_direction.z == 1)
+		_last_movement_direction = move_direction
 
 	process_wall_slide(move_direction)
 

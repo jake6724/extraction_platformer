@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=4 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=16 format=4 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
@@ -39,6 +39,13 @@ _surfaces = [{
 "vertex_count": 36,
 "vertex_data": PackedByteArray("AADAvwAAwMAAAIA/AADAvwAAwMAAAIC/AADAvwAAwEAAAIC/AADAPwAAwMAAAIC/AADAvwAAwMAAAIC/AADAvwAAwMAAAIA/AADAvwAAwEAAAIC/AADAvwAAwMAAAIC/AADAPwAAwMAAAIC/AADAvwAAwEAAAIC/AADAvwAAwEAAAIA/AADAvwAAwMAAAIA/AADAvwAAwMAAAIA/AADAvwAAwEAAAIA/AADAPwAAwEAAAIA/AADAPwAAwEAAAIA/AADAvwAAwEAAAIA/AADAvwAAwEAAAIC/AADAvwAAwMAAAIA/AADAPwAAwMAAAIA/AADAPwAAwMAAAIC/AADAPwAAwEAAAIA/AADAPwAAwMAAAIA/AADAvwAAwMAAAIA/AADAPwAAwMAAAIC/AADAPwAAwMAAAIA/AADAPwAAwEAAAIA/AADAPwAAwMAAAIC/AADAPwAAwEAAAIC/AADAvwAAwEAAAIC/AADAvwAAwEAAAIC/AADAPwAAwEAAAIC/AADAPwAAwEAAAIA/AADAPwAAwEAAAIA/AADAPwAAwEAAAIC/AADAPwAAwMAAAIC/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//38AAP//AAD/fwAA//8AAP9/AAD//wAA/////wAA/z//////AAD/P/////8AAP8/AAD/f/9//n8AAP9//3/+fwAA/3//f/5//3//fwAA/z//f/9/AAD/P/9//38AAP8//3//////AAD/f/////8AAP9//////wAA/38AAP//AAD/fwAA//8AAP9/AAD//wAA/3//fwAA/z//f/9/AAD/P/9//38AAP8/////f/9//n////9//3/+f////3//f/5//////wAA/z//////AAD/P/////8AAP8//3//////AAD/f/////8AAP9//////wAA////f/9//n////9//3/+f////3//f/5/")
 }]
+
+[sub_resource type="Curve3D" id="Curve3D_g3y3g"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 2.5761566, 58.717716, 9.253273, 0, 0, 0, 0, 0, 0, 3.9769897, 58.695557, -36.63186),
+"tilts": PackedFloat32Array(0, 0)
+}
+point_count = 2
 
 [node name="TestLevel" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
 script = ExtResource("1_i6x8u")
@@ -137,8 +144,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.084357, 31.654165, -5.85891
 [node name="EnemyDummy3" parent="Enemies" instance=ExtResource("6_6e24c")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 33.23133, -20.388489)
 
+[node name="Path3D" type="Path3D" parent="Enemies"]
+curve = SubResource("Curve3D_g3y3g")
+
 [node name="EnemyFlying" parent="Enemies" node_paths=PackedStringArray("player") instance=ExtResource("6_5ycvo")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.74258375, 13.371456, -9.914822)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.931868, -11.079713)
 player = NodePath("../../Player")
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]

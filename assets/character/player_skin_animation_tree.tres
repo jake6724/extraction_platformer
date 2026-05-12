@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=37 format=3 uid="uid://mnexgmj80x4h"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=39 format=3 uid="uid://mnexgmj80x4h"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_e801p"]
 animation = &"Attack2"
@@ -18,6 +18,9 @@ animation = &"Land"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hlj17"]
 animation = &"WallJump"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_dmmw0"]
+animation = &"Skid"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_quhyi"]
 animation = &"Attack1"
 
@@ -32,6 +35,8 @@ animation = &"Attack1"
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_wclfu"]
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_hlj17"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_st4vg"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_sboow"]
 animation = &"Fall"
@@ -105,8 +110,8 @@ graph_offset = Vector2(-16, -81)
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_04j55"]
 
 [resource]
-graph_offset = Vector2(196.30225, 189.56934)
-nodes/output/position = Vector2(1860, 140)
+graph_offset = Vector2(971.97363, 59.773834)
+nodes/output/position = Vector2(2120, 140)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_vrqe7")
 nodes/StateMachine/position = Vector2(120, 140)
 nodes/Attack1OneShot/node = SubResource("AnimationNodeOneShot_e801p")
@@ -143,4 +148,8 @@ nodes/TimeScale/position = Vector2(380, 460)
 "nodes/TimeScale 2/position" = Vector2(580, 460)
 "nodes/TimeScale 3/node" = SubResource("AnimationNodeTimeScale_hlj17")
 "nodes/TimeScale 3/position" = Vector2(780, 460)
-node_connections = [&"output", 0, &"WallJumpOneShot", &"Attack1OneShot", 0, &"StateMachine", &"Attack1OneShot", 1, &"TimeScale", &"Attack2OneShot", 0, &"Attack1OneShot", &"Attack2OneShot", 1, &"TimeScale 2", &"Attack3OneShot", 0, &"Attack2OneShot", &"Attack3OneShot", 1, &"TimeScale 3", &"AttackDownOneShot", 0, &"Attack3OneShot", &"AttackDownOneShot", 1, &"Animation 4", &"HurtOneShot", 0, &"AttackDownOneShot", &"HurtOneShot", 1, &"Animation 5", &"LandOneShot", 0, &"HurtOneShot", &"LandOneShot", 1, &"Animation 6", &"WallJumpOneShot", 0, &"LandOneShot", &"WallJumpOneShot", 1, &"Animation 7", &"TimeScale", 0, &"Animation", &"TimeScale 2", 0, &"Animation 2", &"TimeScale 3", 0, &"Animation 3"]
+nodes/SkidOneShot/node = SubResource("AnimationNodeOneShot_st4vg")
+nodes/SkidOneShot/position = Vector2(1860, 140)
+"nodes/Animation 8/node" = SubResource("AnimationNodeAnimation_dmmw0")
+"nodes/Animation 8/position" = Vector2(1860, 420)
+node_connections = [&"output", 0, &"SkidOneShot", &"Attack1OneShot", 0, &"StateMachine", &"Attack1OneShot", 1, &"TimeScale", &"Attack2OneShot", 0, &"Attack1OneShot", &"Attack2OneShot", 1, &"TimeScale 2", &"Attack3OneShot", 0, &"Attack2OneShot", &"Attack3OneShot", 1, &"TimeScale 3", &"AttackDownOneShot", 0, &"Attack3OneShot", &"AttackDownOneShot", 1, &"Animation 4", &"HurtOneShot", 0, &"AttackDownOneShot", &"HurtOneShot", 1, &"Animation 5", &"LandOneShot", 0, &"HurtOneShot", &"LandOneShot", 1, &"Animation 6", &"WallJumpOneShot", 0, &"LandOneShot", &"WallJumpOneShot", 1, &"Animation 7", &"TimeScale", 0, &"Animation", &"TimeScale 2", 0, &"Animation 2", &"TimeScale 3", 0, &"Animation 3", &"SkidOneShot", 0, &"WallJumpOneShot", &"SkidOneShot", 1, &"Animation 8"]
