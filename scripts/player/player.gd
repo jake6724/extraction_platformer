@@ -369,8 +369,8 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 				_direction = Vector3.DOWN
 				_power = attack_down_power
 				pogo()
-		_intruder.owner.take_damage(_direction, _power)
-
+		_intruder.owner.take_damage(_direction, _power, 1) # TODO: Different attack damage in future
+ 
 	elif _intruder.owner is SpikePlatform:
 		pogo()
 		_intruder.owner.flip()

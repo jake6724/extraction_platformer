@@ -1,5 +1,8 @@
 class_name EnemyFlying extends Enemy
 
+# TODO: Maybe the enemy shuld have its own copy of the scents. OR maybe the enemy should create the scents in teh first place, instead
+# of the player
+
 @export var player: Player # TODO: Eventually this should be detected in an area3d
 @export_group("Stats")
 @export var acceleration = 30
@@ -8,6 +11,9 @@ class_name EnemyFlying extends Enemy
 @export var raycast_detect_top: RayCast3D
 @export var raycast_detect_center: RayCast3D
 @export var raycast_detect_bottom: RayCast3D
+@export_group("Combat")
+@export var health: int = 3
+@export var red_percent: float = 0.1
 @export_group("Debug")
 @export var show_debug: bool = false
 @export var move_indicator: MeshInstance3D
@@ -32,13 +38,14 @@ var last_seen_player_position_reached_threshold: float = .5
 var ignore_scents: Dictionary[Scent, Variant] = {}
 var scent_reached_threshold: float = 2.0 # Could try diff values still
 
+# TESTING HIT FLASH WITH NEW MESH
 func _input(event):
 	if Input.is_action_just_pressed("x"):
 		var flash_tween: Tween = get_tree().create_tween()
-		var surface = skin.mesh.get_surface_override_material(0)
-		print(surface)
-		# var mesh_material: StandardMaterial3D = skin.get_active_material(0)
-		# flash_tween.tween_property(mesh_material, "albedo_color", base_color, .25).from(Color.YELLOW)
+		var mesh_material: StandardMaterial3D = skin.mesh.get_active_material(0)
+		print(mesh_material)
+		var reset_color: Color = Color.BLACK.lerp(Color.RED, red_percent)
+		flash_tween.tween_property(mesh_material, "emission", reset_color, .25).from(Color.WHITE)
 
 func _ready():
 	super()
@@ -71,22 +78,25 @@ func _physics_process(delta):
 	velocity = velocity.move_toward(move_direction * speed, delta * acceleration)
 	velocity.x = 0
 
-	#move_direction = move_direction.normalized()
-	# print(move_direction)
-	var target_angle: float = Vector3.BACK.signed_angle_to(move_direction, Vector3.UP)
-	global_rotation.y = target_angle
-	# skin.mirror_mesh(move_direction.z == 1)
+	var flip: bool = move_direction.z > 0
+	skin.flip_horizontal(flip)
+	skin.mirror_mesh(flip)
 
 	move_and_slide()
+	global_transform.origin.x = 0
 
 	# Update debug indicators
 	move_indicator.global_transform.origin = global_transform.origin + (velocity.normalized() * 2)
 	last_seen_player_position_indicator.global_transform.origin = last_seen_player_position
-	if global_transform.origin.distance_to(last_seen_player_position) < last_seen_player_position_reached_threshold:
+	if is_last_seen_position_reached():
 		last_seen_player_position_reached = true
 		last_seen_player_position_indicator.get_surface_override_material(0).albedo_color = Color.DARK_GREEN
 
-	# print(ignore_scents.size())
+func is_last_seen_position_reached() -> bool:
+	var from: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
+	var to: Vector3 = Vector3(0, last_seen_player_position.y, last_seen_player_position.z)
+	global_transform.origin.distance_to(last_seen_player_position)
+	return from.distance_to(to) < last_seen_player_position_reached_threshold 
 
 func get_move_target_point() -> Vector3:
 	var _move_target_point: Vector3
@@ -226,3 +236,18 @@ func get_closest_scent_position(_player: Player) -> Vector3:
 				scent.mesh.get_surface_override_material(0).albedo_color = Color.PINK
 	if is_instance_valid(closest_scent): closest_scent.mesh.get_surface_override_material(0).albedo_color = Color.RED
 	return closest_scent_position
+
+func flash_mesh() -> void:
+	var flash_tween: Tween = get_tree().create_tween()
+	var mesh_material: StandardMaterial3D = skin.mesh.get_active_material(0)
+	var reset_color: Color = Color.WHITE.lerp(Color("e5000d"), red_percent)
+	flash_tween.tween_property(mesh_material, "emission", Color.BLACK, .25).from(reset_color)
+
+## TODO: This should go back into Enemy.gd
+func take_damage(_direction, _power, _damage) -> void:
+	velocity = _direction * _power
+	flash_mesh()
+	red_percent += .33
+	health -= _damage
+	if health < 0:
+		die()
