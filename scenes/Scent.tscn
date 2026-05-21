@@ -17,6 +17,5 @@ mesh = NodePath("MeshInstance3D")
 metadata/_custom_type_script = "uid://c882t77q0mnxv"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-visible = false
 mesh = SubResource("SphereMesh_1sm85")
 surface_material_override/0 = SubResource("StandardMaterial3D_1sm85")
