@@ -5,12 +5,25 @@ class_name EnemyFlying extends Enemy
 
 @export var player: Player # TODO: Eventually this should be detected in an area3d
 @export_group("Stats")
-@export var acceleration = 30
-@export var speed = 8
+@export var acceleration: float = 30.0
 @export_group("Components")
 @export var raycast_detect_top: RayCast3D
 @export var raycast_detect_center: RayCast3D
 @export var raycast_detect_bottom: RayCast3D
+@export var area_detect_player: Area3D
+@export_group("Patrol")
+@export var path_follow: PathFollow3D
+@export var patrol_speed_scale: float = 0.1
+@export var start_left_to_right: bool = true
+@export_group("Chase")
+@export var chase_speed_min: float = 8.0
+@export var chase_speed_max: float = 10.0
+@export var timer_chase_quit: Timer
+@export var chase_quit_delay_min: float = 5
+@export var chase_quit_delay_max: float = 5.0
+var _chase_speed: float
+var _chase_quit_delay: float
+
 @export_group("Combat")
 @export var health: int = 3
 @export var red_percent: float = 0.1
@@ -18,8 +31,10 @@ class_name EnemyFlying extends Enemy
 @export var show_debug: bool = false
 @export var move_indicator: MeshInstance3D
 @export var last_seen_player_position_indicator: MeshInstance3D
-
 @export var skin: EnemyCellBatSkin
+
+enum State {PATROL, CHASE, IDLE}
+var current_state: State = State.PATROL
 
 # Direction
 var directions: Array[Vector3] = [] # Generated based on num_directions
@@ -38,15 +53,6 @@ var last_seen_player_position_reached_threshold: float = .5
 var ignore_scents: Dictionary[Scent, Variant] = {}
 var scent_reached_threshold: float = 2.0 # Could try diff values still
 
-# TESTING HIT FLASH WITH NEW MESH
-func _input(event):
-	if Input.is_action_just_pressed("x"):
-		var flash_tween: Tween = get_tree().create_tween()
-		var mesh_material: StandardMaterial3D = skin.mesh.get_active_material(0)
-		print(mesh_material)
-		var reset_color: Color = Color.BLACK.lerp(Color.RED, red_percent)
-		flash_tween.tween_property(mesh_material, "emission", reset_color, .25).from(Color.WHITE)
-
 func _ready():
 	super()
 	directions = create_directions(num_directions)
@@ -55,7 +61,45 @@ func _ready():
 	move_indicator.visible = show_debug
 	last_seen_player_position_indicator.visible = show_debug
 
+	if not start_left_to_right:
+		patrol_speed_scale *= -1
+		path_follow.progress_ratio = 0.99
+		skin.flip_horizontal(true)
+		skin.mirror_mesh(true)
+	else:
+		patrol_speed_scale *= 1
+		path_follow.progress_ratio = 0.01
+		skin.flip_horizontal(false)
+		skin.mirror_mesh(false)
+
+	area_detect_player.body_entered.connect(on_area_detect_player_body_entered)
+	area_detect_player.body_exited.connect(on_area_detect_player_body_exited)
+	
+	_chase_speed = randf_range(chase_speed_min, chase_speed_max)
+	_chase_quit_delay = randf_range(chase_quit_delay_min, chase_quit_delay_max)
+	timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
+
 func _physics_process(delta):
+	match current_state:
+		State.PATROL: patrol(delta)
+		State.CHASE: chase(delta)
+		State.IDLE: idle(delta)
+		_: push_error("EnemyFlying: invalid current_state. current_state = ", current_state)
+
+func patrol(delta: float) -> void:
+	path_follow.progress_ratio += (delta * patrol_speed_scale)
+	if is_equal_approx(path_follow.progress_ratio, 1.0):
+		patrol_speed_scale *= -1
+		path_follow.progress_ratio = .99
+		skin.flip_horizontal(true)
+		skin.mirror_mesh(true)
+	elif is_equal_approx(path_follow.progress_ratio, 0.0):
+		patrol_speed_scale *= -1
+		path_follow.progress_ratio = .01
+		skin.flip_horizontal(false)
+		skin.mirror_mesh(false)
+
+func chase(delta: float) -> void:
 	var move_target_point: Vector3 = get_move_target_point()
 	interest = get_interest_weights(move_target_point)
 	danger = get_danger_weights()
@@ -75,7 +119,7 @@ func _physics_process(delta):
 		interest[index] += danger[i]
 
 	var move_direction: Vector3 = get_move_direction()
-	velocity = velocity.move_toward(move_direction * speed, delta * acceleration)
+	velocity = velocity.move_toward(move_direction * _chase_speed, delta * acceleration)
 	velocity.x = 0
 
 	var flip: bool = move_direction.z > 0
@@ -91,6 +135,11 @@ func _physics_process(delta):
 	if is_last_seen_position_reached():
 		last_seen_player_position_reached = true
 		last_seen_player_position_indicator.get_surface_override_material(0).albedo_color = Color.DARK_GREEN
+
+## Do not move, but constantly check to see if can see player. If so, return to chasing
+func idle(_delta: float) -> void:
+	if is_target_visible(player.tracker.global_transform.origin):
+		current_state = State.CHASE
 
 func is_last_seen_position_reached() -> bool:
 	var from: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
@@ -121,7 +170,9 @@ func get_move_target_point() -> Vector3:
 
 	# Cannot see player, hasn't visited LSP. Move to LSP
 	elif not last_seen_player_position_reached and is_target_visible(last_seen_player_position):
+		timer_chase_quit.start(_chase_quit_delay)
 		_move_target_point = last_seen_player_position
+		last_seen_player_position_indicator.get_surface_override_material(0).albedo_color = Color.DARK_GREEN
 
 	# Cannot see player, HAS visited LSP, OR cannot see LSP. Follow scent trail
 	elif player.scents.size() != 0:
@@ -134,6 +185,7 @@ func get_move_target_point() -> Vector3:
 	
 	# Can't see player, no scent trail. Return empty Vector3
 	else:
+		current_state = State.IDLE
 		_move_target_point = Vector3()
 
 	return _move_target_point
@@ -237,11 +289,15 @@ func get_closest_scent_position(_player: Player) -> Vector3:
 	if is_instance_valid(closest_scent): closest_scent.mesh.get_surface_override_material(0).albedo_color = Color.RED
 	return closest_scent_position
 
+## Flash skin mesh using shader
 func flash_mesh() -> void:
+	# Get the base material (shared)
+	var base_mat: Material = skin.mesh.get_active_material(0)
+	# Get the next-pass flash material
+	var flash_mat: ShaderMaterial = base_mat.next_pass
+	# Flash with tween
 	var flash_tween: Tween = get_tree().create_tween()
-	var mesh_material: StandardMaterial3D = skin.mesh.get_active_material(0)
-	var reset_color: Color = Color.WHITE.lerp(Color("e5000d"), red_percent)
-	flash_tween.tween_property(mesh_material, "emission", Color.BLACK, .25).from(reset_color)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, .1).from(3.0)
 
 ## TODO: This should go back into Enemy.gd
 func take_damage(_direction, _power, _damage) -> void:
@@ -251,3 +307,13 @@ func take_damage(_direction, _power, _damage) -> void:
 	health -= _damage
 	if health < 0:
 		die()
+
+func on_area_detect_player_body_entered(_player: Player) -> void:
+	player = _player
+	current_state = State.CHASE
+
+func on_area_detect_player_body_exited(_player: Player) -> void:
+	pass
+
+func on_timer_chase_quit_timeout() -> void:
+	current_state = State.IDLE

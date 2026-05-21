@@ -23,6 +23,8 @@ var shake_offset: Vector2 = Vector2.ZERO
 @export var power: float = 5
 @export var decay: float = 20
 
+func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func initialize() -> void:
 	global_transform.origin = camera_pivot.global_transform.origin

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cceo475cxqqlf"]
+[gd_scene load_steps=13 format=3 uid="uid://cceo475cxqqlf"]
 
 [ext_resource type="Script" uid="uid://bhegt4y07ydw8" path="res://scripts/enemies/enemy_flying.gd" id="1_ayqf6"]
 [ext_resource type="PackedScene" uid="uid://bpthkepfib26h" path="res://assets/enemy/EnemyCellBatSkin.tscn" id="2_wlpcq"]
@@ -28,16 +28,23 @@ height = 0.4
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2xq3x"]
 albedo_color = Color(1, 0.13337156, 0.49801546, 1)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_wlpcq"]
-radius = 1.05
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wlpcq"]
+radius = 0.96533203
+height = 3.0092773
 
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_wlpcq"]
+radius = 4.0
+
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "timer_chase_quit", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
 collision_layer = 2
 collision_mask = 6
 script = ExtResource("1_ayqf6")
 raycast_detect_top = NodePath("RaycastDetectTop")
 raycast_detect_center = NodePath("RaycastDetectCenter")
 raycast_detect_bottom = NodePath("RayCastDetectBottom")
+area_detect_player = NodePath("AreaDetectPlayer")
+timer_chase_quit = NodePath("TimerChaseQuit")
+show_debug = true
 move_indicator = NodePath("MoveIndicator")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
 skin = NodePath("EnemyCellBatSkin")
@@ -95,10 +102,23 @@ surface_material_override/0 = SubResource("StandardMaterial3D_2xq3x")
 process_callback = 0
 one_shot = true
 
+[node name="TimerChaseQuit" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
 [node name="Hurtbox" type="Area3D" parent="."]
 collision_layer = 16
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
-shape = SubResource("SphereShape3D_wlpcq")
-debug_color = Color(0.53122216, 0.4128699, 1, 0.41960785)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14477539, 0)
+shape = SubResource("CapsuleShape3D_wlpcq")
+debug_color = Color(0.69224536, 0.26709852, 1, 1)
+
+[node name="AreaDetectPlayer" type="Area3D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AreaDetectPlayer"]
+transform = Transform3D(-4.371139e-08, -1, 0, -1, 4.371139e-08, 8.742277e-08, -8.742278e-08, 0, -1, 0, 0, 0)
+shape = SubResource("CylinderShape3D_wlpcq")
+debug_color = Color(0.52342606, 0.5738057, 1.1551381e-06, 0.41960785)

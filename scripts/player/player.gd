@@ -93,8 +93,29 @@ var _wall_slide_normal: Vector3
 @export var pogo_power: float = 17
 @export var attack_down_power: float = 10
 @export var attack_forward_power: float = 10
+@export var hitstop_duration: float = 0.15
+@export var timer_invulnerable: Timer
+@export var invulnerable_duration: float = .7
+var _invulnerable: bool = false
 var curr_attack_type: Attack
 enum Attack {FORWARD, DOWN}
+
+@export_group("Boost & Jump Reset")
+@export var jump_reset_target: int = 3
+@export var boost_invulnerable_duration: float = 1.0
+var _jump_reset_count: int = 0
+var _can_boost: bool = true
+
+@export_group("Combo")
+@export var combo_max_multiplier: float = 100.0
+@export var combo_decay_base_multiplier: float = 10.0
+@export var combo_hit_increment: float = 34.0
+@export var combo_on_hit_penalty: float = 50.0
+@export var combo_level_up_padding: float = 15.0
+var _combo: float = 0.0
+var _combo_level: float = 1.0
+var _combo_max: float = 0.0
+var _combo_decay_multiplier: float = 0.0
 
 @export_group("Particles")
 @export var dust_particles: GPUParticles3D
@@ -105,6 +126,7 @@ enum Attack {FORWARD, DOWN}
 @export var _skin: PlayerSkin
 @export var input_handler: InputHandler
 @export var tracker: Node3D
+@export var player_hud: PlayerHUD
 
 @export_group("Scents")
 @export var timer_spawn_scent: Timer
@@ -132,6 +154,7 @@ func _ready():
 	timer_wall_jump_coyote.timeout.connect(on_timer_wall_jump_coyote_timeout)
 	timer_attack_slow.timeout.connect(on_timer_attack_slow_timeout)
 	timer_spawn_scent.timeout.connect(on_timer_spawn_scent_timeout)
+	timer_invulnerable.timeout.connect(on_timer_invulnerable_timeout)
 
 	camera.initialize()
 
@@ -151,6 +174,11 @@ func _ready():
 	input_handler.attack_triggered.connect(trigger_skin_attack)
 
 	_skin.hitbox_disable_requested.connect(disable_attack_hitbox)
+
+	_combo_max = (_combo_level * combo_max_multiplier)
+	_combo_decay_multiplier = combo_decay_base_multiplier
+	set_combo_level(0)
+	_combo = 0.0
 
 func on_jump_triggered() -> void:
 	jump()
@@ -172,8 +200,12 @@ func _input(_event):
 
 	if can_move:
 		if Input.is_action_just_pressed("sprint"):
-			velocity.y = (jump_power * 1.5)
-			jump_dust_particles.restart()
+			if _can_boost:
+				velocity.y = (jump_power * 1.5)
+				jump_dust_particles.restart()
+				_invulnerable = true
+				timer_invulnerable.start(boost_invulnerable_duration)
+				#_can_boost = false # TODO: AAHHH
 		if Input.is_action_just_released("sprint"):
 			pass
 		if Input.is_action_just_pressed("move_down"):
@@ -194,6 +226,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_fall(delta, move_direction, move_speed_ground)
 	update_character(delta, move_direction)
+	decay_combo(delta)
 	move_and_slide()
 	set_state()
 	
@@ -334,10 +367,16 @@ func dash() -> void:
 	after_image_active = false
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
-	velocity = _hit_impulse
-	camera.apply_shake(.1)
-	disable_all_hitboxes()
-	_skin.hurt()
+	if not _invulnerable:
+		_invulnerable = true
+		timer_invulnerable.start(invulnerable_duration)
+
+		velocity = _hit_impulse
+		camera.apply_shake(.1)
+		disable_all_hitboxes()
+		_skin.hurt()
+		TimeManager.apply_hitstop(hitstop_duration)
+		increment_combo(-combo_on_hit_penalty)
 
 func disable_all_hitboxes() -> void:
 	disable_attack_hitbox(Attack.FORWARD, true)
@@ -368,9 +407,11 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 			Attack.DOWN:
 				_direction = Vector3.DOWN
 				_power = attack_down_power
+				update_jump_reset()
 				pogo()
 		_intruder.owner.take_damage(_direction, _power, 1) # TODO: Different attack damage in future
- 
+		increment_combo(combo_hit_increment)
+
 	elif _intruder.owner is SpikePlatform:
 		pogo()
 		_intruder.owner.flip()
@@ -381,6 +422,13 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 
 	else:
 		push_warning("Player attack targeting non-enemy")
+
+func update_jump_reset() -> void:
+	_jump_reset_count += 1
+	if _jump_reset_count >= jump_reset_target:
+		_jump_reset_count = 0
+		_jump_count = 1
+	player_hud.set_jump_reset_value(_jump_reset_count)
 
 func disable_attack_hitbox(_attack: Attack, _disabled: bool) -> void:
 	for hitbox in attack_areas[_attack].get_children():
@@ -461,3 +509,34 @@ func spawn_scent() -> void:
 func on_scent_expired(expired_scent: Scent) -> void:
 	scents.erase(expired_scent)
 	expired_scent.queue_free()
+
+func decay_combo(delta: float) -> void:
+	if _combo > 0.0:
+		_combo = clampf(_combo - (delta * _combo_decay_multiplier), 0, INF)
+		if _combo < (_combo_max - 100):
+			set_combo_level(-1)
+
+		var combo_offset: float = _combo_max - 100
+		var combo_value: float = clampf(((_combo - combo_offset) / 100) * 100, 0, 100)
+		player_hud.set_combo_value(combo_value)
+		#print("Combo: ", _combo, " --- Combo Max: ", _combo_max, " --- Combo Decay: ", _combo_decay_multiplier, " --- Combo Level: ", _combo_level, " --- combo_value: ", combo_value, " --- combo_offset: ", combo_offset)
+	else:
+		player_hud.set_combo_value(0)
+
+func increment_combo(_increment: float) -> void:
+	_combo = clampf(_combo + _increment, 0, INF)
+	if _combo >= _combo_max:
+		set_combo_level(1)
+
+func set_combo_level(_step: int) -> void:
+	_combo_level += _step
+	_combo_max = _combo_level * combo_max_multiplier
+	_combo_decay_multiplier = combo_decay_base_multiplier + (_combo_level - 1)
+	player_hud.set_combo_level_value(int(_combo_level))
+
+	# When moving UP to a new level, give _combo padding so player doesn't immediately fall out
+	if _step > 0:
+		_combo += combo_level_up_padding
+
+func on_timer_invulnerable_timeout() -> void:
+	_invulnerable = false

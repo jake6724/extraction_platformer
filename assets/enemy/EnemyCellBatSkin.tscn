@@ -1,16 +1,25 @@
-[gd_scene load_steps=10 format=4 uid="uid://bpthkepfib26h"]
+[gd_scene load_steps=12 format=4 uid="uid://bpthkepfib26h"]
 
 [ext_resource type="Script" uid="uid://cv7c8r5hwjvfc" path="res://scripts/enemies/enemy_cell_bat_skin.gd" id="1_7k4jx"]
+[ext_resource type="Shader" uid="uid://bugoaq3j1v4o6" path="res://materials/hit_flash.gdshader" id="2_7k4jx"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ubf6y"]
 load_path = "res://.godot/imported/Enemy_CellBat_Image.png-da7ff470394b27bc187f0cef7784ee1f.s3tc.ctex"
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2i1do"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("2_7k4jx")
+shader_parameter/flash = 0.0
+shader_parameter/custom_color = Color(1, 1, 1, 1)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7k4jx"]
+resource_local_to_scene = true
 resource_name = "Mat_CellBat"
-shading_mode = 2
+next_pass = SubResource("ShaderMaterial_2i1do")
+shading_mode = 0
 vertex_color_use_as_albedo = true
 albedo_texture = SubResource("CompressedTexture2D_ubf6y")
-emission_enabled = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bk2kg"]
 resource_name = "Mat_Outline"
@@ -21,6 +30,7 @@ emission_enabled = true
 emission = Color(0.24313733, 0.18039215, 0.28235298, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_rt663"]
+resource_local_to_scene = true
 resource_name = "Enemy_CellBat_Cell"
 _surfaces = [{
 "aabb": AABB(-1.9462386, 0.08021927, -1.9305837, 3.8924773, 2.8585246, 3.1245165),
