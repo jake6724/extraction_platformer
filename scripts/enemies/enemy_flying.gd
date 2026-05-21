@@ -3,7 +3,7 @@ class_name EnemyFlying extends Enemy
 # TODO: Maybe the enemy shuld have its own copy of the scents. OR maybe the enemy should create the scents in teh first place, instead
 # of the player
 
-@export var player: Player # TODO: Eventually this should be detected in an area3d
+@export var player: Player
 @export_group("Stats")
 @export var acceleration: float = 30.0
 @export_group("Components")
@@ -11,6 +11,7 @@ class_name EnemyFlying extends Enemy
 @export var raycast_detect_center: RayCast3D
 @export var raycast_detect_bottom: RayCast3D
 @export var area_detect_player: Area3D
+@export var body_collider: CollisionShape3D
 @export_group("Patrol")
 @export var path_follow: PathFollow3D
 @export var patrol_speed_scale: float = 0.1
@@ -19,21 +20,38 @@ class_name EnemyFlying extends Enemy
 @export var chase_speed_min: float = 8.0
 @export var chase_speed_max: float = 10.0
 @export var timer_chase_quit: Timer
-@export var chase_quit_delay_min: float = 5
-@export var chase_quit_delay_max: float = 5.0
+@export var chase_quit_delay_min: float = 10.0
+@export var chase_quit_delay_max: float = 15.0
+@export var post_dash_chase_speed_scale: float = .25
 var _chase_speed: float
+var _post_dash_chase_speed: float
+var _active_chase_speed: float
 var _chase_quit_delay: float
-
+@export_group("Dash")
+@export var dash_initial_cooldown_duration_min: float = 1.0
+@export var dash_initial_cooldown_duration_max: float = 2.0
+@export var timer_dash_charge: Timer
+@export var dash_charge_duration_min: float = .25
+@export var dash_charge_duration_max: float = .5
+@export var timer_dash_cooldown: Timer
+@export var dash_cooldown_duration_min: float = 2.0
+@export var dash_cooldown_duration_max: float = 5.0
+@export var timer_post_dash: Timer
+@export var post_dash_cooldown_duration_min: float = 1.0
+@export var post_dash_cooldown_duration_max: float = 2.0
+@export var dash_power: float = 35.0
+@export var dash_range: float = 7.0
+var _can_dash: bool = false
+var _dash_velocity_reset_threshold: float = 4.0
 @export_group("Combat")
 @export var health: int = 3
-@export var red_percent: float = 0.1
 @export_group("Debug")
 @export var show_debug: bool = false
 @export var move_indicator: MeshInstance3D
 @export var last_seen_player_position_indicator: MeshInstance3D
 @export var skin: EnemyCellBatSkin
 
-enum State {PATROL, CHASE, IDLE}
+enum State {PATROL, CHASE, IDLE, CHARGE, DASH,}
 var current_state: State = State.PATROL
 
 # Direction
@@ -76,14 +94,23 @@ func _ready():
 	area_detect_player.body_exited.connect(on_area_detect_player_body_exited)
 	
 	_chase_speed = randf_range(chase_speed_min, chase_speed_max)
+	_post_dash_chase_speed = _chase_speed * post_dash_chase_speed_scale
+	_active_chase_speed = _chase_speed
 	_chase_quit_delay = randf_range(chase_quit_delay_min, chase_quit_delay_max)
 	timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
+
+	timer_dash_charge.timeout.connect(on_timer_dash_charge_timeout)
+	timer_dash_cooldown.timeout.connect(on_timer_dash_cooldown_timeout)
+
+	timer_post_dash.timeout.connect(on_timer_post_dash_timeout)
 
 func _physics_process(delta):
 	match current_state:
 		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
 		State.IDLE: idle(delta)
+		State.CHARGE: pass
+		State.DASH: dash(delta)
 		_: push_error("EnemyFlying: invalid current_state. current_state = ", current_state)
 
 func patrol(delta: float) -> void:
@@ -119,14 +146,14 @@ func chase(delta: float) -> void:
 		interest[index] += danger[i]
 
 	var move_direction: Vector3 = get_move_direction()
-	velocity = velocity.move_toward(move_direction * _chase_speed, delta * acceleration)
+	velocity = velocity.move_toward(move_direction * _active_chase_speed, delta * acceleration)
 	velocity.x = 0
 
 	var flip: bool = move_direction.z > 0
 	skin.flip_horizontal(flip)
 	skin.mirror_mesh(flip)
 
-	move_and_slide()
+	move_and_collide(velocity * delta)
 	global_transform.origin.x = 0
 
 	# Update debug indicators
@@ -135,6 +162,54 @@ func chase(delta: float) -> void:
 	if is_last_seen_position_reached():
 		last_seen_player_position_reached = true
 		last_seen_player_position_indicator.get_surface_override_material(0).albedo_color = Color.DARK_GREEN
+
+	# Try to dash at the player
+	if _can_dash and is_target_visible(player.tracker.global_transform.origin):
+		var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
+		var x_locked_player_position: Vector3 = Vector3(0, player.tracker.global_transform.origin.y, player.tracker.global_transform.origin.z)
+		if x_locked_position.distance_to(x_locked_player_position) < dash_range:
+			current_state = State.CHARGE
+			var charge_time: float = randf_range(dash_charge_duration_min, dash_charge_duration_max)
+			timer_dash_charge.start(charge_time)
+			flash_mesh_repeat(charge_time, 5, Color.WHITE)
+			_can_dash = false
+
+func on_timer_dash_charge_timeout() -> void:
+	var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
+	var x_locked_player_position: Vector3 = Vector3(0, player.tracker.global_transform.origin.y, player.tracker.global_transform.origin.z)
+	apply_dash(x_locked_position, x_locked_player_position)
+
+func apply_dash(start_position: Vector3, target_position: Vector3) -> void:
+	current_state = State.DASH
+	var dash_direction: Vector3 = start_position.direction_to(target_position)
+	velocity = dash_power * dash_direction
+	set_collision_with_enemies(false)
+
+	_active_chase_speed = _post_dash_chase_speed
+
+func set_collision_with_enemies(_disabled: bool) -> void:
+	set_collision_mask_value(2, _disabled)
+
+func start_dash_cooldown(_min, _max) -> void:
+	var dash_cooldown: float = randf_range(_min, _max)
+	timer_dash_cooldown.start(dash_cooldown)
+
+func dash(delta: float) -> void:
+	move_and_collide(velocity * delta)
+	velocity = velocity.move_toward(Vector3.ZERO, delta * acceleration)
+	if velocity.length() < _dash_velocity_reset_threshold:
+		start_dash_cooldown(dash_cooldown_duration_min, dash_cooldown_duration_max)
+		current_state = State.CHASE
+		set_collision_with_enemies(true)
+		var post_dash_cooldown_duration: float = randf_range(post_dash_cooldown_duration_min, post_dash_cooldown_duration_max)
+		timer_post_dash.start(post_dash_cooldown_duration)
+
+func on_timer_dash_cooldown_timeout() -> void:
+	_can_dash = true
+	flash_mesh_repeat(.5, 3, Color.GREEN)
+
+func on_timer_post_dash_timeout() -> void:
+	_active_chase_speed = _chase_speed
 
 ## Do not move, but constantly check to see if can see player. If so, return to chasing
 func idle(_delta: float) -> void:
@@ -177,6 +252,7 @@ func get_move_target_point() -> Vector3:
 	# Cannot see player, HAS visited LSP, OR cannot see LSP. Follow scent trail
 	elif player.scents.size() != 0:
 		# Set debug values
+		timer_chase_quit.start(_chase_quit_delay)
 		last_seen_player_position_reached = true
 		last_seen_player_position_indicator.get_surface_override_material(0).albedo_color = Color.PALE_GREEN
 
@@ -299,18 +375,35 @@ func flash_mesh() -> void:
 	var flash_tween: Tween = get_tree().create_tween()
 	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, .1).from(3.0)
 
+func flash_mesh_repeat(_total_duration: float, flash_amount: int, flash_color: Color) -> void:
+	var interval: float = (_total_duration / flash_amount) / 2
+	var flash_tween: Tween = get_tree().create_tween()
+
+	var base_mat: Material = skin.mesh.get_active_material(0)
+	var flash_mat: ShaderMaterial = base_mat.next_pass
+	flash_mat.set_shader_parameter("custom_color", flash_color)
+
+	flash_tween.set_loops(flash_amount)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 3.0, 0.0)
+	flash_tween.tween_interval(interval)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, 0.0)
+	flash_tween.tween_interval(interval)
+
 ## TODO: This should go back into Enemy.gd
 func take_damage(_direction, _power, _damage) -> void:
 	velocity = _direction * _power
 	flash_mesh()
-	red_percent += .33
 	health -= _damage
 	if health < 0:
 		die()
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
-	player = _player
-	current_state = State.CHASE
+	if current_state == State.PATROL:
+		player = _player
+
+		if timer_dash_cooldown.time_left <= 0: # Don't restart if already cooling down
+			start_dash_cooldown(dash_initial_cooldown_duration_min, dash_initial_cooldown_duration_max)
+		current_state = State.CHASE
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass

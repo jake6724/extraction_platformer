@@ -35,7 +35,7 @@ height = 3.0092773
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_wlpcq"]
 radius = 4.0
 
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "timer_chase_quit", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "body_collider", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
 collision_layer = 2
 collision_mask = 6
 script = ExtResource("1_ayqf6")
@@ -43,7 +43,11 @@ raycast_detect_top = NodePath("RaycastDetectTop")
 raycast_detect_center = NodePath("RaycastDetectCenter")
 raycast_detect_bottom = NodePath("RayCastDetectBottom")
 area_detect_player = NodePath("AreaDetectPlayer")
-timer_chase_quit = NodePath("TimerChaseQuit")
+body_collider = NodePath("BodyCollider")
+timer_chase_quit = NodePath("Timers/TimerChaseQuit")
+timer_dash_charge = NodePath("Timers/TimerDashCharge")
+timer_dash_cooldown = NodePath("Timers/TimerDashCooldown")
+timer_post_dash = NodePath("Timers/TimerPostDash")
 show_debug = true
 move_indicator = NodePath("MoveIndicator")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
@@ -60,7 +64,7 @@ visible = false
 mesh = SubResource("SphereMesh_ayqf6")
 surface_material_override/0 = SubResource("StandardMaterial3D_wlpcq")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="BodyCollider" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_2xq3x")
 
 [node name="AreaAttack" type="Area3D" parent="."]
@@ -98,13 +102,25 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.719862, 0.3875122, 0)
 mesh = SubResource("SphereMesh_wlpcq")
 surface_material_override/0 = SubResource("StandardMaterial3D_2xq3x")
 
-[node name="TimerSpotPlayer" type="Timer" parent="."]
+[node name="Timers" type="Node" parent="."]
+
+[node name="TimerSpotPlayer" type="Timer" parent="Timers"]
 process_callback = 0
 one_shot = true
 
-[node name="TimerChaseQuit" type="Timer" parent="."]
+[node name="TimerChaseQuit" type="Timer" parent="Timers"]
 process_callback = 0
 one_shot = true
+
+[node name="TimerDashCharge" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
+[node name="TimerDashCooldown" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
+[node name="TimerPostDash" type="Timer" parent="Timers"]
 
 [node name="Hurtbox" type="Area3D" parent="."]
 collision_layer = 16
