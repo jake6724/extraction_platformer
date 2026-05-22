@@ -22,7 +22,7 @@ class_name EnemyFlying extends Enemy
 @export var timer_chase_quit: Timer
 @export var chase_quit_delay_min: float = 10.0
 @export var chase_quit_delay_max: float = 15.0
-@export var post_dash_chase_speed_scale: float = .25
+@export var post_dash_chase_speed_scale: float = .6
 var _chase_speed: float
 var _post_dash_chase_speed: float
 var _active_chase_speed: float
@@ -45,6 +45,8 @@ var _can_dash: bool = false
 var _dash_velocity_reset_threshold: float = 4.0
 @export_group("Combat")
 @export var health: int = 3
+@export_group("Particles")
+@export var death_particles: GPUParticles3D
 @export_group("Debug")
 @export var show_debug: bool = false
 @export var move_indicator: MeshInstance3D
@@ -149,9 +151,7 @@ func chase(delta: float) -> void:
 	velocity = velocity.move_toward(move_direction * _active_chase_speed, delta * acceleration)
 	velocity.x = 0
 
-	var flip: bool = move_direction.z > 0
-	skin.flip_horizontal(flip)
-	skin.mirror_mesh(flip)
+	face_mesh(move_direction)
 
 	move_and_collide(velocity * delta)
 	global_transform.origin.x = 0
@@ -174,6 +174,11 @@ func chase(delta: float) -> void:
 			flash_mesh_repeat(charge_time, 5, Color.WHITE)
 			_can_dash = false
 
+func face_mesh(_move_direction: Vector3) -> void:
+	var flip: bool = _move_direction.z > 0
+	skin.flip_horizontal(flip)
+	skin.mirror_mesh(flip)
+
 func on_timer_dash_charge_timeout() -> void:
 	var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
 	var x_locked_player_position: Vector3 = Vector3(0, player.tracker.global_transform.origin.y, player.tracker.global_transform.origin.z)
@@ -195,6 +200,8 @@ func start_dash_cooldown(_min, _max) -> void:
 	timer_dash_cooldown.start(dash_cooldown)
 
 func dash(delta: float) -> void:
+	var move_direction: Vector3 = get_move_direction()
+	face_mesh(move_direction)
 	move_and_collide(velocity * delta)
 	velocity = velocity.move_toward(Vector3.ZERO, delta * acceleration)
 	if velocity.length() < _dash_velocity_reset_threshold:
@@ -206,7 +213,7 @@ func dash(delta: float) -> void:
 
 func on_timer_dash_cooldown_timeout() -> void:
 	_can_dash = true
-	flash_mesh_repeat(.5, 3, Color.GREEN)
+	if show_debug: flash_mesh_repeat(.5, 3, Color.GREEN)
 
 func on_timer_post_dash_timeout() -> void:
 	_active_chase_speed = _chase_speed
@@ -410,3 +417,10 @@ func on_area_detect_player_body_exited(_player: Player) -> void:
 
 func on_timer_chase_quit_timeout() -> void:
 	current_state = State.IDLE
+
+func die() -> void:
+	skin.hide()
+	death_particles.restart()
+	await death_particles.finished
+	PickupManager.spawn_pickups(Pickup.Type.COIN, 1, global_transform.origin)
+	queue_free()

@@ -16,7 +16,10 @@ var attack_names: Array[String] = ["Attack1OneShot", "Attack2OneShot", "Attack3O
 
 var player_is_on_wall: bool
 
+var curr_skid_direction: Vector3
+
 signal hitbox_disable_requested
+signal skid_complete(skid_direction: Vector3)
 
 func _ready():
 	animation_tree.active = true
@@ -26,6 +29,9 @@ func _ready():
 
 # func _process(delta):
 # 	print(state_machine.get_current_node())
+
+func on_skid_complete() -> void:
+	skid_complete.emit(curr_skid_direction)
 
 func on_animation_tree_animation_finished(_anim_name) -> void:
 	# print(_anim_name)
@@ -88,6 +94,9 @@ func wall_jump():
 func skid(): 
 	animation_tree["parameters/SkidOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
 	animation_tree["parameters/SkidOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+
+func cancel_skid() -> void:
+	animation_tree["parameters/SkidOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
 
 func idle():
 	state_machine.travel("Idle")

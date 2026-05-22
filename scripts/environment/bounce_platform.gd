@@ -1,0 +1,1 @@
+class_name BouncePlatform extends Node3D

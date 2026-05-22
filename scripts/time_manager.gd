@@ -1,5 +1,7 @@
 extends Node
 
+var hitstop_time_scale: float = 0.1
+
 var hitstop_timer: Timer = Timer.new()
 
 func _ready():
@@ -13,7 +15,7 @@ func _ready():
     hitstop_timer.timeout.connect(on_hitstop_timer_timeout)
 
 func apply_hitstop(_duration: float) -> void:
-    Engine.time_scale = 0.1
+    Engine.time_scale = hitstop_time_scale
     hitstop_timer.start(_duration)
 
 func on_hitstop_timer_timeout() -> void:

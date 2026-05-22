@@ -18,6 +18,7 @@ config/icon="uid://c46tvte2oxmw0"
 [autoload]
 
 TimeManager="*res://scripts/time_manager.gd"
+PickupManager="*res://scripts/pickups/pickup_manager.gd"
 
 [debug]
 

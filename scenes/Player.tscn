@@ -36,14 +36,14 @@ scale_min = 0.25
 scale_max = 1.25
 scale_curve = SubResource("CurveTexture_3li8b")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v6fml"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_khinc"]
 next_pass = ExtResource("3_mdl7e")
 diffuse_mode = 3
 metallic_specular = 1.0
 roughness = 0.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_v6fml"]
-material = SubResource("StandardMaterial3D_v6fml")
+material = SubResource("StandardMaterial3D_khinc")
 radius = 0.25
 height = 0.5
 
@@ -51,7 +51,7 @@ height = 0.5
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -3.2004128, 0.0, 0, 0]
 point_count = 2
 
-[sub_resource type="CurveTexture" id="CurveTexture_qu4a1"]
+[sub_resource type="CurveTexture" id="CurveTexture_bruh7"]
 curve = SubResource("Curve_mdl7e")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_70d11"]
@@ -70,7 +70,7 @@ initial_velocity_max = 0.5
 gravity = Vector3(0, 0, 0)
 scale_min = 0.25
 scale_max = 1.25
-scale_curve = SubResource("CurveTexture_qu4a1")
+scale_curve = SubResource("CurveTexture_bruh7")
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_o4126"]
 radius = 0.46435547

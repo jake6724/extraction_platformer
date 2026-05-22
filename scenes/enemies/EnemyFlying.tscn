@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://cceo475cxqqlf"]
+[gd_scene load_steps=19 format=3 uid="uid://cceo475cxqqlf"]
 
 [ext_resource type="Script" uid="uid://bhegt4y07ydw8" path="res://scripts/enemies/enemy_flying.gd" id="1_ayqf6"]
 [ext_resource type="PackedScene" uid="uid://bpthkepfib26h" path="res://assets/enemy/EnemyCellBatSkin.tscn" id="2_wlpcq"]
+[ext_resource type="Material" uid="uid://ioi0p4q0f70j" path="res://materials/outline_material.tres" id="3_2xq3x"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_ayqf6"]
 radius = 1.0
@@ -35,7 +36,42 @@ height = 3.0092773
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_wlpcq"]
 radius = 4.0
 
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "body_collider", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
+[sub_resource type="Curve" id="Curve_fadmd"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -3.2004128, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_qu4a1"]
+curve = SubResource("Curve_fadmd")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_x246h"]
+lifetime_randomness = 0.33
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 0.1
+emission_ring_radius = 1.0
+emission_ring_inner_radius = 0.0
+emission_ring_cone_angle = 90.0
+direction = Vector3(1, 1, 0)
+spread = 180.0
+initial_velocity_min = 4.0
+initial_velocity_max = 10.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.25
+scale_max = 1.25
+scale_curve = SubResource("CurveTexture_qu4a1")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v6fml"]
+next_pass = ExtResource("3_2xq3x")
+diffuse_mode = 3
+metallic_specular = 1.0
+roughness = 0.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_cnk4h"]
+material = SubResource("StandardMaterial3D_v6fml")
+radius = 0.25
+height = 0.5
+
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "body_collider", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
 collision_layer = 2
 collision_mask = 6
 script = ExtResource("1_ayqf6")
@@ -48,7 +84,7 @@ timer_chase_quit = NodePath("Timers/TimerChaseQuit")
 timer_dash_charge = NodePath("Timers/TimerDashCharge")
 timer_dash_cooldown = NodePath("Timers/TimerDashCooldown")
 timer_post_dash = NodePath("Timers/TimerPostDash")
-show_debug = true
+death_particles = NodePath("DeathParticles")
 move_indicator = NodePath("MoveIndicator")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
 skin = NodePath("EnemyCellBatSkin")
@@ -138,3 +174,13 @@ collision_layer = 0
 transform = Transform3D(-4.371139e-08, -1, 0, -1, 4.371139e-08, 8.742277e-08, -8.742278e-08, 0, -1, 0, 0, 0)
 shape = SubResource("CylinderShape3D_wlpcq")
 debug_color = Color(0.52342606, 0.5738057, 1.1551381e-06, 0.41960785)
+
+[node name="DeathParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0.14138544, 0)
+emitting = false
+amount = 100
+lifetime = 0.4
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_x246h")
+draw_pass_1 = SubResource("SphereMesh_cnk4h")

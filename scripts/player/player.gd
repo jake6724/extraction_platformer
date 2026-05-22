@@ -162,9 +162,6 @@ func _ready():
 	jump_dust_particles.visible = true
 
 	player_hurtbox.hit.connect(on_player_hurtbox_hit)
-
-	# for hitbox: CollisionShape3D in hitboxes.values():
-	# 	hitbox.disabled = true
 	
 	area_attack_forward.area_entered.connect(on_attack_area_entered)
 	area_attack_down.area_entered.connect(on_attack_area_entered)
@@ -203,9 +200,11 @@ func _input(_event):
 			if _can_boost:
 				velocity.y = (jump_power * 1.5)
 				jump_dust_particles.restart()
+
 				_invulnerable = true
 				timer_invulnerable.start(boost_invulnerable_duration)
-				#_can_boost = false # TODO: AAHHH
+				_can_boost = false
+
 		if Input.is_action_just_released("sprint"):
 			pass
 		if Input.is_action_just_pressed("move_down"):
@@ -226,7 +225,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_fall(delta, move_direction, move_speed_ground)
 	update_character(delta, move_direction)
-	decay_combo(delta)
+	process_combo(delta)
 	move_and_slide()
 	set_state()
 	
@@ -242,26 +241,45 @@ func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: floa
 
 func update_character(delta: float, move_direction: Vector3) -> void:
 	camera.update(delta)
+	turn_and_skid(move_direction)
+	process_wall_slide(move_direction)
 
+func turn_and_skid(move_direction: Vector3) -> void:
 	# Ensure that character look direction does not update when there is no input
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
 		if curr_state == State.RUN:
+			# Skid if move direction is not the same as previous
 			if move_direction != _last_movement_direction:
-				_skin.skid()
-				await get_tree().create_timer(.333).timeout
-				# Flip skin on Y-axis to face move direction
-				var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
-				global_rotation.y = target_angle
-				_skin.mirror_mesh(_last_movement_direction.z == 1)
-				
+				var is_skid_active: bool = _skin.animation_tree.get("parameters/SkidOneShot/active") == true
+				# If not already skidding, skid and wait for completion to flip character
+				if not is_skid_active:
+					_last_movement_direction = move_direction
+					_skin.skid()
+					await _skin.skid_complete
+					flip_skin_horizontal(move_direction)
+					return # Return because _last_movement_direction has been set and we do not want to do so again
+				# Else cancel previous skid and just flip without a skid
+				else:
+					_skin.cancel_skid()
+					flip_skin_horizontal(move_direction)
+
+		elif curr_state == State.IDLE:
+			# Do not flip if currently skidding
+			var is_skid_active: bool = _skin.animation_tree.get("parameters/SkidOneShot/active") == true
+			if not is_skid_active:
+				flip_skin_horizontal(move_direction)
+
+		# If not grounded, never skid
 		else:
-			var target_angle: float = Vector3.BACK.signed_angle_to(_last_movement_direction, Vector3.UP)
-			global_rotation.y = target_angle
-			_skin.mirror_mesh(_last_movement_direction.z == 1)
+			flip_skin_horizontal(_last_movement_direction)
 
 		_last_movement_direction = move_direction
 
-	process_wall_slide(move_direction)
+func flip_skin_horizontal(_direction: Vector3) -> void:
+	# Flip skin on Y-axis to face move direction
+	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
+	global_rotation.y = target_angle
+	_skin.mirror_mesh(_direction.z == 1)
 
 func process_wall_slide(_move_direction: Vector3) -> void:
 	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide
@@ -300,6 +318,7 @@ func set_state() -> void:
 			_coyote_jump_available = true
 			timer_jump_coyote.stop()
 			_jump_count = 0
+			_can_boost = true
 
 			# Cancel pogo and disable hitbox
 			_skin.canel_attack_down()
@@ -344,7 +363,6 @@ func on_timer_jump_coyote_timeout() -> void:
 
 ## Returns true if wall_raycast is colliding, and character is not on floor
 func can_wall_slide() -> bool:
-	# TODO: Use 2 raycast to define a range, and check that both are colliding
 	return wall_raycast_top.is_colliding() and wall_raycast_bottom.is_colliding() and not is_on_floor()
 
 func sprint() -> void:
@@ -395,7 +413,10 @@ func trigger_skin_attack() -> void:
 		# timer_attack_slow.start(.5)
 
 func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each area, doesn't seem necessary rn
-	# print(_intruder.owner)
+	if _intruder.owner is EnemyDummy:
+		pogo_bounce()
+		return
+
 	var enemy: Enemy = _intruder.owner as Enemy
 	if enemy:
 		var _direction: Vector3
@@ -428,6 +449,7 @@ func update_jump_reset() -> void:
 	if _jump_reset_count >= jump_reset_target:
 		_jump_reset_count = 0
 		_jump_count = 1
+		_can_boost = true
 	player_hud.set_jump_reset_value(_jump_reset_count)
 
 func disable_attack_hitbox(_attack: Attack, _disabled: bool) -> void:
@@ -445,6 +467,9 @@ func on_timer_wall_jump_coyote_timeout() -> void:
 
 func pogo() -> void:
 	velocity.y = pogo_power
+
+func pogo_bounce() -> void:
+	velocity.y = pogo_power * 2
 
 func create_after_image() -> void:
 	var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
@@ -510,7 +535,7 @@ func on_scent_expired(expired_scent: Scent) -> void:
 	scents.erase(expired_scent)
 	expired_scent.queue_free()
 
-func decay_combo(delta: float) -> void:
+func process_combo(delta: float) -> void:
 	if _combo > 0.0:
 		_combo = clampf(_combo - (delta * _combo_decay_multiplier), 0, INF)
 		if _combo < (_combo_max - 100):

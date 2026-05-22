@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://bluaeicy1uibv"]
+
+[ext_resource type="Script" uid="uid://03w8urvvtg52" path="res://scripts/pickups/coin.gd" id="1_chyho"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_chyho"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s3kwx"]
+albedo_color = Color(0.66000605, 0.003648311, 0.96729237, 1)
+metallic_specular = 1.0
+roughness = 0.0
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_chyho"]
+points = PackedVector3Array(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5)
+
+[node name="Coin" type="RigidBody3D"]
+collision_layer = 0
+collision_mask = 4
+gravity_scale = 0.0
+script = ExtResource("1_chyho")
+metadata/_custom_type_script = "uid://03w8urvvtg52"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_chyho")
+surface_material_override/0 = SubResource("StandardMaterial3D_s3kwx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConvexPolygonShape3D_chyho")

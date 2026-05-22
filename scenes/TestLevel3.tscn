@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bq0nqladm2yrd"]
+[gd_scene load_steps=12 format=3 uid="uid://bq0nqladm2yrd"]
 
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_ydhrl"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_wgs22"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="4_nk70o"]
 [ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_x08qt"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_aarjr"]
+[ext_resource type="PackedScene" uid="uid://cceo475cxqqlf" path="res://scenes/enemies/EnemyFlying.tscn" id="7_wgs22"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_i6x8u"]
 panorama = ExtResource("4_nk70o")
@@ -21,6 +22,14 @@ ambient_light_source = 2
 ambient_light_color = Color(0.74558026, 0.7455802, 0.7455802, 1)
 ambient_light_energy = 1.5
 reflected_light_source = 2
+
+[sub_resource type="Curve3D" id="Curve3D_byxhg"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 50, 3, 0, 0, 0, 0, 0, 0, 0, 50, -30),
+"tilts": PackedFloat32Array(0, 0)
+}
+point_count = 2
+up_vector_enabled = false
 
 [node name="TestLevel" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
 script = ExtResource("1_ydhrl")
@@ -280,3 +289,45 @@ player = NodePath("../Player")
 [node name="Platform27" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.5666113, 0, 69.96553, 10.374638)
 player = NodePath("../Player")
+
+[node name="EnemyPatrols" type="Node" parent="."]
+
+[node name="Path3D" type="Path3D" parent="EnemyPatrols"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14.521744)
+curve = SubResource("Curve3D_byxhg")
+debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/Path3D"]
+transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, 3)
+loop = false
+
+[node name="EnemyFlying" parent="EnemyPatrols/Path3D/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("7_wgs22")]
+path_follow = NodePath("..")
+
+[node name="Path3D2" type="Path3D" parent="EnemyPatrols"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 14.521744)
+curve = SubResource("Curve3D_byxhg")
+debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/Path3D2"]
+transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, -30)
+progress = 32.999996
+loop = false
+
+[node name="EnemyFlying" parent="EnemyPatrols/Path3D2/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("7_wgs22")]
+path_follow = NodePath("..")
+start_left_to_right = false
+
+[node name="Path3D3" type="Path3D" parent="EnemyPatrols"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, 14.521744)
+curve = SubResource("Curve3D_byxhg")
+debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/Path3D3"]
+transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, -30)
+progress = 32.999996
+loop = false
+
+[node name="EnemyFlying" parent="EnemyPatrols/Path3D3/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("7_wgs22")]
+path_follow = NodePath("..")
+start_left_to_right = false
