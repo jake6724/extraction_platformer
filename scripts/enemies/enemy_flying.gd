@@ -3,6 +3,8 @@ class_name EnemyFlying extends Enemy
 # TODO: Maybe the enemy shuld have its own copy of the scents. OR maybe the enemy should create the scents in teh first place, instead
 # of the player
 
+# TODO: Pause at patrol end points? 
+
 @export var player: Player
 @export_group("Stats")
 @export var acceleration: float = 30.0
@@ -43,17 +45,15 @@ var _chase_quit_delay: float
 @export var dash_range: float = 7.0
 var _can_dash: bool = false
 var _dash_velocity_reset_threshold: float = 4.0
-@export_group("Combat")
-@export var health: int = 3
 @export_group("Particles")
 @export var death_particles: GPUParticles3D
 @export_group("Debug")
 @export var show_debug: bool = false
 @export var move_indicator: MeshInstance3D
 @export var last_seen_player_position_indicator: MeshInstance3D
-@export var skin: EnemyCellBatSkin
+# @export var skin: EnemyCellBatSkin
 
-enum State {PATROL, CHASE, IDLE, CHARGE, DASH,}
+enum State {PATROL, CHASE, IDLE, CHARGE, DASH,} # TODO: Hurt state? Cancels stuff?
 var current_state: State = State.PATROL
 
 # Direction
@@ -173,11 +173,6 @@ func chase(delta: float) -> void:
 			timer_dash_charge.start(charge_time)
 			flash_mesh_repeat(charge_time, 5, Color.WHITE)
 			_can_dash = false
-
-func face_mesh(_move_direction: Vector3) -> void:
-	var flip: bool = _move_direction.z > 0
-	skin.flip_horizontal(flip)
-	skin.mirror_mesh(flip)
 
 func on_timer_dash_charge_timeout() -> void:
 	var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
@@ -371,38 +366,6 @@ func get_closest_scent_position(_player: Player) -> Vector3:
 				scent.mesh.get_surface_override_material(0).albedo_color = Color.PINK
 	if is_instance_valid(closest_scent): closest_scent.mesh.get_surface_override_material(0).albedo_color = Color.RED
 	return closest_scent_position
-
-## Flash skin mesh using shader
-func flash_mesh() -> void:
-	# Get the base material (shared)
-	var base_mat: Material = skin.mesh.get_active_material(0)
-	# Get the next-pass flash material
-	var flash_mat: ShaderMaterial = base_mat.next_pass
-	# Flash with tween
-	var flash_tween: Tween = get_tree().create_tween()
-	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, .1).from(3.0)
-
-func flash_mesh_repeat(_total_duration: float, flash_amount: int, flash_color: Color) -> void:
-	var interval: float = (_total_duration / flash_amount) / 2
-	var flash_tween: Tween = get_tree().create_tween()
-
-	var base_mat: Material = skin.mesh.get_active_material(0)
-	var flash_mat: ShaderMaterial = base_mat.next_pass
-	flash_mat.set_shader_parameter("custom_color", flash_color)
-
-	flash_tween.set_loops(flash_amount)
-	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 3.0, 0.0)
-	flash_tween.tween_interval(interval)
-	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, 0.0)
-	flash_tween.tween_interval(interval)
-
-## TODO: This should go back into Enemy.gd
-func take_damage(_direction, _power, _damage) -> void:
-	velocity = _direction * _power
-	flash_mesh()
-	health -= _damage
-	if health < 0:
-		die()
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
 	if current_state == State.PATROL:

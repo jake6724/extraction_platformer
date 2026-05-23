@@ -516,7 +516,7 @@ func print_state_change() -> void:
 		State.FALL: text = "Fall"
 		State.WALL_SLIDE: text = "Wall Slide"
 		State.JUMP: text = "Jump"
-	print("Changed current state to: ", text)
+	#print("Changed current state to: ", text)
 
 func on_timer_spawn_scent_timeout() -> void:
 	spawn_scent()

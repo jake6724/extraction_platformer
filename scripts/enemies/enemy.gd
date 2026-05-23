@@ -6,6 +6,9 @@ extends CharacterBody3D
 var attack_power: float = 15.0
 var base_color: Color
 @export var gravity_default: float = -30
+@export var gravity_acceleration: float = 45.0
+@export var skin: EnemySkin
+@export var health: int = 3
 
 func _ready():
 	base_color = mesh.get_active_material(0).albedo_color
@@ -22,14 +25,50 @@ func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void:
 	if _player_hurtbox:
 		_player_hurtbox.take_damage(global_position, attack_power)
 		
+func take_damage_old(_direction, _power, _damage) -> void:
+	velocity = _direction * _power
+	flash_mesh_color()
+
 func take_damage(_direction, _power, _damage) -> void:
 	velocity = _direction * _power
 	flash_mesh()
+	health -= _damage
+	if health <= 0:
+		die()
 
-func flash_mesh() -> void:
+func flash_mesh_color() -> void:
 	var flash_tween: Tween = get_tree().create_tween()
 	var mesh_material: StandardMaterial3D = mesh.get_active_material(0)
 	flash_tween.tween_property(mesh_material, "albedo_color", base_color, .25).from(Color.YELLOW)
 
 func die() -> void:
 	queue_free()
+
+## Flash skin mesh using shader
+func flash_mesh() -> void:
+	# Get the base material (shared)
+	var base_mat: Material = skin.mesh.get_active_material(0)
+	# Get the next-pass flash material
+	var flash_mat: ShaderMaterial = base_mat.next_pass
+	# Flash with tween
+	var flash_tween: Tween = get_tree().create_tween()
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, .1).from(3.0)
+
+func flash_mesh_repeat(_total_duration: float, flash_amount: int, flash_color: Color = Color.WHITE) -> void:
+	var interval: float = (_total_duration / flash_amount) / 2
+	var flash_tween: Tween = get_tree().create_tween()
+
+	var base_mat: Material = skin.mesh.get_active_material(0)
+	var flash_mat: ShaderMaterial = base_mat.next_pass
+	flash_mat.set_shader_parameter("custom_color", flash_color)
+
+	flash_tween.set_loops(flash_amount)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 3.0, 0.0)
+	flash_tween.tween_interval(interval)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, 0.0)
+	flash_tween.tween_interval(interval)
+
+func face_mesh(_move_direction: Vector3) -> void:
+	var flip: bool = _move_direction.z > 0
+	skin.flip_horizontal(flip)
+	skin.mirror_mesh(flip)

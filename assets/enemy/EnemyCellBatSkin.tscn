@@ -742,11 +742,11 @@ _data = {
 &"Root": SubResource("Animation_j5umr")
 }
 
-[node name="EnemyCellBatSkin" type="Node3D" node_paths=PackedStringArray("animation_player", "mesh", "mesh_parent")]
+[node name="EnemyCellBatSkin" type="Node3D" node_paths=PackedStringArray("mesh", "mesh_parent", "animation_player")]
 script = ExtResource("1_7k4jx")
-animation_player = NodePath("Enemy_CellBat/AnimationPlayer")
 mesh = NodePath("Enemy_CellBat/Armature/Skeleton3D/CellBat")
 mesh_parent = NodePath("Enemy_CellBat")
+animation_player = NodePath("Enemy_CellBat/AnimationPlayer")
 metadata/_custom_type_script = "uid://cv7c8r5hwjvfc"
 
 [node name="Enemy_CellBat" type="Node3D" parent="."]

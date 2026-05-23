@@ -12,7 +12,7 @@ extends Node3D
 func initialize(_skin: SophiaSkin) -> void:
 	# state_machine.start(_skin.state_machine.get_current_node())
 
-	print(animation_tree.get_node("AnimationNodeAnimation"))
+	#print(animation_tree.get_node("AnimationNodeAnimation"))
 
 
 	var state_name: StringName = _skin.state_machine.get_current_node()

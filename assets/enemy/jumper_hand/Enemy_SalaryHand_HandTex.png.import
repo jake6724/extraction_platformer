@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ca87s63r34kxl"
-path.s3tc="res://.godot/imported/Enemy_SalaryHand_HandTex.png-6b58d5f715ca4a2a3a6957ced26de27d.s3tc.ctex"
+path.s3tc="res://.godot/imported/Enemy_SalaryHand_HandTex.png-bf5e8df2a96dfc8d278925b006c66abc.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/enemy/Enemy_SalaryHand_HandTex.png"
-dest_files=["res://.godot/imported/Enemy_SalaryHand_HandTex.png-6b58d5f715ca4a2a3a6957ced26de27d.s3tc.ctex"]
+source_file="res://assets/enemy/jumper_hand/Enemy_SalaryHand_HandTex.png"
+dest_files=["res://.godot/imported/Enemy_SalaryHand_HandTex.png-bf5e8df2a96dfc8d278925b006c66abc.s3tc.ctex"]
 
 [params]
 
