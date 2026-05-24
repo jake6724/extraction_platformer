@@ -1,19 +1,2 @@
-All enemies patrol along a Path3D that is set up with the level design
-
-- Flying enemy types:
-    1. Dashing enemy
-        - Moves to a specific angle relative to the player, then dashes
-        - Checks to see if it is a specific distance from the player and angle to the player before each dash
-        - Check to see if it can see the player before dashing
-        -
-
-- Align all units on the X-axis
-- Add dashing
-- Scent trails should not guide enemy to the origin
-
-
-- How does bat go from chasing to patrol
-- How does bat patrol
-
-
-- Enemy should attack the player but not collide
+- Add line of sight check to bat
+- Line of sight check and area check for jumper

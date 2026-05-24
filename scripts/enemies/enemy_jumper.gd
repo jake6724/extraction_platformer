@@ -73,7 +73,7 @@ func on_jump_timer_timeout() -> void:
 
 ## Apply jump impulse, transition to air
 func apply_jump() -> void:
-	var impulse: Vector3 = (get_direction_to_player(player) * 30) + Vector3(0,15,0)
+	var impulse: Vector3 = (get_direction_to_player(player) * 10) + Vector3(0,15,0)
 	velocity = impulse
 	current_state = State.AIR
 	skin.air()
