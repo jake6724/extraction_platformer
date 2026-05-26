@@ -41,10 +41,13 @@ var _chase_quit_delay: float
 @export var timer_post_dash: Timer
 @export var post_dash_cooldown_duration_min: float = 1.0
 @export var post_dash_cooldown_duration_max: float = 2.0
-@export var dash_power: float = 35.0
+@export var dash_power: float = 35
 @export var dash_range: float = 7.0
 var _can_dash: bool = false
 var _dash_velocity_reset_threshold: float = 4.0
+var _dash_cooldown_resume_duration: float # Used to continue dash cooldown where it left off after hitstunned
+var _dash_start_position: Vector3
+var _dash_target_position: Vector3
 @export_group("Particles")
 @export var death_particles: GPUParticles3D
 @export_group("Debug")
@@ -53,7 +56,7 @@ var _dash_velocity_reset_threshold: float = 4.0
 @export var last_seen_player_position_indicator: MeshInstance3D
 # @export var skin: EnemyCellBatSkin
 
-enum State {PATROL, CHASE, IDLE, CHARGE, DASH,} # TODO: Hurt state? Cancels stuff?
+enum State {PATROL, CHASE, IDLE, CHARGE, DASH, HIT}
 var current_state: State = State.PATROL
 
 # Direction
@@ -107,12 +110,14 @@ func _ready():
 	timer_post_dash.timeout.connect(on_timer_post_dash_timeout)
 
 func _physics_process(delta):
+	if show_debug: print_state(current_state)
 	match current_state:
 		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
 		State.IDLE: idle(delta)
 		State.CHARGE: pass
 		State.DASH: dash(delta)
+		State.HIT: hit(delta)
 		_: push_error("EnemyFlying: invalid current_state. current_state = ", current_state)
 
 func patrol(delta: float) -> void:
@@ -170,14 +175,19 @@ func chase(delta: float) -> void:
 		if x_locked_position.distance_to(x_locked_player_position) < dash_range:
 			current_state = State.CHARGE
 			var charge_time: float = randf_range(dash_charge_duration_min, dash_charge_duration_max)
+
+			# Save dash info for when charge is complete
+			_dash_start_position = x_locked_position
+			_dash_target_position = x_locked_player_position
+
 			timer_dash_charge.start(charge_time)
 			flash_mesh_repeat(charge_time, 5, Color.WHITE)
 			_can_dash = false
 
 func on_timer_dash_charge_timeout() -> void:
-	var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
-	var x_locked_player_position: Vector3 = Vector3(0, player.tracker.global_transform.origin.y, player.tracker.global_transform.origin.z)
-	apply_dash(x_locked_position, x_locked_player_position)
+	#var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
+	#var x_locked_player_position: Vector3 = Vector3(0, player.tracker.global_transform.origin.y, player.tracker.global_transform.origin.z)
+	apply_dash(_dash_start_position, _dash_target_position)
 
 func apply_dash(start_position: Vector3, target_position: Vector3) -> void:
 	current_state = State.DASH
@@ -192,12 +202,14 @@ func set_collision_with_enemies(_disabled: bool) -> void:
 
 func start_dash_cooldown(_min, _max) -> void:
 	var dash_cooldown: float = randf_range(_min, _max)
+	print("COOLDOWN: ", dash_cooldown)
 	timer_dash_cooldown.start(dash_cooldown)
 
 func dash(delta: float) -> void:
 	var move_direction: Vector3 = get_move_direction()
 	face_mesh(move_direction)
-	move_and_collide(velocity * delta)
+	# move_and_collide(velocity * delta)
+	move_and_slide()
 	velocity = velocity.move_toward(Vector3.ZERO, delta * acceleration)
 	if velocity.length() < _dash_velocity_reset_threshold:
 		start_dash_cooldown(dash_cooldown_duration_min, dash_cooldown_duration_max)
@@ -217,6 +229,9 @@ func on_timer_post_dash_timeout() -> void:
 func idle(_delta: float) -> void:
 	if is_target_visible(player.tracker.global_transform.origin):
 		current_state = State.CHASE
+
+func hit(delta: float) -> void:
+	move_and_collide(velocity * delta)
 
 func is_last_seen_position_reached() -> bool:
 	var from: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
@@ -387,3 +402,35 @@ func die() -> void:
 	await death_particles.finished
 	PickupManager.spawn_pickups(Pickup.Type.COIN, 1, global_transform.origin)
 	queue_free()
+
+func start_hitstun(_hitstun_duration: float) -> void:
+	super(_hitstun_duration)
+	# Checkpoint dash cooldown if dash is not ready
+	_dash_cooldown_resume_duration = 0.0
+	if timer_dash_cooldown.time_left > 0.0:
+		_dash_cooldown_resume_duration = timer_dash_cooldown.time_left
+
+	timer_dash_cooldown.stop()
+	current_state = State.HIT
+
+func stop_hitstun() -> void:
+	current_state = State.CHASE
+	on_timer_post_dash_timeout()
+	
+	# If dash was still cooling down, resume
+	if _dash_cooldown_resume_duration > 0.0:
+		start_dash_cooldown(_dash_cooldown_resume_duration, _dash_cooldown_resume_duration)
+	# If dash was ready, restart but with the shorter initial durations
+	else:
+		start_dash_cooldown(dash_initial_cooldown_duration_min, dash_initial_cooldown_duration_max)
+
+func print_state(state: State) -> void:
+	var _text: String
+	match state:
+		State.IDLE: _text = "IDLE"
+		State.PATROL: _text = "PATROL"
+		State.CHASE: _text = "CHASE"
+		State.CHARGE: _text = "CHARGE"
+		State.DASH: _text = "DASH"
+		State.HIT: _text = "HIT"
+	print(_text)

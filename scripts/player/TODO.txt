@@ -1,2 +1,2 @@
-- Add line of sight check to bat
+
 - Line of sight check and area check for jumper

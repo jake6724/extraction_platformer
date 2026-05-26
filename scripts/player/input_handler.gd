@@ -5,6 +5,8 @@ var move_direction: Vector3
 
 signal jump_triggered
 signal attack_triggered
+signal slide_triggered
+signal slide_released
 
 func _input(event):
 	if event.is_action("jump") and event.is_pressed() and not event.is_echo():
@@ -12,6 +14,13 @@ func _input(event):
 
 	if event.is_action("attack") and event.is_pressed() and not event.is_echo():
 		attack_triggered.emit()
+
+	if event.is_action("slide") and event.is_pressed() and not event.is_echo():
+		slide_triggered.emit()
+	
+	if event.is_action_released("slide") and not event.is_echo():
+		print("Slide released")
+		slide_released.emit()
 
 func _physics_process(_delta):
 	var raw_input: Vector2 = Vector2.ZERO

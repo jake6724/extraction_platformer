@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=4 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=17 format=4 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
 [ext_resource type="PackedScene" uid="uid://cceo475cxqqlf" path="res://scenes/enemies/EnemyFlying.tscn" id="6_5ycvo"]
-[ext_resource type="PackedScene" uid="uid://d13aehtbq06rs" path="res://scenes/enemies/EnemyDummy.tscn" id="6_6e24c"]
 [ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="6_7i0bt"]
 [ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
 [ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="8_g3y3g"]
@@ -147,20 +146,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 
 [node name="Enemies" type="Node" parent="."]
 
-[node name="EnemyDummy" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30.559044, -12.947756)
-
-[node name="EnemyDummy2" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 31.654165, -5.8589125)
-
-[node name="EnemyDummy3" parent="Enemies" instance=ExtResource("6_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 33.23133, -20.388489)
-
 [node name="Path3D" type="Path3D" parent="Enemies"]
 curve = SubResource("Curve3D_g3y3g")
 
 [node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97412467, -7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97412467, -35.073753)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
@@ -193,34 +183,8 @@ enabled = false
 
 [node name="EnemyPatrols" type="Node" parent="."]
 
-[node name="Path3D" type="Path3D" parent="EnemyPatrols"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13)
-curve = SubResource("Curve3D_6e24c")
-debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
-
-[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/Path3D"]
-transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, 3)
-loop = false
-
-[node name="EnemyFlying" parent="EnemyPatrols/Path3D/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("6_5ycvo")]
-path_follow = NodePath("..")
-
-[node name="Path3D2" type="Path3D" parent="EnemyPatrols"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -13)
-curve = SubResource("Curve3D_6e24c")
-debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
-
-[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/Path3D2"]
-transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, -30)
-progress = 32.999996
-loop = false
-
-[node name="EnemyFlying" parent="EnemyPatrols/Path3D2/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("6_5ycvo")]
-path_follow = NodePath("..")
-start_left_to_right = false
-
 [node name="Path3D3" type="Path3D" parent="EnemyPatrols"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, -13)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -40.984936, 11.698858)
 curve = SubResource("Curve3D_6e24c")
 debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
 
@@ -232,3 +196,4 @@ loop = false
 [node name="EnemyFlying" parent="EnemyPatrols/Path3D3/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("6_5ycvo")]
 path_follow = NodePath("..")
 start_left_to_right = false
+health = 30

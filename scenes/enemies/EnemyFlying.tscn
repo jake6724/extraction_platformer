@@ -71,7 +71,7 @@ material = SubResource("StandardMaterial3D_v6fml")
 radius = 0.25
 height = 0.5
 
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "body_collider", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "skin", "mesh", "area_attack")]
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "body_collider", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "mesh", "area_attack", "skin", "timer_hitstun")]
 collision_layer = 2
 collision_mask = 6
 script = ExtResource("1_ayqf6")
@@ -87,9 +87,10 @@ timer_post_dash = NodePath("Timers/TimerPostDash")
 death_particles = NodePath("DeathParticles")
 move_indicator = NodePath("MoveIndicator")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
-skin = NodePath("EnemyCellBatSkin")
 mesh = NodePath("MeshInstance3D")
 area_attack = NodePath("AreaAttack")
+skin = NodePath("EnemyCellBatSkin")
+timer_hitstun = NodePath("Timers/TimerHitstun")
 metadata/_custom_type_script = "uid://bhegt4y07ydw8"
 
 [node name="EnemyCellBatSkin" parent="." instance=ExtResource("2_wlpcq")]
@@ -157,6 +158,10 @@ process_callback = 0
 one_shot = true
 
 [node name="TimerPostDash" type="Timer" parent="Timers"]
+
+[node name="TimerHitstun" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
 
 [node name="Hurtbox" type="Area3D" parent="."]
 collision_layer = 16

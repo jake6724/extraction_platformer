@@ -16,9 +16,11 @@ Some internal variables have a corresponding @export var which controls their in
 @export var move_speed_attack: float = 2.5
 ## Multiplier controlling how quickly the player reaches their intended velocity. Lowering this value will make the character appear more slippery.
 @export var acceleration: float = 70
+@export var slide_acceleration: float = 2.0
 ## Multipler controlling how quickly the player mesh rotates to face the forward direction. In a sidescroller, only affects speed the player changes from left to right.
 @export var rotation_speed: float = 12.0
 var _move_speed: float
+var _active_acceleration: float
 
 @export_group("Jump")
 @export var jump_power: float = 15
@@ -81,6 +83,9 @@ var _coyote_wall_jump_available: bool = false
 ## Set each time the player starts wall_slide, remains available to allow for wall jump coyote time
 var _wall_slide_normal: Vector3
 
+@export_group("Slide")
+var _is_sliding: bool = false
+
 @export_group("Combat")
 @export var timer_attack_slow: Timer
 @export var area_attack_forward: Area3D
@@ -96,6 +101,7 @@ var _wall_slide_normal: Vector3
 @export var hitstop_duration: float = 0.15
 @export var timer_invulnerable: Timer
 @export var invulnerable_duration: float = .7
+@export var default_attack_hitstun_duration: float = .5
 var _invulnerable: bool = false
 var curr_attack_type: Attack
 enum Attack {FORWARD, DOWN}
@@ -138,7 +144,7 @@ var scents: Array[Scent] = []
 @export var state_movement_label: Label3D
 @export var state_action_label: Label3D
 
-enum State {IDLE, RUN, JUMP, FALL, WALL_SLIDE,}
+enum State {IDLE, RUN, JUMP, FALL, WALL_SLIDE, SLIDE}
 var curr_state: State:
 	set(value):
 		curr_state = value
@@ -147,6 +153,7 @@ var curr_state: State:
 func _ready():
 	_gravity = gravity_default
 	_move_speed = move_speed_ground
+	_active_acceleration = acceleration
 
 	timer_jump_coyote.timeout.connect(on_timer_jump_coyote_timeout)
 	timer_wall_slide.timeout.connect(on_timer_wall_slide_timeout)
@@ -169,6 +176,8 @@ func _ready():
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
 	input_handler.attack_triggered.connect(trigger_skin_attack)
+	input_handler.slide_triggered.connect(on_slide_triggered)
+	input_handler.slide_released.connect(on_slide_released)
 
 	_skin.hitbox_disable_requested.connect(disable_attack_hitbox)
 
@@ -232,7 +241,7 @@ func _physics_process(delta: float) -> void:
 func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: float) -> void:
 	var y_velocity = velocity.y
 	velocity.y = 0.0
-	velocity = velocity.move_toward(move_direction * state_move_speed, acceleration * delta) # Apply horizontal movement
+	velocity = velocity.move_toward(move_direction * state_move_speed, _active_acceleration * delta) # Apply horizontal movement
 	velocity.y = clampf((y_velocity + (_gravity * (gravity_scale * delta))), min_y_velocity, max_y_velocity) # Apply vertical movement
 
 	if _prev_is_on_floor != is_on_floor() and not is_on_floor():
@@ -296,11 +305,21 @@ func process_wall_slide(_move_direction: Vector3) -> void:
 		_gravity -= gravity_wall_slide_increment
 
 func set_state() -> void:
+	var speed: float = abs(velocity.z)
+	print(speed)
+	# Wall slide
 	if _is_wall_sliding:
 		if curr_state != State.WALL_SLIDE:
 			_skin.wall_slide()
 			curr_state = State.WALL_SLIDE
 
+	# Slide
+	elif _is_sliding and speed > 1.0:
+		if curr_state != State.SLIDE:
+			curr_state = State.SLIDE
+			_skin.slide()
+
+	# In Air
 	elif not is_on_floor():
 		_move_speed = move_speed_air
 
@@ -313,8 +332,12 @@ func set_state() -> void:
 				curr_state = State.JUMP
 				_skin.jump()
 
+	# Grounded
 	elif is_on_floor():
-		if curr_state != State.RUN or curr_state != State.IDLE:
+		# First frame being grounded again
+		# TODO: Maybe heirarchy state for this?
+		# TODO: Everytime you set the usual state var it could set a parent one that tracks grounded or not or whatever
+		if curr_state != State.RUN or curr_state != State.IDLE or curr_state != State.SLIDE:
 			_coyote_jump_available = true
 			timer_jump_coyote.stop()
 			_jump_count = 0
@@ -328,12 +351,14 @@ func set_state() -> void:
 			_skin.land()
 
 		var ground_speed: float = velocity.length()
+		print(ground_speed)
 		if ground_speed > 1.0:
 			if curr_state != State.RUN:
 				curr_state = State.RUN
 				_skin.run()
 		else:
 			if curr_state != State.IDLE:
+				on_slide_released() # Stop slide if slowed down too much
 				curr_state = State.IDLE
 				_skin.idle()
 
@@ -409,6 +434,7 @@ func trigger_skin_attack() -> void:
 			curr_attack_type = Attack.DOWN
 			_skin.attack_down()
 		_move_speed = move_speed_attack
+		camera.apply_shake(.03)
 		# min_y_velocity = -4 # More needs to be fixed, specifically how move_speed is used and ground and air speeds
 		# timer_attack_slow.start(.5)
 
@@ -430,7 +456,7 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 				_power = attack_down_power
 				update_jump_reset()
 				pogo()
-		_intruder.owner.take_damage(_direction, _power, 1) # TODO: Different attack damage in future
+		_intruder.owner.take_damage(_direction, _power, 1, default_attack_hitstun_duration) # TODO: Different attack damage in future
 		increment_combo(combo_hit_increment)
 
 	elif _intruder.owner is SpikePlatform:
@@ -516,7 +542,7 @@ func print_state_change() -> void:
 		State.FALL: text = "Fall"
 		State.WALL_SLIDE: text = "Wall Slide"
 		State.JUMP: text = "Jump"
-	#print("Changed current state to: ", text)
+	print("Changed current state to: ", text)
 
 func on_timer_spawn_scent_timeout() -> void:
 	spawn_scent()
@@ -565,3 +591,17 @@ func set_combo_level(_step: int) -> void:
 
 func on_timer_invulnerable_timeout() -> void:
 	_invulnerable = false
+
+func on_slide_triggered() -> void:
+	_is_sliding = true
+	can_move = false
+	var ground_speed: float = velocity.length()
+	if ground_speed > (move_speed_ground / 2):
+		velocity.z = 12.0 * _last_movement_direction.z
+	_active_acceleration = slide_acceleration
+
+func on_slide_released() -> void:
+	can_move = true
+	_is_sliding = false
+	_active_acceleration = acceleration
+	_skin.slide_end()

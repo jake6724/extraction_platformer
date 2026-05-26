@@ -147,6 +147,7 @@ current = true
 size = 16.0
 script = ExtResource("3_qu4a1")
 camera_pivot = NodePath("../CameraPivot")
+decay = 5.0
 metadata/_custom_type_script = "uid://buj65w2r2owws"
 
 [node name="PlayerInput" type="Node" parent="."]

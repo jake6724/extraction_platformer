@@ -9,11 +9,12 @@ var base_color: Color
 @export var gravity_acceleration: float = 45.0
 @export var skin: EnemySkin
 @export var health: int = 3
+@export var timer_hitstun: Timer
 
 func _ready():
 	base_color = mesh.get_active_material(0).albedo_color
-
 	area_attack.area_entered.connect(on_area_attack_area_entered)
+	timer_hitstun.timeout.connect(stop_hitstun)
 
 func _physics_process(delta):
 	velocity = velocity.move_toward(Vector3.ZERO, delta * 30)
@@ -29,12 +30,14 @@ func take_damage_old(_direction, _power, _damage) -> void:
 	velocity = _direction * _power
 	flash_mesh_color()
 
-func take_damage(_direction, _power, _damage) -> void:
+func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_duration: float) -> void:
 	velocity = _direction * _power
 	flash_mesh()
 	health -= _damage
 	if health <= 0:
 		die()
+	else:
+		start_hitstun(_hitstun_duration)
 
 func flash_mesh_color() -> void:
 	var flash_tween: Tween = get_tree().create_tween()
@@ -72,3 +75,10 @@ func face_mesh(_move_direction: Vector3) -> void:
 	var flip: bool = _move_direction.z > 0
 	skin.flip_horizontal(flip)
 	skin.mirror_mesh(flip)
+
+func start_hitstun(_hitstun_duration: float) -> void:
+	timer_hitstun.start(_hitstun_duration)
+	flash_mesh_repeat(_hitstun_duration, 5)
+
+func stop_hitstun() -> void:
+	pass
