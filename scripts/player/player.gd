@@ -91,7 +91,7 @@ var _wall_slide_normal: Vector3
 @export var hitbox_down3: CollisionShape3D
 @onready var attack_areas: Dictionary[Attack, Area3D] = {Attack.FORWARD: area_attack_forward, Attack.DOWN: area_attack_down}
 @export var pogo_power: float = 17
-@export var attack_down_power: float = 10
+@export var attack_down_power: float = 20
 @export var attack_forward_power: float = 10
 @export var hitstop_duration: float = 0.15
 @export var timer_invulnerable: Timer
