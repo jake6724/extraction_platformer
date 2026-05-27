@@ -12,10 +12,10 @@ Some internal variables have a corresponding @export var which controls their in
 # Fix turn in place, especially with sliding
 # Disable attacking and other things while sliding
 # Sliding into wall auto kick off
-# Damage enemies with slide (player should be able to pass through also)
-# Separate player colliders for sliding and not
+
+
 # Add ascend to statemachine, plays 'under' jump oneshot
-# Add white shader, add blink to dash
+
 
 @export_category("Player Settings")
 @export_group("Movement")
@@ -269,7 +269,6 @@ func _physics_process(delta: float) -> void:
 	process_combo(delta)
 	move_and_slide()
 	set_state()
-
 	
 func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: float) -> void:
 	var y_velocity = velocity.y
@@ -287,6 +286,7 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 	process_wall_slide(move_direction)
 	process_slide(delta, move_direction)
 
+## NOTE: Make sure that _skin's "skid" animation has a on_skid_complete method track call for the await below.
 func turn_and_skid(move_direction: Vector3) -> void:
 	# Ensure that character look direction does not update when there is no input
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
@@ -296,10 +296,11 @@ func turn_and_skid(move_direction: Vector3) -> void:
 				var is_skid_active: bool = _skin.animation_tree.get("parameters/SkidOneShot/active") == true
 				# If not already skidding, skid and wait for completion to flip character
 				if not is_skid_active:
+					var skid_direction = move_direction
 					_last_movement_direction = move_direction
 					_skin.skid()
 					await _skin.skid_complete
-					flip_skin_horizontal(move_direction)
+					flip_skin_horizontal(skid_direction)
 					return # Return because _last_movement_direction has been set and we do not want to do so again
 				# Else cancel previous skid and just flip without a skid
 				else:
@@ -377,6 +378,7 @@ func set_state() -> void:
 func flip_skin_horizontal(_direction: Vector3) -> void:
 	# Flip skin on Y-axis to face move direction
 	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
+	print("TA: ", target_angle)
 	global_rotation.y = target_angle
 	_skin.mirror_mesh(_direction.z == 1)
 
@@ -520,6 +522,7 @@ func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	if not _invulnerable:
 		_invulnerable = true
 		timer_invulnerable.start(invulnerable_duration)
+		flash_mesh_repeat(invulnerable_duration, 8)
 
 		velocity = _hit_impulse
 		camera.apply_shake(.1)
