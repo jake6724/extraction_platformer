@@ -95,7 +95,12 @@ var _wall_slide_normal: Vector3
 @export var slide_impulse: float = 20
 var _is_sliding: bool = false
 var _prev_floor_angle: float = 0.0
-var _is_sliding_down: bool = false
+var _slide_slope_modifier: float
+var _slide_down_power: float = 10.0
+## Threshold for determining flat vs. sloped when calculating dot product of forward and floor normal
+var _slide_flat_forward_normal_dot_threshold: float = 0.3
+## The minimum `get_floor_angle()` value that must be exceed to check for slopes. If this angle is not exceeded, floor will be considered flat
+var slide_floor_min_angle_threshold: float = 0.03
 
 @export_group("Combat")
 @export var timer_attack_slow: Timer
@@ -367,74 +372,63 @@ func flip_skin_horizontal(_direction: Vector3) -> void:
 func process_slide(delta: float, move_direction: Vector3) -> void:
 	if _is_sliding:
 		if is_on_floor():
-			velocity.y = 0
-			# print("Floor angle: ", get_floor_angle())
+			apply_floor_snap()
 			# print("Floor normal: ", get_floor_normal())
-			_gravity = gravity_default * 30
+			# _gravity = gravity_default 
 			var _angle: float = get_floor_angle()
-
 			var floor_normal = get_floor_normal()
+
+			if _angle < slide_floor_min_angle_threshold:
+				_prev_floor_angle = _angle
+				global_rotation.x = _angle
+				_slide_slope_modifier = 0.0
+				return
 
 			# # Get your character's local forward direction (negative Z in Godot)
 			var forward_dir = global_transform.basis.z
-			# print("Forward Dir: ", global_transform.basis.z)
+			#print("Forward Dir: ", global_transform.basis.z)
 			# print("Dot: ", forward_dir.dot(get_floor_normal()))
 
 			# # Check if the floor is sloping up or down relative to your forward direction
 			var forward_normal_dot: float = forward_dir.dot(floor_normal)
 
 			var angle_difference_threshold: float = .2
-			print("forward_normal_dot: ", forward_normal_dot)
-
+			# print("forward_normal_dot: ", forward_normal_dot)
 			# Flat slide
-			if is_equal_approx(forward_normal_dot, 0.0):
+			# Check if forward_normal_dot is between +/- _slide_flat_forward_normal_dot_threshold
+			if forward_normal_dot > -_slide_flat_forward_normal_dot_threshold and forward_normal_dot < _slide_flat_forward_normal_dot_threshold:
 				var diff: float = abs(_prev_floor_angle - _angle)
 				# print(diff)
 				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
+					print("forward_normal_dot: ", forward_normal_dot)
 					print("FLAT")
 					_prev_floor_angle = _angle
 					global_rotation.x = _angle
-					_is_sliding_down = false
+					_slide_slope_modifier = 0.0
 
-			
-			# Sloping down
-			elif forward_normal_dot > 0.1:
+			# Sliding Down
+			elif forward_normal_dot > _slide_flat_forward_normal_dot_threshold:
 				var diff: float = abs(_prev_floor_angle - _angle)
 				# print(diff)
 				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
+					print("forward_normal_dot: ", forward_normal_dot)
 					print("DOWN")
 					_prev_floor_angle = _angle
 					global_rotation.x = _angle
-					_is_sliding_down = true
+					_slide_slope_modifier = 1.0
 			
-			# Sloping up
-			elif forward_normal_dot < 0.0:
+			# Sliding Up
+			elif forward_normal_dot < -_slide_flat_forward_normal_dot_threshold:
 				var diff: float = abs(_prev_floor_angle - _angle)
 				# print(diff)
 				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
+					print("forward_normal_dot: ", forward_normal_dot)
 					print("UP")
 					_prev_floor_angle = _angle
 					global_rotation.x = -_angle
-					_is_sliding_down = false
+					_slide_slope_modifier = -1.0
 
-			# if forward_dir.dot(floor_normal) >= 0.0:
-			# 	_is_sliding_down = true
-			# 	# Ground slopes down in front of you or is flat
-			# 	if _prev_floor_angle != _angle:
-			# 		print("OPTION 1 ")
-			# 		_prev_floor_angle = _angle
-			# 		global_rotation.x = _angle
-			# else:
-			# 	# Ground slopes up in front of you
-			# 	_is_sliding_down = false
-			# 	if _prev_floor_angle != _angle:
-			# 		print("OPTION 2")
-			# 		_prev_floor_angle = _angle
-			# 		global_rotation.x = -_angle
-
-			if _is_sliding_down:
-				velocity.z += _last_movement_direction.z * 10 * delta
-
+			velocity.z += _slide_slope_modifier * _last_movement_direction.z * _slide_down_power * delta
 		else:
 			_gravity = gravity_default
 
@@ -558,7 +552,6 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 			Attack.SLIDE:
 				var _up_scale: float = 2.0
 				var forward_scale: float = 7.0
-				# _direction = Vector3.FORWARD * sign(tracker.transform.origin - enemy.transform.origin) 
 				_direction = ((Vector3.FORWARD * -sign(_last_movement_direction) * forward_scale) + Vector3(0,1 * _up_scale,0)).normalized()
 				_power = 20
 
