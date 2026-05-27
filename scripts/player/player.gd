@@ -15,6 +15,7 @@ Some internal variables have a corresponding @export var which controls their in
 # Damage enemies with slide (player should be able to pass through also)
 # Separate player colliders for sliding and not
 # Add ascend to statemachine, plays 'under' jump oneshot
+# Add white shader, add blink to dash
 
 @export_category("Player Settings")
 @export_group("Movement")
@@ -102,6 +103,13 @@ var _slide_flat_forward_normal_dot_threshold: float = 0.3
 ## The minimum `get_floor_angle()` value that must be exceed to check for slopes. If this angle is not exceeded, floor will be considered flat
 var slide_floor_min_angle_threshold: float = 0.03
 
+@export_group("Dash")
+@export var dash_power_horizontal: float = 25.0
+@export var dash_power_vertical_grounded: float = 0.0
+@export var dash_power_vertical_air: float = 5.0
+## Invulerability duration from the start of dash
+@export var dash_invulnerable_duration: float = .2
+
 @export_group("Combat")
 @export var timer_attack_slow: Timer
 @export var area_attack_forward: Area3D
@@ -113,7 +121,7 @@ var slide_floor_min_angle_threshold: float = 0.03
 @export var hitbox_down3: CollisionShape3D
 @onready var attack_areas: Dictionary[Attack, Area3D] = {Attack.FORWARD: area_attack_forward, Attack.DOWN: area_attack_down, Attack.SLIDE: area_attack_slide}
 @export var pogo_power: float = 17
-@export var attack_down_power: float = 20
+@export var attack_down_power: float = 10
 @export var attack_forward_power: float = 10
 @export var attack_slide_power: float = 15
 @export var hitstop_duration: float = 0.15
@@ -199,6 +207,7 @@ func _ready():
 	input_handler.attack_triggered.connect(trigger_skin_attack)
 	input_handler.slide_triggered.connect(on_slide_triggered)
 	input_handler.slide_released.connect(on_slide_released)
+	input_handler.dash_triggered.connect(on_dash_triggered)
 
 	_skin.hitbox_disable_requested.connect(disable_attack_hitbox)
 
@@ -206,6 +215,8 @@ func _ready():
 	_combo_decay_multiplier = combo_decay_base_multiplier
 	set_combo_level(0)
 	_combo = 0.0
+
+	_last_movement_direction = Vector3.FORWARD # initialize incase player uses an ability before giving move input
 
 func on_jump_triggered() -> void:
 	jump()
@@ -494,14 +505,16 @@ func reset_sprint() -> void:
 	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
 
 func dash() -> void:
-	after_image_active = true
-	var raw_input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var right_direction: Vector3 = camera.global_basis.x
-	var move_direction: Vector3 = (right_direction * raw_input.x).normalized()
-	velocity += (move_direction * 25)
-	velocity.y += 10
-	await get_tree().create_timer(.6).timeout
-	after_image_active = false
+	_active_acceleration = acceleration # Ensure acceleration is reset
+	_invulnerable = true
+	timer_invulnerable.start(dash_invulnerable_duration)
+	velocity += (_last_movement_direction * 25)
+	if is_on_floor():
+		velocity.y += dash_power_vertical_grounded
+	else:
+		velocity.y += dash_power_vertical_air
+	_skin.dash()
+	flash_mesh()
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 	if not _invulnerable:
@@ -601,23 +614,26 @@ func pogo() -> void:
 func pogo_bounce() -> void:
 	velocity.y = pogo_power * 2
 
+## LAGGY AND BROKEN
 func create_after_image() -> void:
-	var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
-	var skin_clone: PlayerSkin = _skin.duplicate()
-	after_image_parent.add_child(skin_clone)
-	skin_clone.animation_tree.active = false
+	pass
 
-	skin_clone.mesh.set_surface_override_material(0,material_after_image)
-	skin_clone.mesh.set_surface_override_material(1,material_after_image)
-	skin_clone.mesh.set_surface_override_material(2,material_after_image)
-	skin_clone.mesh.set_surface_override_material(3,material_after_image)
+	# var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
+	# var skin_clone: PlayerSkin = _skin.duplicate()
+	# after_image_parent.add_child(skin_clone)
+	# skin_clone.animation_tree.active = false
 
-	skin_clone.global_position = _skin.mesh.global_position
-	skin_clone.global_rotation = _skin.global_rotation
+	# skin_clone.mesh.set_surface_override_material(0,material_after_image)
+	# skin_clone.mesh.set_surface_override_material(1,material_after_image)
+	# skin_clone.mesh.set_surface_override_material(2,material_after_image)
+	# skin_clone.mesh.set_surface_override_material(3,material_after_image)
 
-	var lifetime: float = .3
-	await get_tree().create_timer(lifetime).timeout
-	skin_clone.queue_free()
+	# skin_clone.global_position = _skin.mesh.global_position
+	# skin_clone.global_rotation = _skin.global_rotation
+
+	# var lifetime: float = .3
+	# await get_tree().create_timer(lifetime).timeout
+	# skin_clone.queue_free()
 
 func process_dust_particles() -> void:
 	## TODO: Disable if character is attacking/moving slow
@@ -719,3 +735,31 @@ func on_slide_released() -> void:
 	_gravity = gravity_default
 	global_rotation.x = 0.0
 	_prev_floor_angle = INF
+
+func on_dash_triggered() -> void:
+	if not _is_sliding and not _is_wall_sliding:
+		dash()
+
+## Flash skin mesh using shader
+func flash_mesh() -> void:
+	# Get the base material (shared)
+	var base_mat: Material = _skin.mesh.get_active_material(0)
+	# Get the next-pass flash material
+	var flash_mat: ShaderMaterial = base_mat.next_pass
+	# Flash with tween
+	var flash_tween: Tween = get_tree().create_tween()
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, .1).from(3.0)
+
+func flash_mesh_repeat(_total_duration: float, flash_amount: int, flash_color: Color = Color.WHITE) -> void:
+	var interval: float = (_total_duration / flash_amount) / 2
+	var flash_tween: Tween = get_tree().create_tween()
+
+	var base_mat: Material = _skin.mesh.get_active_material(0)
+	var flash_mat: ShaderMaterial = base_mat.next_pass
+	flash_mat.set_shader_parameter("custom_color", flash_color)
+
+	flash_tween.set_loops(flash_amount)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 3.0, 0.0)
+	flash_tween.tween_interval(interval)
+	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, 0.0)
+	flash_tween.tween_interval(interval)

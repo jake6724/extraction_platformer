@@ -1,10 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://bq0nqladm2yrd"]
+[gd_scene load_steps=12 format=3 uid="uid://bq0nqladm2yrd"]
 
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_ydhrl"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_wgs22"]
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="3_byxhg"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="4_nk70o"]
-[ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_x08qt"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_aarjr"]
 [ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="6_byxhg"]
 [ext_resource type="PackedScene" uid="uid://cceo475cxqqlf" path="res://scenes/enemies/EnemyFlying.tscn" id="7_wgs22"]
@@ -179,9 +178,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 28)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 
 [node name="Enemies" type="Node" parent="."]
-
-[node name="EnemyFloater" parent="Enemies" instance=ExtResource("5_x08qt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, -52.03183)
 
 [node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_byxhg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 6.009042, -2.3041687)

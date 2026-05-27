@@ -7,6 +7,7 @@ signal jump_triggered
 signal attack_triggered
 signal slide_triggered
 signal slide_released
+signal dash_triggered
 
 func _input(event):
 	if event.is_action("jump") and event.is_pressed() and not event.is_echo():
@@ -20,6 +21,9 @@ func _input(event):
 	
 	if event.is_action_released("slide") and not event.is_echo():
 		slide_released.emit()
+
+	if event.is_action("dash") and event.is_pressed() and not event.is_echo():
+		dash_triggered.emit()
 
 func _physics_process(_delta):
 	var raw_input: Vector2 = Vector2.ZERO

@@ -95,13 +95,14 @@ height = 1.7145138
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cw2d6"]
 albedo_color = Color(0.6958272, 0.29175738, 0, 1)
 
-[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack_forward", "area_attack_down", "area_attack_slide", "hitbox_forward", "timer_invulnerable", "dust_particles", "jump_dust_particles", "character_collider", "character_collider_slide", "player_hurtbox", "_skin", "input_handler", "tracker", "player_hud", "timer_spawn_scent", "scent_parent", "state_movement_label", "state_action_label")]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("timer_jump_coyote", "camera", "camera_pivot", "after_image_parent", "wall_raycast_top", "wall_raycast_bottom", "timer_wall_slide", "timer_prevent_wall_slide", "timer_wall_jump_coyote", "timer_attack_slow", "area_attack_forward", "area_attack_down", "area_attack_slide", "hitbox_forward", "timer_invulnerable", "dust_particles", "jump_dust_particles", "character_collider", "character_collider_slide", "player_hurtbox", "_skin", "input_handler", "tracker", "player_hud", "timer_spawn_scent", "scent_parent", "state_movement_label", "state_action_label")]
 collision_mask = 36
 floor_snap_length = 0.8
 script = ExtResource("1_v6fml")
 timer_jump_coyote = NodePath("Timers/TimeJumpCoyote")
 camera = NodePath("Camera3D")
 camera_pivot = NodePath("CameraPivot")
+after_image_parent = NodePath("AfterImageParent")
 wall_raycast_top = NodePath("CharacterCollider/WallRaycastTop")
 wall_raycast_bottom = NodePath("CharacterCollider/WallRaycastBottom")
 timer_wall_slide = NodePath("Timers/TimerWallSlide")

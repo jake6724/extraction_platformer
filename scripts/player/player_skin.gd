@@ -126,6 +126,9 @@ func slide_end():
 	pass
 	#animation_tree["parameters/SlideOutOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
+func dash():
+	animation_tree["parameters/DashOneShot/request"] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+
 func request_disable_hitbox(_attack: Player.Attack, _disable: bool) -> void:
 	hitbox_disable_requested.emit(_attack, _disable)
 
