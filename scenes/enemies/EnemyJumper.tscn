@@ -42,6 +42,7 @@ timer_hitstun = NodePath("TimerHitstun")
 metadata/_custom_type_script = "uid://c0vmpp55n5606"
 
 [node name="AreaDetectPlayer" type="Area3D" parent="."]
+collision_layer = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AreaDetectPlayer"]
 shape = SubResource("SphereShape3D_h3c4m")

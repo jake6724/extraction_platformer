@@ -8,6 +8,14 @@ Anything that starts with @export can be modified to change player stats.
 Some internal variables have a corresponding @export var which controls their initial value (example: _gravity and gravity_default)
 """
 
+#TODO:
+# Fix turn in place, especially with sliding
+# Disable attacking and other things while sliding
+# Sliding into wall auto kick off
+# Damage enemies with slide (player should be able to pass through also)
+# Separate player colliders for sliding and not
+# Add ascend to statemachine, plays 'under' jump oneshot
+
 @export_category("Player Settings")
 @export_group("Movement")
 @export var move_speed_ground: float = 8.0
@@ -16,7 +24,6 @@ Some internal variables have a corresponding @export var which controls their in
 @export var move_speed_attack: float = 2.5
 ## Multiplier controlling how quickly the player reaches their intended velocity. Lowering this value will make the character appear more slippery.
 @export var acceleration: float = 70
-@export var slide_acceleration: float = 2.0
 ## Multipler controlling how quickly the player mesh rotates to face the forward direction. In a sidescroller, only affects speed the player changes from left to right.
 @export var rotation_speed: float = 12.0
 var _move_speed: float
@@ -84,27 +91,33 @@ var _coyote_wall_jump_available: bool = false
 var _wall_slide_normal: Vector3
 
 @export_group("Slide")
+@export var slide_acceleration: float = 5
+@export var slide_impulse: float = 20
 var _is_sliding: bool = false
+var _prev_floor_angle: float = 0.0
+var _is_sliding_down: bool = false
 
 @export_group("Combat")
 @export var timer_attack_slow: Timer
 @export var area_attack_forward: Area3D
 @export var area_attack_down: Area3D
+@export var area_attack_slide: Area3D
 @export var hitbox_forward: CollisionShape3D
 @export var hitbox_down1: CollisionShape3D
 @export var hitbox_down2: CollisionShape3D
 @export var hitbox_down3: CollisionShape3D
-@onready var attack_areas: Dictionary[Attack, Area3D] = {Attack.FORWARD: area_attack_forward, Attack.DOWN: area_attack_down}
+@onready var attack_areas: Dictionary[Attack, Area3D] = {Attack.FORWARD: area_attack_forward, Attack.DOWN: area_attack_down, Attack.SLIDE: area_attack_slide}
 @export var pogo_power: float = 17
 @export var attack_down_power: float = 20
 @export var attack_forward_power: float = 10
+@export var attack_slide_power: float = 15
 @export var hitstop_duration: float = 0.15
 @export var timer_invulnerable: Timer
 @export var invulnerable_duration: float = .7
 @export var default_attack_hitstun_duration: float = .5
 var _invulnerable: bool = false
 var curr_attack_type: Attack
-enum Attack {FORWARD, DOWN}
+enum Attack {FORWARD, DOWN, SLIDE}
 
 @export_group("Boost & Jump Reset")
 @export var jump_reset_target: int = 3
@@ -128,6 +141,8 @@ var _combo_decay_multiplier: float = 0.0
 @export var jump_dust_particles: GPUParticles3D
 
 @export_group("Components")
+@export var character_collider: CollisionShape3D
+@export var character_collider_slide: CollisionShape3D
 @export var player_hurtbox: PlayerHurtbox
 @export var _skin: PlayerSkin
 @export var input_handler: InputHandler
@@ -172,6 +187,7 @@ func _ready():
 	
 	area_attack_forward.area_entered.connect(on_attack_area_entered)
 	area_attack_down.area_entered.connect(on_attack_area_entered)
+	area_attack_slide.area_entered.connect(on_attack_area_entered)
 	disable_all_hitboxes()
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
@@ -237,6 +253,7 @@ func _physics_process(delta: float) -> void:
 	process_combo(delta)
 	move_and_slide()
 	set_state()
+
 	
 func move_and_fall(delta: float, move_direction: Vector3, state_move_speed: float) -> void:
 	var y_velocity = velocity.y
@@ -252,6 +269,7 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 	camera.update(delta)
 	turn_and_skid(move_direction)
 	process_wall_slide(move_direction)
+	process_slide(delta, move_direction)
 
 func turn_and_skid(move_direction: Vector3) -> void:
 	# Ensure that character look direction does not update when there is no input
@@ -284,29 +302,8 @@ func turn_and_skid(move_direction: Vector3) -> void:
 
 		_last_movement_direction = move_direction
 
-func flip_skin_horizontal(_direction: Vector3) -> void:
-	# Flip skin on Y-axis to face move direction
-	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
-	global_rotation.y = target_angle
-	_skin.mirror_mesh(_direction.z == 1)
-
-func process_wall_slide(_move_direction: Vector3) -> void:
-	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide
-		_is_wall_sliding = true
-		velocity = Vector3.ZERO
-		_gravity = gravity_wall_slide
-		_jump_count = 0
-		_wall_slide_normal = get_wall_normal()
-	elif not can_wall_slide() and _is_wall_sliding: # JUST fell off wall
-		reset_from_wall_slide()
-		_coyote_wall_jump_available = true
-		timer_wall_jump_coyote.start(wall_jump_coyote_time)
-	elif _is_wall_sliding: # Is actively wall sliding
-		_gravity -= gravity_wall_slide_increment
-
 func set_state() -> void:
 	var speed: float = abs(velocity.z)
-	print(speed)
 	# Wall slide
 	if _is_wall_sliding:
 		if curr_state != State.WALL_SLIDE:
@@ -351,7 +348,6 @@ func set_state() -> void:
 			_skin.land()
 
 		var ground_speed: float = velocity.length()
-		print(ground_speed)
 		if ground_speed > 1.0:
 			if curr_state != State.RUN:
 				curr_state = State.RUN
@@ -362,26 +358,130 @@ func set_state() -> void:
 				curr_state = State.IDLE
 				_skin.idle()
 
+func flip_skin_horizontal(_direction: Vector3) -> void:
+	# Flip skin on Y-axis to face move direction
+	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
+	global_rotation.y = target_angle
+	_skin.mirror_mesh(_direction.z == 1)
+
+func process_slide(delta: float, move_direction: Vector3) -> void:
+	if _is_sliding:
+		if is_on_floor():
+			velocity.y = 0
+			# print("Floor angle: ", get_floor_angle())
+			# print("Floor normal: ", get_floor_normal())
+			_gravity = gravity_default * 30
+			var _angle: float = get_floor_angle()
+
+			var floor_normal = get_floor_normal()
+
+			# # Get your character's local forward direction (negative Z in Godot)
+			var forward_dir = global_transform.basis.z
+			# print("Forward Dir: ", global_transform.basis.z)
+			# print("Dot: ", forward_dir.dot(get_floor_normal()))
+
+			# # Check if the floor is sloping up or down relative to your forward direction
+			var forward_normal_dot: float = forward_dir.dot(floor_normal)
+
+			var angle_difference_threshold: float = .2
+			print("forward_normal_dot: ", forward_normal_dot)
+
+			# Flat slide
+			if is_equal_approx(forward_normal_dot, 0.0):
+				var diff: float = abs(_prev_floor_angle - _angle)
+				# print(diff)
+				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
+					print("FLAT")
+					_prev_floor_angle = _angle
+					global_rotation.x = _angle
+					_is_sliding_down = false
+
+			
+			# Sloping down
+			elif forward_normal_dot > 0.1:
+				var diff: float = abs(_prev_floor_angle - _angle)
+				# print(diff)
+				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
+					print("DOWN")
+					_prev_floor_angle = _angle
+					global_rotation.x = _angle
+					_is_sliding_down = true
+			
+			# Sloping up
+			elif forward_normal_dot < 0.0:
+				var diff: float = abs(_prev_floor_angle - _angle)
+				# print(diff)
+				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
+					print("UP")
+					_prev_floor_angle = _angle
+					global_rotation.x = -_angle
+					_is_sliding_down = false
+
+			# if forward_dir.dot(floor_normal) >= 0.0:
+			# 	_is_sliding_down = true
+			# 	# Ground slopes down in front of you or is flat
+			# 	if _prev_floor_angle != _angle:
+			# 		print("OPTION 1 ")
+			# 		_prev_floor_angle = _angle
+			# 		global_rotation.x = _angle
+			# else:
+			# 	# Ground slopes up in front of you
+			# 	_is_sliding_down = false
+			# 	if _prev_floor_angle != _angle:
+			# 		print("OPTION 2")
+			# 		_prev_floor_angle = _angle
+			# 		global_rotation.x = -_angle
+
+			if _is_sliding_down:
+				velocity.z += _last_movement_direction.z * 10 * delta
+
+		else:
+			_gravity = gravity_default
+
+func process_wall_slide(_move_direction: Vector3) -> void:
+	if can_wall_slide() and not _is_wall_sliding and _move_direction != Vector3.ZERO and _wall_slide_allowed: # Start wall slide
+		_is_wall_sliding = true
+		velocity = Vector3.ZERO
+		_gravity = gravity_wall_slide
+		_jump_count = 0
+		_wall_slide_normal = get_wall_normal()
+	elif not can_wall_slide() and _is_wall_sliding: # JUST fell off wall
+		reset_from_wall_slide()
+		_coyote_wall_jump_available = true
+		timer_wall_jump_coyote.start(wall_jump_coyote_time)
+	elif _is_wall_sliding: # Is actively wall sliding
+		_gravity -= gravity_wall_slide_increment
+
 func jump() -> void:
+	if _is_sliding:
+		on_slide_released()
+
 	if is_on_floor() or _coyote_jump_available or (_jump_count < jump_max):
 		if _jump_count != 0: # air jumping
 			jump_dust_particles.restart()
 		_jump_count += 1
 		_coyote_jump_available = false
 		_skin.jump()
-		var _jump_power: float = jump_power
-
+		
 		# Can wall jump if currently wall sliding, or wall jump coyote avaiable AND input is moving away from wall
 		if _is_wall_sliding or (_coyote_wall_jump_available and (_last_movement_direction.z == _wall_slide_normal.z)): 
-			_coyote_wall_jump_available = false
-			_jump_power = wall_jump_power 
-			velocity.z += (_wall_slide_normal.z * wall_push_power) # Push off away from wall if sliding
-			_last_movement_direction = -_last_movement_direction # Flip direction character is facing
-			can_move = false
-			timer_wall_slide.start(wall_jump_move_disable_duration)
-			_skin.wall_jump()
+			wall_jump()
+		else:
+			velocity.y = jump_power
 
-		velocity.y = _jump_power
+func wall_jump() -> void:
+	_coyote_wall_jump_available = false
+	velocity.z += (_wall_slide_normal.z * wall_push_power) # Push off away from wall if sliding
+	_last_movement_direction = -_last_movement_direction # Flip direction character is facing
+	can_move = false
+	timer_wall_slide.start(wall_jump_move_disable_duration)
+	_skin.wall_jump()
+	velocity.y = wall_jump_power
+
+# Similar to wall jump, does not require a wall
+func push_off(_direction: Vector3, _power: float) -> void:
+	velocity = _direction * _power
+	_skin.wall_jump()
 
 func on_timer_jump_coyote_timeout() -> void:
 	_coyote_jump_available = false
@@ -424,6 +524,7 @@ func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:
 func disable_all_hitboxes() -> void:
 	disable_attack_hitbox(Attack.FORWARD, true)
 	disable_attack_hitbox(Attack.DOWN, true)
+	disable_attack_hitbox(Attack.SLIDE, true)
 
 func trigger_skin_attack() -> void:
 	if _skin.is_attack_available() and not _is_wall_sliding:
@@ -435,8 +536,6 @@ func trigger_skin_attack() -> void:
 			_skin.attack_down()
 		_move_speed = move_speed_attack
 		camera.apply_shake(.03)
-		# min_y_velocity = -4 # More needs to be fixed, specifically how move_speed is used and ground and air speeds
-		# timer_attack_slow.start(.5)
 
 func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each area, doesn't seem necessary rn
 	if _intruder.owner is EnemyDummy:
@@ -456,6 +555,18 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 				_power = attack_down_power
 				update_jump_reset()
 				pogo()
+			Attack.SLIDE:
+				var _up_scale: float = 2.0
+				var forward_scale: float = 7.0
+				# _direction = Vector3.FORWARD * sign(tracker.transform.origin - enemy.transform.origin) 
+				_direction = ((Vector3.FORWARD * -sign(_last_movement_direction) * forward_scale) + Vector3(0,1 * _up_scale,0)).normalized()
+				_power = 20
+
+				if not is_on_floor(): # Cancel slide if air kicking
+					var _push_off_direction: Vector3 = ((Vector3.FORWARD * sign(_last_movement_direction) * forward_scale)).normalized()
+					push_off(_push_off_direction, _power/2)
+					on_slide_released()
+
 		_intruder.owner.take_damage(_direction, _power, 1, default_attack_hitstun_duration) # TODO: Different attack damage in future
 		increment_combo(combo_hit_increment)
 
@@ -597,11 +708,21 @@ func on_slide_triggered() -> void:
 	can_move = false
 	var ground_speed: float = velocity.length()
 	if ground_speed > (move_speed_ground / 2):
-		velocity.z = 12.0 * _last_movement_direction.z
+		velocity.z = slide_impulse * _last_movement_direction.z
 	_active_acceleration = slide_acceleration
+	disable_attack_hitbox(Player.Attack.SLIDE, false)
+	curr_attack_type = Attack.SLIDE
+	character_collider.set_deferred("disabled", true)
+	character_collider_slide.set_deferred("disabled", false)
 
 func on_slide_released() -> void:
 	can_move = true
 	_is_sliding = false
 	_active_acceleration = acceleration
 	_skin.slide_end()
+	disable_attack_hitbox(Player.Attack.SLIDE, true)
+	character_collider.set_deferred("disabled", false)
+	character_collider_slide.set_deferred("disabled", true)
+	_gravity = gravity_default
+	global_rotation.x = 0.0
+	_prev_floor_angle = INF

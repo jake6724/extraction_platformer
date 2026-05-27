@@ -19,7 +19,6 @@ func _input(event):
 		slide_triggered.emit()
 	
 	if event.is_action_released("slide") and not event.is_echo():
-		print("Slide released")
 		slide_released.emit()
 
 func _physics_process(_delta):

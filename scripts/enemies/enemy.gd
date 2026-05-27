@@ -79,6 +79,7 @@ func face_mesh(_move_direction: Vector3) -> void:
 func start_hitstun(_hitstun_duration: float) -> void:
 	timer_hitstun.start(_hitstun_duration)
 	flash_mesh_repeat(_hitstun_duration, 5)
+	area_attack.monitoring = false
 
 func stop_hitstun() -> void:
-	pass
+	area_attack.monitoring = true

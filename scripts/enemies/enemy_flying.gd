@@ -414,6 +414,7 @@ func start_hitstun(_hitstun_duration: float) -> void:
 	current_state = State.HIT
 
 func stop_hitstun() -> void:
+	super()
 	current_state = State.CHASE
 	on_timer_post_dash_timeout()
 	
