@@ -102,6 +102,7 @@ var _slide_down_power: float = 10.0
 var _slide_flat_forward_normal_dot_threshold: float = 0.3
 ## The minimum `get_floor_angle()` value that must be exceed to check for slopes. If this angle is not exceeded, floor will be considered flat
 var slide_floor_min_angle_threshold: float = 0.03
+var _slide_angle_diff_threshold: float = 0.2
 
 @export_group("Dash")
 @export var dash_power_horizontal: float = 25.0
@@ -267,6 +268,7 @@ func _physics_process(delta: float) -> void:
 	move_and_fall(delta, move_direction, move_speed_ground)
 	update_character(delta, move_direction)
 	process_combo(delta)
+	velocity.x = 0
 	move_and_slide()
 	set_state()
 	
@@ -284,7 +286,7 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 	camera.update(delta)
 	turn_and_skid(move_direction)
 	process_wall_slide(move_direction)
-	process_slide(delta, move_direction)
+	process_slide(delta)
 
 ## NOTE: Make sure that _skin's "skid" animation has a on_skid_complete method track call for the await below.
 func turn_and_skid(move_direction: Vector3) -> void:
@@ -378,68 +380,45 @@ func set_state() -> void:
 func flip_skin_horizontal(_direction: Vector3) -> void:
 	# Flip skin on Y-axis to face move direction
 	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
-	print("TA: ", target_angle)
 	global_rotation.y = target_angle
 	_skin.mirror_mesh(_direction.z == 1)
 
-func process_slide(delta: float, move_direction: Vector3) -> void:
+func process_slide(delta: float) -> void:
 	if _is_sliding:
 		if is_on_floor():
 			apply_floor_snap()
-			# print("Floor normal: ", get_floor_normal())
-			# _gravity = gravity_default 
 			var _angle: float = get_floor_angle()
 			var floor_normal = get_floor_normal()
 
+			# If the floor angle is flat enough, just consider it flat and skip everything else
 			if _angle < slide_floor_min_angle_threshold:
 				_prev_floor_angle = _angle
 				global_rotation.x = _angle
 				_slide_slope_modifier = 0.0
 				return
 
-			# # Get your character's local forward direction (negative Z in Godot)
-			var forward_dir = global_transform.basis.z
-			#print("Forward Dir: ", global_transform.basis.z)
-			# print("Dot: ", forward_dir.dot(get_floor_normal()))
+			var forward_direction = global_transform.basis.z
+			var forward_normal_dot: float = forward_direction.dot(floor_normal) # Find how sloped floor is
+			var angle_diff: float = abs(_prev_floor_angle - _angle)
+			var angle_sign: float = 1.0
 
-			# # Check if the floor is sloping up or down relative to your forward direction
-			var forward_normal_dot: float = forward_dir.dot(floor_normal)
-
-			var angle_difference_threshold: float = .2
-			# print("forward_normal_dot: ", forward_normal_dot)
-			# Flat slide
-			# Check if forward_normal_dot is between +/- _slide_flat_forward_normal_dot_threshold
-			if forward_normal_dot > -_slide_flat_forward_normal_dot_threshold and forward_normal_dot < _slide_flat_forward_normal_dot_threshold:
-				var diff: float = abs(_prev_floor_angle - _angle)
-				# print(diff)
-				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
-					print("forward_normal_dot: ", forward_normal_dot)
-					print("FLAT")
-					_prev_floor_angle = _angle
-					global_rotation.x = _angle
+			if _prev_floor_angle != _angle and angle_diff > _slide_angle_diff_threshold:
+				# Flat slide
+				if forward_normal_dot > -_slide_flat_forward_normal_dot_threshold and forward_normal_dot < _slide_flat_forward_normal_dot_threshold:
 					_slide_slope_modifier = 0.0
 
-			# Sliding Down
-			elif forward_normal_dot > _slide_flat_forward_normal_dot_threshold:
-				var diff: float = abs(_prev_floor_angle - _angle)
-				# print(diff)
-				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
-					print("forward_normal_dot: ", forward_normal_dot)
-					print("DOWN")
-					_prev_floor_angle = _angle
-					global_rotation.x = _angle
+				# Sliding Down
+				elif forward_normal_dot > _slide_flat_forward_normal_dot_threshold:
 					_slide_slope_modifier = 1.0
-			
-			# Sliding Up
-			elif forward_normal_dot < -_slide_flat_forward_normal_dot_threshold:
-				var diff: float = abs(_prev_floor_angle - _angle)
-				# print(diff)
-				if _prev_floor_angle != _angle and diff > angle_difference_threshold:
-					print("forward_normal_dot: ", forward_normal_dot)
-					print("UP")
-					_prev_floor_angle = _angle
-					global_rotation.x = -_angle
+				
+				# Sliding Up
+				elif forward_normal_dot < -_slide_flat_forward_normal_dot_threshold:
 					_slide_slope_modifier = -1.0
+					angle_sign = -1.0
+
+				var final_angle: float = _angle * sign(angle_sign)
+				_prev_floor_angle = _angle # Angle should NOT be saved with the sign; sign is only used for rotating
+				global_rotation.x = final_angle
 
 			velocity.z += _slide_slope_modifier * _last_movement_direction.z * _slide_down_power * delta
 		else:
@@ -617,27 +596,6 @@ func pogo() -> void:
 func pogo_bounce() -> void:
 	velocity.y = pogo_power * 2
 
-## LAGGY AND BROKEN
-func create_after_image() -> void:
-	pass
-
-	# var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
-	# var skin_clone: PlayerSkin = _skin.duplicate()
-	# after_image_parent.add_child(skin_clone)
-	# skin_clone.animation_tree.active = false
-
-	# skin_clone.mesh.set_surface_override_material(0,material_after_image)
-	# skin_clone.mesh.set_surface_override_material(1,material_after_image)
-	# skin_clone.mesh.set_surface_override_material(2,material_after_image)
-	# skin_clone.mesh.set_surface_override_material(3,material_after_image)
-
-	# skin_clone.global_position = _skin.mesh.global_position
-	# skin_clone.global_rotation = _skin.global_rotation
-
-	# var lifetime: float = .3
-	# await get_tree().create_timer(lifetime).timeout
-	# skin_clone.queue_free()
-
 func process_dust_particles() -> void:
 	## TODO: Disable if character is attacking/moving slow
 	if not is_equal_approx(velocity.z, 0) and is_on_floor() and abs(velocity.z) > 7:
@@ -766,3 +724,24 @@ func flash_mesh_repeat(_total_duration: float, flash_amount: int, flash_color: C
 	flash_tween.tween_interval(interval)
 	flash_tween.tween_property(flash_mat, "shader_parameter/flash", 0.0, 0.0)
 	flash_tween.tween_interval(interval)
+
+## LAGGY AND BROKEN
+func create_after_image() -> void:
+	pass
+
+	# var material_after_image: StandardMaterial3D = load("res://materials/material_afterimage.tres")
+	# var skin_clone: PlayerSkin = _skin.duplicate()
+	# after_image_parent.add_child(skin_clone)
+	# skin_clone.animation_tree.active = false
+
+	# skin_clone.mesh.set_surface_override_material(0,material_after_image)
+	# skin_clone.mesh.set_surface_override_material(1,material_after_image)
+	# skin_clone.mesh.set_surface_override_material(2,material_after_image)
+	# skin_clone.mesh.set_surface_override_material(3,material_after_image)
+
+	# skin_clone.global_position = _skin.mesh.global_position
+	# skin_clone.global_rotation = _skin.global_rotation
+
+	# var lifetime: float = .3
+	# await get_tree().create_timer(lifetime).timeout
+	# skin_clone.queue_free()

@@ -210,14 +210,13 @@ bones/53/rotation = Quaternion(-0.080437794, -1.690942e-07, -0.0076444554, 0.996
 bones/55/position = Vector3(-0.23694685, 0.30777332, 0.30468678)
 bones/55/rotation = Quaternion(-0.6469456, -0.62813026, -0.17346387, 0.39601028)
 bones/56/rotation = Quaternion(-0.24711962, -0.68033475, 0.68686616, -0.06550879)
-bones/57/rotation = Quaternion(-0.09259686, -0.67838675, 0.72407126, -0.08329538)
 bones/58/position = Vector3(-0.07398899, 0.13429245, 0.44495407)
 bones/59/position = Vector3(-0.76183826, -0.276129, -0.5356439)
 bones/60/position = Vector3(0.32821506, 0.6990818, 0.006727934)
 bones/61/position = Vector3(0.32760787, 0.44649047, -0.7493514)
 
 [node name="BoneAttachment3D" parent="PlayerSkin/Char_Player/ArmaturePlayer/Skeleton3D" index="1"]
-transform = Transform3D(0.021208242, 0.95011884, -0.31116554, 0.9207129, 0.10274358, 0.37647235, 0.3896639, -0.29447857, -0.8726077, -0.19335848, 0.2487514, 0.40083495)
+transform = Transform3D(0.021208242, 0.95011884, -0.31116554, 0.9207129, 0.10274358, 0.37647235, 0.3896639, -0.29447857, -0.8726077, -0.11277375, 0.2487514, 0.40083495)
 
 [node name="CharacterCollider" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.765625, 0)

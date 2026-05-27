@@ -184,7 +184,7 @@ enabled = false
 [node name="EnemyPatrols" type="Node" parent="."]
 
 [node name="Path3D3" type="Path3D" parent="EnemyPatrols"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10.415356, 11.698858)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -24.154781, 44.398026)
 curve = SubResource("Curve3D_6e24c")
 debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
 
