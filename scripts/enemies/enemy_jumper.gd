@@ -33,11 +33,26 @@ var jumping: bool = false
 @export var raycast_wall: RayCast3D
 
 @export var patrol_speed: float = 3.0
+@export var chase_speed: float = 3.0
+@export var escape_speed_multiplier: float = 2.7
+
+@export var max_jump_trigger_distance: float = 7.0
+@export var min_jump_trigger_distance: float = 5.0
+
+@export var timer_jump_in_range: Timer
+@export var jump_in_range_duration_requirement: float = 0.01
+
+var _player_position_at_jump_trigger: Vector3
+
+@export var outer_range_left: MeshInstance3D
+@export var outer_range_right: MeshInstance3D
+@export var inner_range_left: MeshInstance3D
+@export var inner_range_right: MeshInstance3D
 
 enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT}
 var current_state: State = State.PATROL
 
-var current_move_direction: Vector3 = Vector3(0,0,1)
+var current_patrol_direction: Vector3 = Vector3(0,0,1)
 
 func _ready():
 	super()
@@ -47,7 +62,15 @@ func _ready():
 	area_chase_quit.body_exited.connect(on_area_chase_quit_body_exited)
 	timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
 
+	timer_jump_in_range.timeout.connect(on_timer_jump_in_range_timeout)
+
 	skin.land_complete.connect(on_skin_land_complete)
+	skin.jump_charge_complete.connect(on_skin_jump_complete)
+
+	outer_range_left.position.z -= max_jump_trigger_distance
+	outer_range_right.position.z += max_jump_trigger_distance
+	inner_range_left.position.z -= min_jump_trigger_distance
+	inner_range_right.position.z += min_jump_trigger_distance
 
 	skin.run()
 
@@ -56,7 +79,7 @@ func _physics_process(delta):
 		State.IDLE: idle(delta)
 		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
-		State.CHARGE: pass
+		# State.CHARGE: charge(delta)
 		State.AIR: air(delta)
 		State.LAND: land(delta)
 		State.HIT: pass
@@ -66,20 +89,65 @@ func _physics_process(delta):
 func patrol(delta: float) -> void:
 	# Patrol until a wall found or end of platform reached
 	if is_floor_ahead() and not is_wall_ahead():
-		move_and_fall(delta, patrol_speed)
+		move_and_fall(delta, patrol_speed, current_patrol_direction)
 	# Turn around
 	else:
-		current_move_direction *= -1
-		var target_angle: float = Vector3.BACK.signed_angle_to(current_move_direction, Vector3.UP)
-		global_rotation.y = target_angle
-		face_mesh(current_move_direction)
+		current_patrol_direction *= -1
+		rotate_on_y(current_patrol_direction)
 		return
+		
+## The goal of chase is to get into a position where a jump can be triggered.
+func chase(delta: float) -> void:
+	var z_direction_to_player: float = player.global_transform.origin.z - global_transform.origin.z
+	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
+
+	var x_locked_player_position: Vector3 = player.global_transform.origin
+	x_locked_player_position.x = 0
+	var x_locked_position: Vector3 = global_transform.origin
+	x_locked_position.x = 0
+	var distance_to_player: float = x_locked_position.distance_to(x_locked_player_position)
+	# Player in range of jump
+
+	# Too close to player, move away
+	if distance_to_player < min_jump_trigger_distance:
+		rotate_on_y(-_direction_to_player)
+		move_and_fall(delta, chase_speed * escape_speed_multiplier, -_direction_to_player)
+		timer_jump_in_range.stop()
+	# Too far from player, move toward
+	elif distance_to_player > max_jump_trigger_distance:
+		rotate_on_y(_direction_to_player)
+		move_and_fall(delta, chase_speed, _direction_to_player)
+		timer_jump_in_range.stop()
+	# In jump range
+	else:
+		on_timer_jump_in_range_timeout()
+		# if timer_jump_in_range.is_stopped():
+		# 	timer_jump_in_range.start(jump_in_range_duration_requirement)
+
+	# if distance_to_player >= min_jump_trigger_distance and distance_to_player <= max_jump_trigger_distance:
+	# 	current_state = State.IDLE
+	# 	_player_position_at_jump_trigger = x_locked_player_position
+	# 	charge()
+	# 	return
+	# # Player out of range
+	# else:
+	# 	print("OUT OF RANGE!")
+	# 	move_and_fall(delta, chase_speed, _direction_to_player)
+	# 	face_mesh(_direction_to_player)
+
+	# velocity = velocity.move_toward(_direction_to_player * ground_speed, delta * acceleration)
+	# velocity.x = 0
+	# velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
+
+	# face_mesh(_direction_to_player)
+	# move_and_slide()
 
 ## Wrapper for basic movement. Adds gravity and calls `move_and_slide()`
-func move_and_fall(delta: float, _move_speed: float) -> void:
-	velocity = velocity.move_toward(current_move_direction * _move_speed, delta * acceleration)
+func move_and_fall(delta: float, _move_speed: float, _move_direction: Vector3) -> void:
+	var velocity_y = velocity.y
+	velocity = velocity.move_toward(_move_direction * _move_speed, delta * acceleration)
+	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
 	velocity.x = 0
-	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
 	move_and_slide()
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
@@ -87,9 +155,16 @@ func on_area_detect_player_body_entered(_player: Player) -> void:
 		player = _player
 		current_state = State.CHASE
 		skin.run()
-		var jump_delay: float = randf_range(jump_delay_min, jump_delay_max)
-		jump_timer.start(jump_delay)
+		# var jump_delay: float = randf_range(jump_delay_min, jump_delay_max)
+		# jump_timer.start(jump_delay)
 	timer_chase_quit.stop() # Always cancel chase quitting process if they walk into attack range
+
+func on_timer_jump_in_range_timeout() -> void:
+	var x_locked_player_position: Vector3 = player.global_transform.origin
+	x_locked_player_position.x = 0
+	current_state = State.IDLE
+	_player_position_at_jump_trigger = x_locked_player_position
+	charge()
 
 ## Time to start a jump windup
 func on_jump_timer_timeout() -> void:
@@ -101,10 +176,24 @@ func on_jump_timer_timeout() -> void:
 
 ## Apply jump impulse, transition to air
 func apply_jump() -> void:
-	var impulse: Vector3 = (get_direction_to_player(player) * 10) + Vector3(0,15,0)
+
+	var launch_power: float = 30
+	var horizontal_distance: float = global_transform.origin.distance_to(player.global_transform.origin)
+	var angle: float = 0.5 * asin( (gravity_default  * horizontal_distance) / (launch_power ** 2))
+	print(rad_to_deg(angle))
+	var angle_vector: Vector3 = Vector3.FORWARD.rotated(Vector3.RIGHT, angle).normalized()
+	var impulse: Vector3 = angle_vector * launch_power
 	velocity = impulse
 	current_state = State.AIR
 	skin.air()
+
+	# # var _direction_to_player: Vector3 = get_direction_to_player(player)
+	# var _direction_to_player: Vector3 = global_transform.origin.direction_to(_player_position_at_jump_trigger)
+	# var impulse: Vector3 = (_direction_to_player * 10) + Vector3(0,15,0)
+	# velocity = impulse
+	# rotate_on_y(_direction_to_player)
+	# current_state = State.AIR
+	# skin.air()
 
 func idle(delta: float) -> void:
 	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration)
@@ -118,11 +207,12 @@ func air(delta: float) -> void:
 	move_and_slide()
 
 	if is_on_floor():
-		current_state = State.LAND
+		current_state = State.IDLE
 		skin.land()
 
-func charge(delta: float) -> void:
-	pass
+func charge() -> void:
+	rotate_on_y(get_direction_to_player(player))
+	skin.jump()
 
 func land(delta: float) -> void:
 	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration*10)
@@ -132,25 +222,19 @@ func on_skin_land_complete() -> void:
 	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
 	skin.run()
 
-func chase(delta: float) -> void:
-	var z_direction_to_player: float = player.global_transform.origin.z - global_transform.origin.z
-	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
-
-	velocity = velocity.move_toward(_direction_to_player * ground_speed, delta * acceleration)
-	velocity.x = 0
-	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
-
-	face_mesh(_direction_to_player)
-	move_and_slide()
+func on_skin_jump_complete() -> void:
+	apply_jump()
 
 func on_area_chase_quit_body_exited(_player: Player) -> void:
-	if not timer_chase_quit.time_left > 0:
-		timer_chase_quit.start(chase_quit_delay)
+	pass
+	# if not timer_chase_quit.time_left > 0:
+	# 	timer_chase_quit.start(chase_quit_delay)
 
 func on_timer_chase_quit_timeout() -> void:
-	current_state = State.IDLE
-	skin.idle()
-	player = null
+	pass
+	# current_state = State.IDLE
+	# skin.idle()
+	# player = null
 
 func get_direction_to_player(_player: Player) -> Vector3:
 	var z_direction_to_player: float = _player.global_transform.origin.z - global_transform.origin.z

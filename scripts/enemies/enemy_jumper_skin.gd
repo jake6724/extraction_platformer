@@ -1,6 +1,7 @@
 class_name EnemyJumperSkin extends EnemySkin
 
 signal land_complete
+signal jump_charge_complete
 
 func run() -> void:
     animation_player.play("Run")
@@ -22,3 +23,6 @@ func land() -> void:
 
 func emit_land_complete() -> void:
     land_complete.emit()
+
+func emit_jump_charge_complete() -> void:
+    jump_charge_complete.emit()

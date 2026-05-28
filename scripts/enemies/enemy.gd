@@ -76,6 +76,14 @@ func face_mesh(_move_direction: Vector3) -> void:
 	skin.flip_horizontal(flip)
 	skin.mirror_mesh(flip)
 
+func rotate_on_y(_direction: Vector3) -> void:
+	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
+	global_rotation.y = target_angle
+
+func face_all(_direction: Vector3) -> void:
+	face_mesh(_direction)
+	rotate_on_y(_direction)
+	
 func start_hitstun(_hitstun_duration: float) -> void:
 	timer_hitstun.start(_hitstun_duration)
 	flash_mesh_repeat(_hitstun_duration, 5)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://d01c7ugxu20qw"]
+[gd_scene load_steps=13 format=3 uid="uid://d01c7ugxu20qw"]
 
 [ext_resource type="Script" uid="uid://c0vmpp55n5606" path="res://scripts/enemies/enemy_jumper.gd" id="1_h3c4m"]
 [ext_resource type="PackedScene" uid="uid://b81857coulg6n" path="res://scenes/enemies/EnemyJumperSkin.tscn" id="2_6hreo"]
@@ -27,7 +27,17 @@ height = 1.8408203
 [sub_resource type="SphereShape3D" id="SphereShape3D_nj2nm"]
 radius = 10.182311
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("jump_timer", "area_detect_player", "area_chase_quit", "timer_chase_quit", "raycast_floor", "raycast_wall", "mesh", "area_attack", "skin", "timer_hitstun")]
+[sub_resource type="SphereMesh" id="SphereMesh_6hreo"]
+radius = 0.2
+height = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ql82d"]
+albedo_color = Color(0.8627104, 0, 0.054378644, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nj2nm"]
+albedo_color = Color(0.6485813, 0.39008486, 3.85046e-07, 1)
+
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("jump_timer", "area_detect_player", "area_chase_quit", "timer_chase_quit", "raycast_floor", "raycast_wall", "timer_jump_in_range", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "mesh", "area_attack", "skin", "timer_hitstun")]
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_h3c4m")
@@ -37,6 +47,13 @@ area_chase_quit = NodePath("AreaChaseQuit")
 timer_chase_quit = NodePath("Timers/TimerChaseQuit")
 raycast_floor = NodePath("Raycasts/RaycastFloor")
 raycast_wall = NodePath("Raycasts/RayCastWall")
+max_jump_trigger_distance = 13.0
+min_jump_trigger_distance = 4.0
+timer_jump_in_range = NodePath("Timers/TimerJumpInRange")
+outer_range_left = NodePath("OutLeft")
+outer_range_right = NodePath("OutRight")
+inner_range_left = NodePath("InLeft")
+inner_range_right = NodePath("InRight")
 mesh = NodePath("MeshInstance3D")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyJumperSkin")
@@ -100,6 +117,10 @@ one_shot = true
 process_callback = 0
 one_shot = true
 
+[node name="TimerJumpInRange" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
 [node name="Raycasts" type="Node3D" parent="."]
 
 [node name="RaycastFloor" type="RayCast3D" parent="Raycasts"]
@@ -110,3 +131,19 @@ collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43947893, 0)
 target_position = Vector3(0, 0, 1.5)
 collision_mask = 4
+
+[node name="OutLeft" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_6hreo")
+surface_material_override/0 = SubResource("StandardMaterial3D_ql82d")
+
+[node name="OutRight" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_6hreo")
+surface_material_override/0 = SubResource("StandardMaterial3D_ql82d")
+
+[node name="InLeft" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_6hreo")
+surface_material_override/0 = SubResource("StandardMaterial3D_nj2nm")
+
+[node name="InRight" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_6hreo")
+surface_material_override/0 = SubResource("StandardMaterial3D_nj2nm")

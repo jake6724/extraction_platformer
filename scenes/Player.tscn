@@ -402,18 +402,12 @@ surface_material_override/0 = SubResource("StandardMaterial3D_cw2d6")
 [node name="PlayerHud" parent="." instance=ExtResource("8_khinc")]
 
 [node name="SlashDown" parent="." instance=ExtResource("9_bruh7")]
-transform = Transform3D(-7.633781e-08, -0.99999994, 0, 1.7464056, -4.3711385e-08, 0, 0, 0, 2.0879805, -1.5544655, -0.08047491, 0)
+transform = Transform3D(-7.633781e-08, -0.99999994, 0, 1.7464056, -4.3711385e-08, 0, 0, 0, 2.0879805, -1.5544655, -0.517542, 0)
 visible = false
 
 [node name="Mesh" parent="SlashDown" index="0"]
 transform = Transform3D(0.013827389, -0.11500519, -1.0150459, -0.11959839, 0.9947211, -0.1173551, 1.0413399, 0.11577132, -4.584381e-08, 0.3012514, -0.31018484, 0.07621618)
 surface_material_override/0 = SubResource("ShaderMaterial_d3wef")
-
-[node name="RemoteTransform3D" type="RemoteTransform3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5544655, -0.517542, 0)
-remote_path = NodePath("../SlashDown")
-update_rotation = false
-update_scale = false
 
 [editable path="PlayerSkin"]
 [editable path="SlashDown"]
