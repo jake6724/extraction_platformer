@@ -53,6 +53,8 @@ func is_attack_available() -> bool:
 	return res
 
 func attack() -> void:
+	skid_complete.emit()
+	cancel_skid()
 	# print("Attack called")
 	attack_combo_timer.start(combo_duration)
 

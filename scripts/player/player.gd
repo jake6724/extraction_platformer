@@ -9,13 +9,11 @@ Some internal variables have a corresponding @export var which controls their in
 """
 
 #TODO:
-# Fix turn in place, especially with sliding
+# Maintain momentum when jumping out of a slide
 # Disable attacking and other things while sliding
 # Sliding into wall auto kick off
 
-
 # Add ascend to statemachine, plays 'under' jump oneshot
-
 
 @export_category("Player Settings")
 @export_group("Movement")
@@ -129,6 +127,8 @@ var _slide_angle_diff_threshold: float = 0.2
 @export var timer_invulnerable: Timer
 @export var invulnerable_duration: float = .7
 @export var default_attack_hitstun_duration: float = .5
+@export var slash_down: Slash
+@onready var slashes: Dictionary[Attack, Slash] = {Attack.DOWN: slash_down}
 var _invulnerable: bool = false
 var curr_attack_type: Attack
 enum Attack {FORWARD, DOWN, SLIDE}
@@ -205,7 +205,7 @@ func _ready():
 	disable_all_hitboxes()
 
 	input_handler.jump_triggered.connect(on_jump_triggered)
-	input_handler.attack_triggered.connect(trigger_skin_attack)
+	input_handler.attack_triggered.connect(trigger_attack)
 	input_handler.slide_triggered.connect(on_slide_triggered)
 	input_handler.slide_released.connect(on_slide_released)
 	input_handler.dash_triggered.connect(on_dash_triggered)
@@ -489,6 +489,8 @@ func dash() -> void:
 	_active_acceleration = acceleration # Ensure acceleration is reset
 	_invulnerable = true
 	timer_invulnerable.start(dash_invulnerable_duration)
+	var impulse: Vector3 = (_last_movement_direction * 25)
+	impulse.x = 0
 	velocity += (_last_movement_direction * 25)
 	if is_on_floor():
 		velocity.y += dash_power_vertical_grounded
@@ -515,7 +517,7 @@ func disable_all_hitboxes() -> void:
 	disable_attack_hitbox(Attack.DOWN, true)
 	disable_attack_hitbox(Attack.SLIDE, true)
 
-func trigger_skin_attack() -> void:
+func trigger_attack() -> void:
 	if _skin.is_attack_available() and not _is_wall_sliding:
 		if is_on_floor():
 			curr_attack_type = Attack.FORWARD
@@ -523,6 +525,8 @@ func trigger_skin_attack() -> void:
 		else:
 			curr_attack_type = Attack.DOWN
 			_skin.attack_down()
+			slashes[Attack.DOWN].slash()
+
 		_move_speed = move_speed_attack
 		camera.apply_shake(.03)
 
