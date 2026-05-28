@@ -27,18 +27,20 @@ height = 1.8408203
 [sub_resource type="SphereShape3D" id="SphereShape3D_nj2nm"]
 radius = 10.182311
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("jump_timer", "area_detect_player", "area_chase_quit", "timer_chase_quit", "mesh", "area_attack", "skin", "timer_hitstun")]
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("jump_timer", "area_detect_player", "area_chase_quit", "timer_chase_quit", "raycast_floor", "raycast_wall", "mesh", "area_attack", "skin", "timer_hitstun")]
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_h3c4m")
-jump_timer = NodePath("Timer")
+jump_timer = NodePath("Timers/TimerJump")
 area_detect_player = NodePath("AreaDetectPlayer")
 area_chase_quit = NodePath("AreaChaseQuit")
-timer_chase_quit = NodePath("TimerChaseQuit")
+timer_chase_quit = NodePath("Timers/TimerChaseQuit")
+raycast_floor = NodePath("Raycasts/RaycastFloor")
+raycast_wall = NodePath("Raycasts/RayCastWall")
 mesh = NodePath("MeshInstance3D")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyJumperSkin")
-timer_hitstun = NodePath("TimerHitstun")
+timer_hitstun = NodePath("Timers/TimerHitstun")
 metadata/_custom_type_script = "uid://c0vmpp55n5606"
 
 [node name="AreaDetectPlayer" type="Area3D" parent="."]
@@ -65,10 +67,6 @@ collision_mask = 8
 shape = SubResource("SphereShape3D_6hreo")
 debug_color = Color(0.8123125, 0.41055724, 0, 0.41960785)
 
-[node name="Timer" type="Timer" parent="."]
-process_callback = 0
-one_shot = true
-
 [node name="Hurtbox" type="Area3D" parent="."]
 collision_layer = 16
 collision_mask = 0
@@ -85,13 +83,30 @@ collision_layer = 0
 shape = SubResource("SphereShape3D_nj2nm")
 debug_color = Color(0.85578424, 0.36757025, 0, 0.41960785)
 
-[node name="TimerChaseQuit" type="Timer" parent="."]
-process_callback = 0
-one_shot = true
-
 [node name="EnemyJumperSkin" parent="." instance=ExtResource("2_6hreo")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.3550843, 0)
 
-[node name="TimerHitstun" type="Timer" parent="."]
+[node name="Timers" type="Node" parent="."]
+
+[node name="TimerHitstun" type="Timer" parent="Timers"]
 process_callback = 0
 one_shot = true
+
+[node name="TimerChaseQuit" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
+[node name="TimerJump" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
+[node name="Raycasts" type="Node3D" parent="."]
+
+[node name="RaycastFloor" type="RayCast3D" parent="Raycasts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012383699, 1.5062873)
+collision_mask = 4
+
+[node name="RayCastWall" type="RayCast3D" parent="Raycasts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43947893, 0)
+target_position = Vector3(0, 0, 1.5)
+collision_mask = 4

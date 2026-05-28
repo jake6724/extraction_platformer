@@ -377,6 +377,7 @@ func set_state() -> void:
 				curr_state = State.IDLE
 				_skin.idle()
 
+## TODO: This shold prob be renamed, it turns everything not just the mesh ?
 func flip_skin_horizontal(_direction: Vector3) -> void:
 	# Flip skin on Y-axis to face move direction
 	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
@@ -486,6 +487,7 @@ func reset_sprint() -> void:
 	_skin.animation_tree.set("parameters/TimeScale/scale", 1.0)
 
 func dash() -> void:
+	_skin.dash() # Must be called first so that skid_complete can emit
 	_active_acceleration = acceleration # Ensure acceleration is reset
 	_invulnerable = true
 	timer_invulnerable.start(dash_invulnerable_duration)
@@ -496,7 +498,6 @@ func dash() -> void:
 		velocity.y += dash_power_vertical_grounded
 	else:
 		velocity.y += dash_power_vertical_air
-	_skin.dash()
 	flash_mesh()
 
 func on_player_hurtbox_hit(_hit_impulse: Vector3) -> void:

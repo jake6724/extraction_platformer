@@ -29,8 +29,15 @@ var jumping: bool = false
 @export var ground_speed: float = 7.0
 @export var acceleration: float = 40
 
+@export var raycast_floor: RayCast3D
+@export var raycast_wall: RayCast3D
+
+@export var patrol_speed: float = 3.0
+
 enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT}
-var current_state: State = State.IDLE
+var current_state: State = State.PATROL
+
+var current_move_direction: Vector3 = Vector3(0,0,1)
 
 func _ready():
 	super()
@@ -42,17 +49,38 @@ func _ready():
 
 	skin.land_complete.connect(on_skin_land_complete)
 
-	skin.idle()
+	skin.run()
 
 func _physics_process(delta):
 	match current_state:
 		State.IDLE: idle(delta)
-		State.PATROL: pass
+		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
 		State.CHARGE: pass
 		State.AIR: air(delta)
 		State.LAND: land(delta)
 		State.HIT: pass
+
+# TODO: Determine if they should avoid each other or walk through each other
+# They could have their own layer and pass through other enemy types
+func patrol(delta: float) -> void:
+	# Patrol until a wall found or end of platform reached
+	if is_floor_ahead() and not is_wall_ahead():
+		move_and_fall(delta, patrol_speed)
+	# Turn around
+	else:
+		current_move_direction *= -1
+		var target_angle: float = Vector3.BACK.signed_angle_to(current_move_direction, Vector3.UP)
+		global_rotation.y = target_angle
+		face_mesh(current_move_direction)
+		return
+
+## Wrapper for basic movement. Adds gravity and calls `move_and_slide()`
+func move_and_fall(delta: float, _move_speed: float) -> void:
+	velocity = velocity.move_toward(current_move_direction * _move_speed, delta * acceleration)
+	velocity.x = 0
+	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
+	move_and_slide()
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
 	if current_state == State.IDLE or current_state == State.PATROL:
@@ -138,3 +166,9 @@ func can_attack() -> bool:
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass
+
+func is_floor_ahead() -> bool:
+	return raycast_floor.is_colliding()
+
+func is_wall_ahead() -> bool:
+	return raycast_wall.is_colliding()

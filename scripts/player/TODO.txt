@@ -1,2 +1,0 @@
-
-- Line of sight check and area check for jumper

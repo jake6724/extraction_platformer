@@ -77,11 +77,11 @@ size = Vector3(1, 31.47168, 126.48816)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -39.77364)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -43.934895)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(1, 1, 5)
+size = Vector3(1, 1, 13.32251)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="Terrain"]
@@ -116,16 +116,8 @@ collision_mask = 0
 size = Vector3(1, 1, 61.939507)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -49.77364)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(1, 1, 5)
-material = ExtResource("1_dojpo")
-
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.17101963, 22.736298, 52.89476)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, -0.07941844, 1.7825813, -28.635822)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -150,7 +142,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 curve = SubResource("Curve3D_g3y3g")
 
 [node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97412467, -35.073753)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5070505, -43.44999)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, 18)
