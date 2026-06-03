@@ -6,7 +6,8 @@ extends CharacterBody3D
 var attack_power: float = 15.0
 var base_color: Color
 @export var gravity_default: float = -30
-@export var gravity_acceleration: float = 45.0
+# @export var gravity_acceleration: float = 45.0
+@export var gravity_acceleration: float = 30
 @export var skin: EnemySkin
 @export var health: int = 3
 @export var timer_hitstun: Timer
