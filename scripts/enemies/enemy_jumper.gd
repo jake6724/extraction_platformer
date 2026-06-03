@@ -177,15 +177,57 @@ func on_jump_timer_timeout() -> void:
 ## Apply jump impulse, transition to air
 func apply_jump() -> void:
 
-	var launch_power: float = 30
-	var horizontal_distance: float = global_transform.origin.distance_to(player.global_transform.origin)
-	var angle: float = 0.5 * asin( (gravity_default  * horizontal_distance) / (launch_power ** 2))
-	print(rad_to_deg(angle))
-	var angle_vector: Vector3 = Vector3.FORWARD.rotated(Vector3.RIGHT, angle).normalized()
-	var impulse: Vector3 = angle_vector * launch_power
+	var initial_velocity: float = 20
+	var x_range: float = player.global_transform.origin.z - global_transform.origin.z
+	var y_range: float = player.global_transform.origin.y - global_transform.origin.y
+
+	var g_x_squared: float = (abs(gravity_default)) * (pow(x_range, 2))
+	var two_y_v_squared: float = 2 * y_range * (pow(initial_velocity, 2))
+
+	var discriminant: float = (pow(initial_velocity, 4)) - ((abs(gravity_default)) * (g_x_squared + two_y_v_squared))
+	var square_root_discriminant: float = sqrt(discriminant)
+	var inner_solution: float = ((pow(initial_velocity, 2)) + square_root_discriminant) / ((abs(gravity_default)) * x_range)
+	var angle_plus: float = atan(inner_solution)
+
+	var _direction_to_player: Vector3 = get_direction_to_player(player)
+	var _direction = Vector3(-sin(angle_plus), 0, -cos(angle_plus)).normalized()
+	var jump_impulse_direction: Vector3 = Vector3(0, abs(_direction.x), abs(_direction.z) * sign(_direction_to_player.z))
+	var impulse = jump_impulse_direction * initial_velocity
+
+	print("x_range: ", x_range)
+	print("y_range: ", y_range)
+
+	print("g_x_squared: ", g_x_squared)
+	print("two_y_v_squared: ", two_y_v_squared)
+	print("discriminant: ", discriminant)
+	print("square_root_discriminant: ", square_root_discriminant)
+	print("inner_solution: ", inner_solution)
+
+	print("_direction: ", _direction)
+	print("jump_impulse_direction: ", jump_impulse_direction)
+	print("angle_plus (to degree): ", rad_to_deg(angle_plus))
+	print("impulse: ", impulse)
+
 	velocity = impulse
 	current_state = State.AIR
 	skin.air()
+
+	debug_draw_jump_trajectory(impulse)
+
+
+	# var angle_minus: float = (initial_velocity**2) - under_root_value
+
+
+
+
+	# var horizontal_distance: float = global_transform.origin.distance_to(player.global_transform.origin)
+	# var angle: float = 0.5 * asin( (gravity_default  * horizontal_distance) / (launch_power ** 2))
+	# print(rad_to_deg(angle))
+	# var angle_vector: Vector3 = Vector3.FORWARD.rotated(Vector3.RIGHT, angle).normalized()
+	# var impulse: Vector3 = angle_vector * launch_power
+	# velocity = impulse
+	# current_state = State.AIR
+	# skin.air()
 
 	# # var _direction_to_player: Vector3 = get_direction_to_player(player)
 	# var _direction_to_player: Vector3 = global_transform.origin.direction_to(_player_position_at_jump_trigger)
@@ -194,6 +236,36 @@ func apply_jump() -> void:
 	# rotate_on_y(_direction_to_player)
 	# current_state = State.AIR
 	# skin.air()
+
+func debug_draw_jump_trajectory(_jump_impulse: Vector3) -> void:
+	var iterations: int = 256
+	var time_step: float = .01666
+	
+	for i in range(iterations):
+		var new_mesh: MeshInstance3D = MeshInstance3D.new()
+
+		var new_sphere_mesh: SphereMesh = SphereMesh.new()
+		new_sphere_mesh.radius = 0.25
+		new_sphere_mesh.height = 0.5
+		new_sphere_mesh.radial_segments = 32
+		new_sphere_mesh.rings = 16
+
+		new_mesh.mesh = new_sphere_mesh
+		var material: StandardMaterial3D = StandardMaterial3D.new()
+		material.albedo_color = Color.RED
+		new_mesh.material_override = material
+		add_child(new_mesh)
+
+		new_mesh.global_transform.origin = global_transform.origin + (_jump_impulse * time_step)
+		_jump_impulse.y += gravity_default * time_step
+
+		#velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
+
+		# var _jump_impulse_y: float = _jump_impulse.y + (i * .01666 * gravity_default)
+		# var curr_jump_impulse: Vector3 = _jump_impulse
+		# curr_jump_impulse.y = _jump_impulse_y
+		# var iteration_position: Vector3 = global_transform.origin + curr_jump_impulse
+		# new_mesh.global_transform.origin = iteration_position
 
 func idle(delta: float) -> void:
 	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration)
@@ -239,7 +311,7 @@ func on_timer_chase_quit_timeout() -> void:
 func get_direction_to_player(_player: Player) -> Vector3:
 	var z_direction_to_player: float = _player.global_transform.origin.z - global_transform.origin.z
 	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
-	print(_direction_to_player)
+	# print(_direction_to_player)
 	return _direction_to_player
 
 func can_attack() -> bool:
