@@ -37,24 +37,23 @@ albedo_color = Color(0.8627104, 0, 0.054378644, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nj2nm"]
 albedo_color = Color(0.6485813, 0.39008486, 3.85046e-07, 1)
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("jump_timer", "area_detect_player", "area_chase_quit", "timer_chase_quit", "raycast_floor", "raycast_wall", "timer_jump_in_range", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "trajectory_debug_parent", "mesh", "area_attack", "skin", "timer_hitstun")]
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "area_chase_quit", "raycast_floor", "raycast_wall", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "mesh", "area_attack", "skin", "timer_hitstun")]
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_h3c4m")
-jump_timer = NodePath("Timers/TimerJump")
-area_detect_player = NodePath("AreaDetectPlayer")
-area_chase_quit = NodePath("AreaChaseQuit")
 timer_chase_quit = NodePath("Timers/TimerChaseQuit")
-raycast_floor = NodePath("Raycasts/RaycastFloor")
-raycast_wall = NodePath("Raycasts/RayCastWall")
+timer_jump_in_range = NodePath("Timers/TimerJumpInRange")
 max_jump_trigger_distance = 13.0
 min_jump_trigger_distance = 4.0
-timer_jump_in_range = NodePath("Timers/TimerJumpInRange")
+area_detect_player = NodePath("AreaDetectPlayer")
+area_chase_quit = NodePath("AreaChaseQuit")
+raycast_floor = NodePath("Raycasts/RaycastFloor")
+raycast_wall = NodePath("Raycasts/RayCastWall")
+trajectory_debug_parent = NodePath("TrajectoryDebugParent")
 outer_range_left = NodePath("OutLeft")
 outer_range_right = NodePath("OutRight")
 inner_range_left = NodePath("InLeft")
 inner_range_right = NodePath("InRight")
-trajectory_debug_parent = NodePath("TrajectoryDebugParent")
 mesh = NodePath("MeshInstance3D")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyJumperSkin")

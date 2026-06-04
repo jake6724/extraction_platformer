@@ -77,7 +77,7 @@ size = Vector3(1, 31.47168, 126.48816)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.000715, -43.934895)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.991276, -43.934895)
 use_collision = true
 collision_layer = 4
 collision_mask = 0

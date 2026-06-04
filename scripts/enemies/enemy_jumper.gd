@@ -1,17 +1,21 @@
 class_name EnemyJumper extends Enemy
 
+"""
+When patrolling, should they pass thru eachother?
+"""
+
 @export_group("General")
 @export var acceleration: float = 40
 @export_group("Patrol")
 @export var patrol_speed: float = 3.0
-var current_patrol_direction: Vector3 = Vector3(0,0,1)
+var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 @export_group("Chase")
 @export var chase_speed: float = 3.0
 @export var chase_quit_delay: float = 5.0
 @export var timer_chase_quit: Timer
 @export var escape_speed_multiplier: float = 2.7
 @export_group("Jump")
-@export var jump_power: float = 25
+@export var jump_power: float = 25.0
 @export var timer_jump_in_range: Timer
 @export var jump_in_range_duration_requirement: float = 0.01
 @export var max_jump_trigger_distance: float = 7.0
@@ -31,6 +35,10 @@ var _player_position_at_jump_trigger: Vector3
 @export var outer_range_right: MeshInstance3D
 @export var inner_range_left: MeshInstance3D
 @export var inner_range_right: MeshInstance3D
+## How many time steps into future to predict trajectory
+@export var trajectory_debug_iterations: int = 128
+## Takes the place of delta in velocity calculations. Lower values give more precision
+@export var trajectory_debug_time_step: float = .0166
 
 enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT}
 var current_state: State = State.PATROL
@@ -38,16 +46,15 @@ var player: Player
 
 func _ready():
 	super()
-	# jump_timer.timeout.connect(on_jump_timer_timeout)
 	area_detect_player.body_entered.connect(on_area_detect_player_body_entered)
 	area_detect_player.body_exited.connect(on_area_detect_player_body_exited)
 	area_chase_quit.body_exited.connect(on_area_chase_quit_body_exited)
 	timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
 
-	timer_jump_in_range.timeout.connect(on_timer_jump_in_range_timeout)
+	timer_jump_in_range.timeout.connect(start_jump_charge)
 
 	skin.land_complete.connect(on_skin_land_complete)
-	skin.jump_charge_complete.connect(on_skin_jump_complete)
+	skin.jump_charge_complete.connect(on_skin_jump_charge_complete)
 
 	outer_range_left.position.z -= max_jump_trigger_distance
 	outer_range_right.position.z += max_jump_trigger_distance
@@ -56,25 +63,29 @@ func _ready():
 	skin.run()
 
 func _physics_process(delta):
+	#print_state()
 	match current_state:
 		State.IDLE: idle(delta)
 		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
-		# State.CHARGE: charge(delta)
 		State.AIR: air(delta)
 		State.LAND: land(delta)
 		State.HIT: pass
 
-# TODO: Determine if they should avoid each other or walk through each other
-# They could have their own layer and pass through other enemy types
+func idle(delta: float) -> void:
+	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration)
+	velocity.x = 0
+	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
+	move_and_slide()
+
 func patrol(delta: float) -> void:
-	# Patrol until a wall found or end of platform reached
+	# Patrol in a direction until a wall found or end of platform reached
 	if is_floor_ahead() and not is_wall_ahead():
-		move_and_fall(delta, patrol_speed, current_patrol_direction)
+		move_and_fall(delta, patrol_speed, _current_patrol_direction)
 	# Turn around
 	else:
-		current_patrol_direction *= -1
-		rotate_on_y(current_patrol_direction)
+		_current_patrol_direction *= -1
+		rotate_on_y(_current_patrol_direction)
 		return
 		
 ## The goal of chase is to get into a position where a jump can be triggered.
@@ -87,7 +98,6 @@ func chase(delta: float) -> void:
 	var x_locked_position: Vector3 = global_transform.origin
 	x_locked_position.x = 0
 	var distance_to_player: float = x_locked_position.distance_to(x_locked_player_position)
-	# Player in range of jump
 
 	# Too close to player, move away
 	if distance_to_player < min_jump_trigger_distance:
@@ -101,33 +111,42 @@ func chase(delta: float) -> void:
 		timer_jump_in_range.stop()
 	# In jump range
 	else:
-		on_timer_jump_in_range_timeout()
-		# if timer_jump_in_range.is_stopped():
-		# 	timer_jump_in_range.start(jump_in_range_duration_requirement)
+		print("start_jump_charge from chase")
+		start_jump_charge()
 
-## Wrapper for basic movement. Adds gravity and calls `move_and_slide()`
-func move_and_fall(delta: float, _move_speed: float, _move_direction: Vector3) -> void:
-	var velocity_y = velocity.y
-	velocity = velocity.move_toward(_move_direction * _move_speed, delta * acceleration)
-	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
+func air(delta: float) -> void:
+	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
 	velocity.x = 0
 	move_and_slide()
+
+	if is_on_floor():
+		current_state = State.IDLE
+		skin.land()
+		clear_debug_trajectory_points()
+
+func land(delta: float) -> void:
+	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration*10)
+	move_and_collide(velocity * delta)
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
 	if current_state == State.IDLE or current_state == State.PATROL:
 		player = _player
 		current_state = State.CHASE
 		skin.run()
-		# var jump_delay: float = randf_range(jump_delay_min, jump_delay_max)
-		# jump_timer.start(jump_delay)
 	timer_chase_quit.stop() # Always cancel chase quitting process if they walk into attack range
 
-func on_timer_jump_in_range_timeout() -> void:
+func start_jump_charge() -> void:
+	print("start_jump_charge")
 	var x_locked_player_position: Vector3 = player.global_transform.origin
 	x_locked_player_position.x = 0
 	current_state = State.IDLE
 	_player_position_at_jump_trigger = x_locked_player_position
 	charge()
+
+func charge() -> void:
+	_jump_impulse = get_jump_impulse()
+	rotate_on_y(get_direction_to_player(player))
+	skin.jump()
 
 ## Based on "Angle θ required to hit coordinate (x, y)" section of https://en.wikipedia.org/wiki/Projectile_motion
 func get_jump_impulse() -> Vector3:
@@ -146,7 +165,7 @@ func get_jump_impulse() -> Vector3:
 	var discriminant: float = (pow(initial_velocity, 4)) - ((abs(gravity_default)) * (g_x_squared + two_y_v_squared))
 	var square_root_discriminant: float = sqrt(discriminant)
 	# Compute the value inside the highest-level parenthesis 
-		# The +/- here:[(pow(initial_velocity, 2)) +/- square_root_discriminant)] determines where the high or low arc is used.
+	# The +/- here:[(pow(initial_velocity, 2)) +/- square_root_discriminant)] determines where the high or low arc is used.
 	var inner_solution: float = ((pow(initial_velocity, 2)) + square_root_discriminant) / ((abs(gravity_default)) * x_range)
 	# Compute final angle
 	var angle: float = atan(inner_solution)
@@ -161,48 +180,37 @@ func get_jump_impulse() -> Vector3:
 	var jump_impulse_direction: Vector3 = Vector3(0, abs(_direction.x), abs(_direction.z) * sign(_direction_to_player.z))
 	var impulse = jump_impulse_direction * initial_velocity
 
-	if show_trajectory_debug:
-		debug_draw_jump_trajectory(impulse, target_position)
-		print("target_position: ", target_position)
-		print("x_range: ", x_range)
-		print("y_range: ", y_range)
-		print("g_x_squared: ", g_x_squared)
-		print("two_y_v_squared: ", two_y_v_squared)
-		print("discriminant: ", discriminant)
-		print("square_root_discriminant: ", square_root_discriminant)
-		print("inner_solution: ", inner_solution)
-		print("_direction: ", _direction)
-		print("jump_impulse_direction: ", jump_impulse_direction)
-		print("angle (converted to degree for print only): ", rad_to_deg(angle))
-		print("impulse: ", impulse)
+	if show_trajectory_debug: debug_draw_jump_trajectory(impulse, target_position)
 	return impulse
 
-## Apply jump impulse, transition to air
+## Apply jump impulse, transition to air. Impulse used is `_jump_impulse`
 func apply_jump() -> void:
-	var impulse: Vector3 = get_jump_impulse()
-	if impulse != Vector3.ZERO:
-		velocity = impulse
+	rotate_on_y(get_direction_to_player(player))
+	if _jump_impulse != Vector3.ZERO:
+		velocity = _jump_impulse
 		current_state = State.AIR
 		skin.air()
 
-func debug_draw_jump_trajectory(_jump_impulse: Vector3, _target_positon: Vector3) -> void:
-	var iterations: int = 128 # How many time steps into future to predict trajectory
-	var time_step: float = .0166 # Takes the place of delta in velocity calculations. Lower values give more precision
+func debug_draw_jump_trajectory(_impulse: Vector3, _target_positon: Vector3) -> void:
 	var curr_position: Vector3 = global_transform.origin	
-
 	# Place a debug mesh at the target position
 	var target_mesh = create_debug_mesh(.3, .6, Color.ORANGE)
 	trajectory_debug_parent.add_child(target_mesh)
 	target_mesh.global_transform.origin = _target_positon
 
 	# Place a debug mesh along the jump impulse's trajectory
-	for i in range(iterations):
+	for i in range(trajectory_debug_iterations):
 		var new_mesh = create_debug_mesh()
 		trajectory_debug_parent.add_child(new_mesh)
 		# Increment placement position based on trajectory's path at next time step
-		curr_position += (_jump_impulse * time_step)
+		curr_position += (_impulse * trajectory_debug_time_step)
 		new_mesh.global_transform.origin = curr_position
-		_jump_impulse.y = move_toward(_jump_impulse.y, gravity_default, time_step * gravity_acceleration)
+		_impulse.y = move_toward(_impulse.y, gravity_default, trajectory_debug_time_step * gravity_acceleration)
+
+func clear_debug_trajectory_points() -> void:
+	await get_tree().create_timer(1).timeout
+	for child in trajectory_debug_parent.get_children():
+		child.queue_free()
 
 func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Color.RED) -> MeshInstance3D:
 	# Initialize mesh instance, create and configure sphere mesh
@@ -219,46 +227,16 @@ func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Col
 	new_mesh.material_override = material
 	return new_mesh
 
-func clear_debug_trajectory_points() -> void:
-	await get_tree().create_timer(1).timeout
-	for child in trajectory_debug_parent.get_children():
-		child.queue_free()
-
-func idle(delta: float) -> void:
-	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration)
-	velocity.x = 0
-	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
-	move_and_slide()
-
-func air(delta: float) -> void:
-	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
-	velocity.x = 0
-	move_and_slide()
-
-	if is_on_floor():
-		current_state = State.IDLE
-		skin.land()
-		clear_debug_trajectory_points()
-
-func charge() -> void:
-	_jump_impulse = get_jump_impulse()
-	rotate_on_y(get_direction_to_player(player))
-	skin.jump()
-
-func land(delta: float) -> void:
-	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration*10)
-	move_and_collide(velocity * delta)
-
 func on_skin_land_complete() -> void:
+	print("Skin land complete")
 	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
 	skin.run()
 
-func on_skin_jump_complete() -> void:
+func on_skin_jump_charge_complete() -> void:
 	var temp_jump_impulse: Vector3 = get_jump_impulse()
 	if temp_jump_impulse != Vector3.ZERO:
 		_jump_impulse = temp_jump_impulse
 	apply_jump()
-
 
 func on_area_chase_quit_body_exited(_player: Player) -> void:
 	pass
@@ -277,11 +255,13 @@ func get_direction_to_player(_player: Player) -> Vector3:
 	# print(_direction_to_player)
 	return _direction_to_player
 
-func can_attack() -> bool:
-	if area_detect_player.get_overlapping_bodies().size() > 0:
-		return true
-	else:
-		return false
+## Wrapper for basic movement. Adds gravity and calls `move_and_slide()`
+func move_and_fall(delta: float, _move_speed: float, _move_direction: Vector3) -> void:
+	var velocity_y = velocity.y
+	velocity = velocity.move_toward(_move_direction * _move_speed, delta * acceleration)
+	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
+	velocity.x = 0
+	move_and_slide()
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass
@@ -291,3 +271,13 @@ func is_floor_ahead() -> bool:
 
 func is_wall_ahead() -> bool:
 	return raycast_wall.is_colliding()
+
+func print_state() -> void:
+	var _text: String
+	match current_state:
+		State.IDLE: _text = "IDLE"
+		State.CHASE: _text = "CHASE"
+		State.AIR: _text = "AIR"
+		State.LAND: _text = "LAND"
+		State.HIT: _text = "HIT"
+	print(_text)
