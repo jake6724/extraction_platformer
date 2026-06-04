@@ -1,7 +1,7 @@
 class_name Enemy
 extends CharacterBody3D
 
-@export var mesh: MeshInstance3D
+# @export var mesh: MeshInstance3D
 @export var area_attack: Area3D
 var attack_power: float = 15.0
 var base_color: Color
@@ -11,9 +11,10 @@ var base_color: Color
 @export var skin: EnemySkin
 @export var health: int = 3
 @export var timer_hitstun: Timer
+@export var acceleration: float = 40
 
 func _ready():
-	base_color = mesh.get_active_material(0).albedo_color
+	# base_color = mesh.get_active_material(0).albedo_color
 	area_attack.area_entered.connect(on_area_attack_area_entered)
 	timer_hitstun.timeout.connect(stop_hitstun)
 
@@ -22,14 +23,22 @@ func _physics_process(delta):
 	velocity.x = 0
 	move_and_slide()
 
+## Wrapper for basic movement. Adds gravity and calls `move_and_slide()`
+func move_and_fall(delta: float, _move_speed: float, _move_direction: Vector3, _acceleration: float) -> void:
+	var velocity_y = velocity.y
+	velocity = velocity.move_toward(_move_direction * _move_speed, delta * _acceleration)
+	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
+	velocity.x = 0
+	move_and_slide()
+
 ## Attack
 func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void: 
 	if _player_hurtbox:
 		_player_hurtbox.take_damage(global_position, attack_power)
 		
-func take_damage_old(_direction, _power, _damage) -> void:
-	velocity = _direction * _power
-	flash_mesh_color()
+# func take_damage_old(_direction, _power, _damage) -> void:
+# 	velocity = _direction * _power
+	# flash_mesh_color()
 
 func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_duration: float) -> void:
 	velocity = _direction * _power
@@ -40,10 +49,10 @@ func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_dura
 	else:
 		start_hitstun(_hitstun_duration)
 
-func flash_mesh_color() -> void:
-	var flash_tween: Tween = get_tree().create_tween()
-	var mesh_material: StandardMaterial3D = mesh.get_active_material(0)
-	flash_tween.tween_property(mesh_material, "albedo_color", base_color, .25).from(Color.YELLOW)
+# func flash_mesh_color() -> void:
+# 	var flash_tween: Tween = get_tree().create_tween()
+# 	# var mesh_material: StandardMaterial3D = mesh.get_active_material(0)
+# 	# flash_tween.tween_property(mesh_material, "albedo_color", base_color, .25).from(Color.YELLOW)
 
 func die() -> void:
 	queue_free()

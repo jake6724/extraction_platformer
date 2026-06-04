@@ -5,7 +5,7 @@ When patrolling, should they pass thru eachother?
 """
 
 @export_group("General")
-@export var acceleration: float = 40
+# @export var acceleration: float = 40
 @export_group("Patrol")
 @export var patrol_speed: float = 3.0
 var _current_patrol_direction: Vector3 = Vector3(0,0,1)
@@ -51,7 +51,7 @@ func _ready():
 	area_chase_quit.body_exited.connect(on_area_chase_quit_body_exited)
 	timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
 
-	timer_jump_in_range.timeout.connect(start_jump_charge)
+	# timer_jump_in_range.timeout.connect(start_jump_charge)
 
 	skin.land_complete.connect(on_skin_land_complete)
 	skin.jump_charge_complete.connect(on_skin_jump_charge_complete)
@@ -81,7 +81,7 @@ func idle(delta: float) -> void:
 func patrol(delta: float) -> void:
 	# Patrol in a direction until a wall found or end of platform reached
 	if is_floor_ahead() and not is_wall_ahead():
-		move_and_fall(delta, patrol_speed, _current_patrol_direction)
+		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
 	# Turn around
 	else:
 		_current_patrol_direction *= -1
@@ -102,12 +102,12 @@ func chase(delta: float) -> void:
 	# Too close to player, move away
 	if distance_to_player < min_jump_trigger_distance:
 		rotate_on_y(-_direction_to_player)
-		move_and_fall(delta, chase_speed * escape_speed_multiplier, -_direction_to_player)
+		move_and_fall(delta, chase_speed * escape_speed_multiplier, -_direction_to_player, acceleration)
 		timer_jump_in_range.stop()
 	# Too far from player, move toward
 	elif distance_to_player > max_jump_trigger_distance:
 		rotate_on_y(_direction_to_player)
-		move_and_fall(delta, chase_speed, _direction_to_player)
+		move_and_fall(delta, chase_speed, _direction_to_player, acceleration)
 		timer_jump_in_range.stop()
 	# In jump range
 	else:
@@ -130,6 +130,7 @@ func land(delta: float) -> void:
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
 	if current_state == State.IDLE or current_state == State.PATROL:
+		print("Player detected and I care")
 		player = _player
 		current_state = State.CHASE
 		skin.run()
@@ -147,6 +148,29 @@ func charge() -> void:
 	_jump_impulse = get_jump_impulse()
 	rotate_on_y(get_direction_to_player(player))
 	skin.jump()
+
+## Connected to [skin.jump_charge_complete]; called once skin jump windup animation has finished.
+## Triggers actual jump physics
+func on_skin_jump_charge_complete() -> void:
+	var temp_jump_impulse: Vector3 = get_jump_impulse()
+	if temp_jump_impulse != Vector3.ZERO:
+		_jump_impulse = temp_jump_impulse
+	apply_jump()
+
+## Apply jump impulse, transition to air. Impulse used is `_jump_impulse`
+func apply_jump() -> void:
+	rotate_on_y(get_direction_to_player(player))
+	if _jump_impulse != Vector3.ZERO:
+		velocity = _jump_impulse
+		current_state = State.AIR
+		skin.air()
+
+## Connected to [skin.land_complete]; called once skin land animation has finished
+## Tranisitions to post jumping behavior
+func on_skin_land_complete() -> void:
+	print("Skin land complete")
+	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
+	skin.run()
 
 ## Based on "Angle θ required to hit coordinate (x, y)" section of https://en.wikipedia.org/wiki/Projectile_motion
 func get_jump_impulse() -> Vector3:
@@ -182,14 +206,6 @@ func get_jump_impulse() -> Vector3:
 
 	if show_trajectory_debug: debug_draw_jump_trajectory(impulse, target_position)
 	return impulse
-
-## Apply jump impulse, transition to air. Impulse used is `_jump_impulse`
-func apply_jump() -> void:
-	rotate_on_y(get_direction_to_player(player))
-	if _jump_impulse != Vector3.ZERO:
-		velocity = _jump_impulse
-		current_state = State.AIR
-		skin.air()
 
 func debug_draw_jump_trajectory(_impulse: Vector3, _target_positon: Vector3) -> void:
 	var curr_position: Vector3 = global_transform.origin	
@@ -227,17 +243,6 @@ func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Col
 	new_mesh.material_override = material
 	return new_mesh
 
-func on_skin_land_complete() -> void:
-	print("Skin land complete")
-	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
-	skin.run()
-
-func on_skin_jump_charge_complete() -> void:
-	var temp_jump_impulse: Vector3 = get_jump_impulse()
-	if temp_jump_impulse != Vector3.ZERO:
-		_jump_impulse = temp_jump_impulse
-	apply_jump()
-
 func on_area_chase_quit_body_exited(_player: Player) -> void:
 	pass
 	# if not timer_chase_quit.time_left > 0:
@@ -254,14 +259,6 @@ func get_direction_to_player(_player: Player) -> Vector3:
 	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
 	# print(_direction_to_player)
 	return _direction_to_player
-
-## Wrapper for basic movement. Adds gravity and calls `move_and_slide()`
-func move_and_fall(delta: float, _move_speed: float, _move_direction: Vector3) -> void:
-	var velocity_y = velocity.y
-	velocity = velocity.move_toward(_move_direction * _move_speed, delta * acceleration)
-	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
-	velocity.x = 0
-	move_and_slide()
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass

@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3 uid="uid://btp315oeixtsw"]
+
+[ext_resource type="Script" uid="uid://chbxbnnn5op54" path="res://scripts/enemies/enemy_cube.gd" id="1_btn8l"]
+[ext_resource type="PackedScene" uid="uid://c2igbvqovh0sa" path="res://scenes/enemies/EnemySkinCube.tscn" id="2_ux554"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_btn8l"]
+size = Vector3(2.5, 2.5, 2.5)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ux554"]
+radius = 2.0
+
+[node name="EnemyCube" type="CharacterBody3D" node_paths=PackedStringArray("raycast_floor", "raycast_wall", "area_attack", "skin", "timer_hitstun")]
+collision_layer = 2
+collision_mask = 4
+script = ExtResource("1_btn8l")
+raycast_floor = NodePath("Raycasts/RaycastFloor")
+raycast_wall = NodePath("Raycasts/RayCastWall")
+area_attack = NodePath("AreaAttack")
+skin = NodePath("EnemySkinCube")
+timer_hitstun = NodePath("Timers/TimerHitstun")
+
+[node name="BodyCollider" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_btn8l")
+
+[node name="Raycasts" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+
+[node name="RaycastFloor" type="RayCast3D" parent="Raycasts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1239122, 1.5062873)
+collision_mask = 4
+hit_from_inside = true
+
+[node name="RayCastWall" type="RayCast3D" parent="Raycasts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2182777, 0)
+target_position = Vector3(0, 0, 1.5)
+collision_mask = 4
+
+[node name="EnemySkinCube" parent="." instance=ExtResource("2_ux554")]
+
+[node name="Timers" type="Node" parent="."]
+
+[node name="TimerHitstun" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
+[node name="AreaAttack" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AreaAttack"]
+shape = SubResource("SphereShape3D_ux554")

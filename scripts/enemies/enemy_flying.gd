@@ -6,8 +6,8 @@ class_name EnemyFlying extends Enemy
 # TODO: Pause at patrol end points? 
 
 @export var player: Player
-@export_group("Stats")
-@export var acceleration: float = 30.0
+# @export_group("Stats")
+# @export var acceleration: float = 40.0
 @export_group("Components")
 @export var raycast_detect_top: RayCast3D
 @export var raycast_detect_center: RayCast3D

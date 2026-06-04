@@ -1,12 +1,12 @@
-[gd_scene load_steps=15 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=14 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_1fpmp"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
+[ext_resource type="PackedScene" uid="uid://btp315oeixtsw" path="res://scenes/enemies/EnemyCube.tscn" id="5_6e24c"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
 [ext_resource type="PackedScene" uid="uid://cceo475cxqqlf" path="res://scenes/enemies/EnemyFlying.tscn" id="6_5ycvo"]
-[ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="6_7i0bt"]
 [ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
 [ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="8_g3y3g"]
 
@@ -24,13 +24,6 @@ ambient_light_source = 2
 ambient_light_color = Color(0.74558026, 0.7455802, 0.7455802, 1)
 ambient_light_energy = 1.5
 reflected_light_source = 2
-
-[sub_resource type="Curve3D" id="Curve3D_g3y3g"]
-_data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 2.5761566, 58.717716, 9.253273, 0, 0, 0, 0, 0, 0, 3.9769897, 58.695557, -36.63186),
-"tilts": PackedFloat32Array(0, 0)
-}
-point_count = 2
 
 [sub_resource type="Curve3D" id="Curve3D_6e24c"]
 _data = {
@@ -138,11 +131,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 
 [node name="Enemies" type="Node" parent="."]
 
-[node name="Path3D" type="Path3D" parent="Enemies"]
-curve = SubResource("Curve3D_g3y3g")
-
-[node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2225819, -46.14472)
+[node name="EnemyCube" parent="Enemies" instance=ExtResource("5_6e24c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7538657, -43.17245)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, 18)

@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://c2igbvqovh0sa"]
+
+[ext_resource type="Script" uid="uid://b6q2b0g4yvds2" path="res://scripts/enemies/enemy_skin_cube.gd" id="1_ge5a5"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ge5a5"]
+size = Vector3(2.5, 2.5, 2.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4e65v"]
+albedo_color = Color(0.84817815, 0, 0.08016657, 1)
+
+[node name="EnemySkinCube" type="Node3D"]
+script = ExtResource("1_ge5a5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ge5a5")
+surface_material_override/0 = SubResource("StandardMaterial3D_4e65v")
