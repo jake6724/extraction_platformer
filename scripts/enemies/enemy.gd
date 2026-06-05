@@ -12,6 +12,7 @@ var base_color: Color
 @export var health: int = 3
 @export var timer_hitstun: Timer
 @export var acceleration: float = 40
+@export var body_collider: CollisionShape3D
 
 func _ready():
 	# base_color = mesh.get_active_material(0).albedo_color
@@ -101,3 +102,11 @@ func start_hitstun(_hitstun_duration: float) -> void:
 
 func stop_hitstun() -> void:
 	area_attack.monitoring = true
+
+func set_collisions_with_enemies(_value: bool) -> void:
+	set_collision_mask_value.call_deferred(2, _value)
+
+func enable_enemy_collisions_1_frame() -> void:
+	set_collision_mask_value(2, true)
+	await get_tree().process_frame
+	set_collision_mask_value(2, false)

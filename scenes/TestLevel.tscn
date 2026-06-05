@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=15 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://btp315oeixtsw" path="res://scenes/enemies/EnemyCube.tscn" id="5_6e24c"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
 [ext_resource type="PackedScene" uid="uid://cceo475cxqqlf" path="res://scenes/enemies/EnemyFlying.tscn" id="6_5ycvo"]
+[ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="6_7i0bt"]
 [ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="7_0n17k"]
 [ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="8_g3y3g"]
 
@@ -70,7 +71,7 @@ size = Vector3(1, 31.47168, 126.48816)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D4" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.991276, -43.934895)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 28.991276, -43.934895)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
@@ -85,32 +86,8 @@ collision_mask = 0
 size = Vector3(1, 1, 10.593311)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D11" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0171089, -10.7348385)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(1, 1, 11.409576)
-material = ExtResource("1_dojpo")
-
-[node name="CSGBox3D12" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 0.94732213, -0.32028234, 0, 0.32028234, 0.94732213, 0, 2.3488493, -19.125237)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(1, 1, 15.434595)
-material = ExtResource("1_dojpo")
-
-[node name="CSGBox3D7" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 0.9408926, 0.3387051, 0, -0.3387051, 0.9408926, 0, 9.962881, 16.58667)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(1, 1, 61.939507)
-material = ExtResource("1_dojpo")
-
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, -0.07941844, 1.7825813, -28.635822)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0016405054, 1.7825813, -2.2469342)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -132,10 +109,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyCube" parent="Enemies" instance=ExtResource("5_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7538657, -43.17245)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7538657, -120.77684)
+
+[node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -117.00411)
+
+[node name="EnemyJumper2" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -109.3363)
+
+[node name="EnemyJumper3" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -112.93714)
+
+[node name="EnemyJumper4" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -21.275307)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, 18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)
 player = NodePath("../Player")
 
 [node name="Platform2" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]

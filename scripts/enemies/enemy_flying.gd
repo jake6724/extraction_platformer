@@ -13,7 +13,6 @@ class_name EnemyFlying extends Enemy
 @export var raycast_detect_center: RayCast3D
 @export var raycast_detect_bottom: RayCast3D
 @export var area_detect_player: Area3D
-@export var body_collider: CollisionShape3D
 @export_group("Patrol")
 @export var path_follow: PathFollow3D
 @export var patrol_speed_scale: float = 0.1

@@ -71,7 +71,7 @@ material = SubResource("StandardMaterial3D_v6fml")
 radius = 0.25
 height = 0.5
 
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "body_collider", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "mesh", "area_attack", "skin", "timer_hitstun")]
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
 collision_mask = 6
 script = ExtResource("1_ayqf6")
@@ -79,7 +79,6 @@ raycast_detect_top = NodePath("RaycastDetectTop")
 raycast_detect_center = NodePath("RaycastDetectCenter")
 raycast_detect_bottom = NodePath("RayCastDetectBottom")
 area_detect_player = NodePath("AreaDetectPlayer")
-body_collider = NodePath("BodyCollider")
 timer_chase_quit = NodePath("Timers/TimerChaseQuit")
 timer_dash_charge = NodePath("Timers/TimerDashCharge")
 timer_dash_cooldown = NodePath("Timers/TimerDashCooldown")
@@ -87,10 +86,10 @@ timer_post_dash = NodePath("Timers/TimerPostDash")
 death_particles = NodePath("DeathParticles")
 move_indicator = NodePath("MoveIndicator")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
-mesh = NodePath("MeshInstance3D")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyCellBatSkin")
 timer_hitstun = NodePath("Timers/TimerHitstun")
+body_collider = NodePath("BodyCollider")
 metadata/_custom_type_script = "uid://bhegt4y07ydw8"
 
 [node name="EnemyCellBatSkin" parent="." instance=ExtResource("2_wlpcq")]

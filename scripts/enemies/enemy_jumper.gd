@@ -10,10 +10,10 @@ When patrolling, should they pass thru eachother?
 @export var patrol_speed: float = 3.0
 var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 @export_group("Chase")
-@export var chase_speed: float = 3.0
+@export var chase_speed: float = 5.0
+@export var escape_speed: float = 11.0
 @export var chase_quit_delay: float = 5.0
 @export var timer_chase_quit: Timer
-@export var escape_speed_multiplier: float = 2.7
 @export_group("Jump")
 @export var jump_power: float = 25.0
 @export var timer_jump_in_range: Timer
@@ -25,12 +25,13 @@ var _jump_impulse: Vector3
 var _player_position_at_jump_trigger: Vector3
 @export_group("Components")
 @export var area_detect_player: Area3D
+@export var collider_detect_player: CollisionShape3D
 @export var area_chase_quit: Area3D
 @export var raycast_floor: RayCast3D
 @export var raycast_wall: RayCast3D
 @export_group("Debug")
 @export var trajectory_debug_parent: Node
-@export var show_trajectory_debug: bool = true
+@export var show_debug: bool = true
 @export var outer_range_left: MeshInstance3D
 @export var outer_range_right: MeshInstance3D
 @export var inner_range_left: MeshInstance3D
@@ -51,15 +52,23 @@ func _ready():
 	area_chase_quit.body_exited.connect(on_area_chase_quit_body_exited)
 	timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
 
+	axis_lock_linear_x = true
+
 	# timer_jump_in_range.timeout.connect(start_jump_charge)
 
 	skin.land_complete.connect(on_skin_land_complete)
 	skin.jump_charge_complete.connect(on_skin_jump_charge_complete)
 
+	collider_detect_player.shape.radius = min_jump_trigger_distance
+
 	outer_range_left.position.z -= max_jump_trigger_distance
 	outer_range_right.position.z += max_jump_trigger_distance
 	inner_range_left.position.z -= min_jump_trigger_distance
 	inner_range_right.position.z += min_jump_trigger_distance
+	outer_range_left.visible = show_debug
+	outer_range_right.visible = show_debug
+	inner_range_left.visible = show_debug
+	inner_range_right.visible = show_debug
 	skin.run()
 
 func _physics_process(delta):
@@ -69,7 +78,7 @@ func _physics_process(delta):
 		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
 		State.AIR: air(delta)
-		State.LAND: land(delta)
+		# State.LAND: land(delta)
 		State.HIT: pass
 
 func idle(delta: float) -> void:
@@ -90,6 +99,7 @@ func patrol(delta: float) -> void:
 		
 ## The goal of chase is to get into a position where a jump can be triggered.
 func chase(delta: float) -> void:
+	enable_enemy_collisions_1_frame()
 	var z_direction_to_player: float = player.global_transform.origin.z - global_transform.origin.z
 	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
 
@@ -102,7 +112,7 @@ func chase(delta: float) -> void:
 	# Too close to player, move away
 	if distance_to_player < min_jump_trigger_distance:
 		rotate_on_y(-_direction_to_player)
-		move_and_fall(delta, chase_speed * escape_speed_multiplier, -_direction_to_player, acceleration)
+		move_and_fall(delta, escape_speed, -_direction_to_player, acceleration)
 		timer_jump_in_range.stop()
 	# Too far from player, move toward
 	elif distance_to_player > max_jump_trigger_distance:
@@ -111,7 +121,6 @@ func chase(delta: float) -> void:
 		timer_jump_in_range.stop()
 	# In jump range
 	else:
-		print("start_jump_charge from chase")
 		start_jump_charge()
 
 func air(delta: float) -> void:
@@ -121,38 +130,39 @@ func air(delta: float) -> void:
 
 	if is_on_floor():
 		current_state = State.IDLE
+		# set_collisions_with_enemies(true)
 		skin.land()
 		clear_debug_trajectory_points()
 
-func land(delta: float) -> void:
-	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration*10)
-	move_and_collide(velocity * delta)
+# func land(delta: float) -> void:
+# 	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration*10)
+# 	velocity.x = 0
+# 	move_and_collide(velocity * delta)
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
-	if current_state == State.IDLE or current_state == State.PATROL:
-		print("Player detected and I care")
+	if current_state == State.PATROL:
 		player = _player
 		current_state = State.CHASE
 		skin.run()
 	timer_chase_quit.stop() # Always cancel chase quitting process if they walk into attack range
 
 func start_jump_charge() -> void:
-	print("start_jump_charge")
-	var x_locked_player_position: Vector3 = player.global_transform.origin
+	var x_locked_player_position: Vector3 = get_x_locked_player_position()
 	x_locked_player_position.x = 0
 	current_state = State.IDLE
-	_player_position_at_jump_trigger = x_locked_player_position
+	# _player_position_at_jump_trigger = x_locked_player_position
+	_jump_impulse = get_jump_impulse(x_locked_player_position)
 	charge()
 
 func charge() -> void:
-	_jump_impulse = get_jump_impulse()
 	rotate_on_y(get_direction_to_player(player))
+	# set_collisions_with_enemies(false)
 	skin.jump()
 
 ## Connected to [skin.jump_charge_complete]; called once skin jump windup animation has finished.
 ## Triggers actual jump physics
 func on_skin_jump_charge_complete() -> void:
-	var temp_jump_impulse: Vector3 = get_jump_impulse()
+	var temp_jump_impulse: Vector3 = get_jump_impulse(get_x_locked_player_position())
 	if temp_jump_impulse != Vector3.ZERO:
 		_jump_impulse = temp_jump_impulse
 	apply_jump()
@@ -164,19 +174,20 @@ func apply_jump() -> void:
 		velocity = _jump_impulse
 		current_state = State.AIR
 		skin.air()
+	else:
+		current_state = State.CHASE
 
 ## Connected to [skin.land_complete]; called once skin land animation has finished
 ## Tranisitions to post jumping behavior
 func on_skin_land_complete() -> void:
-	print("Skin land complete")
 	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
 	skin.run()
 
 ## Based on "Angle θ required to hit coordinate (x, y)" section of https://en.wikipedia.org/wiki/Projectile_motion
-func get_jump_impulse() -> Vector3:
+func get_jump_impulse(_player_position: Vector3) -> Vector3:
 	var initial_velocity: float = jump_power
 	# Store the player's position and distances. The z distance is used as x here
-	var target_position: Vector3 = player.global_transform.origin
+	var target_position: Vector3 = _player_position
 	var x_range: float = player.global_transform.origin.z - global_transform.origin.z
 	var y_range: float = player.global_transform.origin.y - global_transform.origin.y
 
@@ -204,7 +215,7 @@ func get_jump_impulse() -> Vector3:
 	var jump_impulse_direction: Vector3 = Vector3(0, abs(_direction.x), abs(_direction.z) * sign(_direction_to_player.z))
 	var impulse = jump_impulse_direction * initial_velocity
 
-	if show_trajectory_debug: debug_draw_jump_trajectory(impulse, target_position)
+	if show_debug: debug_draw_jump_trajectory(impulse, target_position)
 	return impulse
 
 func debug_draw_jump_trajectory(_impulse: Vector3, _target_positon: Vector3) -> void:
@@ -278,3 +289,8 @@ func print_state() -> void:
 		State.LAND: _text = "LAND"
 		State.HIT: _text = "HIT"
 	print(_text)
+
+func get_x_locked_player_position() -> Vector3:
+	var x_locked_player_position: Vector3 = player.global_transform.origin
+	x_locked_player_position.x = 0
+	return x_locked_player_position

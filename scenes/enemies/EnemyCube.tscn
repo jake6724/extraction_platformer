@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://btp315oeixtsw"]
+[gd_scene load_steps=6 format=3 uid="uid://btp315oeixtsw"]
 
 [ext_resource type="Script" uid="uid://chbxbnnn5op54" path="res://scripts/enemies/enemy_cube.gd" id="1_btn8l"]
 [ext_resource type="PackedScene" uid="uid://c2igbvqovh0sa" path="res://scenes/enemies/EnemySkinCube.tscn" id="2_ux554"]
@@ -9,15 +9,22 @@ size = Vector3(2.5, 2.5, 2.5)
 [sub_resource type="SphereShape3D" id="SphereShape3D_ux554"]
 radius = 2.0
 
-[node name="EnemyCube" type="CharacterBody3D" node_paths=PackedStringArray("raycast_floor", "raycast_wall", "area_attack", "skin", "timer_hitstun")]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ux554"]
+size = Vector3(3.310608, 3.2698975, 14.815247)
+
+[node name="EnemyCube" type="CharacterBody3D" node_paths=PackedStringArray("raycast_floor", "raycast_wall", "raycast_wall_dash", "area_detect_player", "timer_dash_reset", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_btn8l")
 raycast_floor = NodePath("Raycasts/RaycastFloor")
 raycast_wall = NodePath("Raycasts/RayCastWall")
+raycast_wall_dash = NodePath("Raycasts/RayCastWallDash")
+area_detect_player = NodePath("AreaDetectPlayer")
+timer_dash_reset = NodePath("Timers/TimerDashReset")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemySkinCube")
 timer_hitstun = NodePath("Timers/TimerHitstun")
+body_collider = NodePath("BodyCollider")
 
 [node name="BodyCollider" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_btn8l")
@@ -35,6 +42,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2182777, 0)
 target_position = Vector3(0, 0, 1.5)
 collision_mask = 4
 
+[node name="RayCastWallDash" type="RayCast3D" parent="Raycasts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2182777, -1.1405667)
+target_position = Vector3(0, 0, 1.5)
+collision_mask = 4
+
 [node name="EnemySkinCube" parent="." instance=ExtResource("2_ux554")]
 
 [node name="Timers" type="Node" parent="."]
@@ -43,7 +55,19 @@ collision_mask = 4
 process_callback = 0
 one_shot = true
 
+[node name="TimerDashReset" type="Timer" parent="Timers"]
+process_callback = 0
+one_shot = true
+
 [node name="AreaAttack" type="Area3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AreaAttack"]
 shape = SubResource("SphereShape3D_ux554")
+
+[node name="AreaDetectPlayer" type="Area3D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AreaDetectPlayer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0049743652, 0.24249268, 6.9076233)
+shape = SubResource("BoxShape3D_ux554")
+debug_color = Color(0.4323789, 0.6012486, 0, 0.41960785)
