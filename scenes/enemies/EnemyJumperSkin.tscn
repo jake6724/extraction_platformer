@@ -12,6 +12,7 @@ shader_parameter/flash = 0.0
 shader_parameter/custom_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0mata"]
+resource_local_to_scene = true
 resource_name = "Mat_SalaryHand"
 next_pass = SubResource("ShaderMaterial_l3pxu")
 vertex_color_use_as_albedo = true
@@ -21,6 +22,7 @@ emission_enabled = true
 emission_texture = ExtResource("2_e01rx")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1cdin"]
+resource_local_to_scene = true
 resource_name = "Mat_Outline"
 vertex_color_use_as_albedo = true
 albedo_color = Color(0, 0, 0, 1)
@@ -29,6 +31,7 @@ emission_enabled = true
 emission = Color(0.054901976, 0.07058825, 0.19215693, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_bdq2b"]
+resource_local_to_scene = true
 resource_name = "Enemy_SalaryHand_Cube"
 _surfaces = [{
 "aabb": AABB(-0.322094, 0.012226554, -0.09420285, 0.54109913, 0.9234847, 0.273832),

@@ -16,6 +16,8 @@ var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 @export var timer_chase_quit: Timer
 @export_group("Jump")
 @export var jump_power: float = 25.0
+@export var jump_power_modifier_min: float = -4.0
+@export var jump_power_modifier_max: float = 4.0
 @export var timer_jump_in_range: Timer
 @export var jump_in_range_duration_requirement: float = 0.01
 @export var max_jump_trigger_distance: float = 7.0
@@ -23,12 +25,15 @@ var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 ## Tracks the most recent jump impulse; used in apply_jump()
 var _jump_impulse: Vector3
 var _player_position_at_jump_trigger: Vector3
+var is_on_terrain_enable_delay: float = 0.2
 @export_group("Components")
 @export var area_detect_player: Area3D
 @export var collider_detect_player: CollisionShape3D
 @export var area_chase_quit: Area3D
-@export var raycast_floor: RayCast3D
+@export var raycast_floor_ahead: RayCast3D
 @export var raycast_wall: RayCast3D
+@export var raycast_floor: RayCast3D
+@export var shapecast_jump: ShapeCast3D
 @export_group("Debug")
 @export var trajectory_debug_parent: Node
 @export var show_debug: bool = true
@@ -54,12 +59,16 @@ func _ready():
 
 	axis_lock_linear_x = true
 
+	jump_power += randf_range(jump_power_modifier_min, jump_power_modifier_max)
+
 	# timer_jump_in_range.timeout.connect(start_jump_charge)
 
 	skin.land_complete.connect(on_skin_land_complete)
 	skin.jump_charge_complete.connect(on_skin_jump_charge_complete)
 
 	collider_detect_player.shape.radius = min_jump_trigger_distance
+
+	raycast_floor.enabled = false
 
 	outer_range_left.position.z -= max_jump_trigger_distance
 	outer_range_right.position.z += max_jump_trigger_distance
@@ -99,7 +108,7 @@ func patrol(delta: float) -> void:
 		
 ## The goal of chase is to get into a position where a jump can be triggered.
 func chase(delta: float) -> void:
-	enable_enemy_collisions_1_frame()
+	# enable_enemy_collisions_1_frame()
 	var z_direction_to_player: float = player.global_transform.origin.z - global_transform.origin.z
 	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
 
@@ -128,9 +137,11 @@ func air(delta: float) -> void:
 	velocity.x = 0
 	move_and_slide()
 
-	if is_on_floor():
+	if is_on_terrain():
+		print("Terrain hit!")
 		current_state = State.IDLE
 		# set_collisions_with_enemies(true)
+		raycast_floor.enabled = false
 		skin.land()
 		clear_debug_trajectory_points()
 
@@ -174,6 +185,8 @@ func apply_jump() -> void:
 		velocity = _jump_impulse
 		current_state = State.AIR
 		skin.air()
+		await get_tree().create_timer(is_on_terrain_enable_delay).timeout
+		raycast_floor.enabled = true
 	else:
 		current_state = State.CHASE
 
@@ -182,6 +195,7 @@ func apply_jump() -> void:
 func on_skin_land_complete() -> void:
 	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
 	skin.run()
+	enable_enemy_collisions_1_frame()
 
 ## Based on "Angle θ required to hit coordinate (x, y)" section of https://en.wikipedia.org/wiki/Projectile_motion
 func get_jump_impulse(_player_position: Vector3) -> Vector3:
@@ -214,7 +228,7 @@ func get_jump_impulse(_player_position: Vector3) -> Vector3:
 	# Re-order the direction vector so that x,y,z are all in their correct positions. Orient the z value with direction to player
 	var jump_impulse_direction: Vector3 = Vector3(0, abs(_direction.x), abs(_direction.z) * sign(_direction_to_player.z))
 	var impulse = jump_impulse_direction * initial_velocity
-
+	is_jump_trajectory_clear(impulse)
 	if show_debug: debug_draw_jump_trajectory(impulse, target_position)
 	return impulse
 
@@ -254,6 +268,22 @@ func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Col
 	new_mesh.material_override = material
 	return new_mesh
 
+func is_jump_trajectory_clear(_impulse: Vector3) -> void: 
+	var curr_position: Vector3 = global_transform.origin	
+	# Place a debug mesh at the target position
+	var target_mesh = create_debug_mesh(.3, .6, Color.PURPLE)
+	trajectory_debug_parent.add_child(target_mesh)
+	var local_timestep: float = .05
+
+	curr_position += (_impulse * (local_timestep * 5))
+
+	for i in range(256):
+		var new_mesh = create_debug_mesh(.3, .6, Color.PURPLE)
+		trajectory_debug_parent.add_child(new_mesh)
+		curr_position += (_impulse * local_timestep)
+		new_mesh.global_transform.origin = curr_position
+		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
+
 func on_area_chase_quit_body_exited(_player: Player) -> void:
 	pass
 	# if not timer_chase_quit.time_left > 0:
@@ -268,14 +298,13 @@ func on_timer_chase_quit_timeout() -> void:
 func get_direction_to_player(_player: Player) -> Vector3:
 	var z_direction_to_player: float = _player.global_transform.origin.z - global_transform.origin.z
 	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
-	# print(_direction_to_player)
 	return _direction_to_player
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass
 
 func is_floor_ahead() -> bool:
-	return raycast_floor.is_colliding()
+	return raycast_floor_ahead.is_colliding()
 
 func is_wall_ahead() -> bool:
 	return raycast_wall.is_colliding()
@@ -294,3 +323,6 @@ func get_x_locked_player_position() -> Vector3:
 	var x_locked_player_position: Vector3 = player.global_transform.origin
 	x_locked_player_position.x = 0
 	return x_locked_player_position
+
+func is_on_terrain() -> bool:
+	return true if raycast_floor.is_colliding() else false
