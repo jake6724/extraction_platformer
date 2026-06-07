@@ -87,7 +87,6 @@ func _physics_process(delta):
 		State.PATROL: patrol(delta)
 		State.CHASE: chase(delta)
 		State.AIR: air(delta)
-		# State.LAND: land(delta)
 		State.HIT: pass
 
 func idle(delta: float) -> void:
@@ -118,6 +117,11 @@ func chase(delta: float) -> void:
 	x_locked_position.x = 0
 	var distance_to_player: float = x_locked_position.distance_to(x_locked_player_position)
 
+	# Take a jump if no where left to run
+	if not is_floor_ahead() or is_wall_ahead():
+		rotate_on_y(-_direction_to_player)
+		start_jump_charge()
+
 	# Too close to player, move away
 	if distance_to_player < min_jump_trigger_distance:
 		rotate_on_y(-_direction_to_player)
@@ -144,11 +148,6 @@ func air(delta: float) -> void:
 		raycast_floor.enabled = false
 		skin.land()
 		clear_debug_trajectory_points()
-
-# func land(delta: float) -> void:
-# 	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration*10)
-# 	velocity.x = 0
-# 	move_and_collide(velocity * delta)
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
 	if current_state == State.PATROL:
@@ -269,20 +268,31 @@ func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Col
 	return new_mesh
 
 func is_jump_trajectory_clear(_impulse: Vector3) -> void: 
-	var curr_position: Vector3 = global_transform.origin	
-	# Place a debug mesh at the target position
-	var target_mesh = create_debug_mesh(.3, .6, Color.PURPLE)
-	trajectory_debug_parent.add_child(target_mesh)
-	var local_timestep: float = .05
+	pass
+	# var curr_position: Vector3 = global_transform.origin
+	# var local_timestep: float = 0.016
+	# var local_iterations: int = 128
+	# var count: int = 0
+	# var count_target: int = 2
 
-	curr_position += (_impulse * (local_timestep * 5))
+	# for i in range(local_iterations):
+	# 	curr_position += (_impulse * local_timestep)
+	# 	if count == count_target:
+	# 		count = 0
+	# 		var new_mesh = create_debug_mesh(.3, .6, Color.PURPLE)
+	# 		trajectory_debug_parent.add_child(new_mesh)
+	# 		new_mesh.global_transform.origin = curr_position
 
-	for i in range(256):
-		var new_mesh = create_debug_mesh(.3, .6, Color.PURPLE)
-		trajectory_debug_parent.add_child(new_mesh)
-		curr_position += (_impulse * local_timestep)
-		new_mesh.global_transform.origin = curr_position
-		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
+	# 		shapecast_jump.target_position = to_local(curr_position)
+	# 		shapecast_jump.force_shapecast_update()
+	# 		if shapecast_jump.is_colliding():
+	# 			print("Shapecast collision: ", shapecast_jump.get_collider(0))
+
+
+	# 	else:
+	# 		count += 1
+		
+	# 	_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
 
 func on_area_chase_quit_body_exited(_player: Player) -> void:
 	pass
