@@ -39,7 +39,7 @@ albedo_color = Color(0.8627104, 0, 0.054378644, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nj2nm"]
 albedo_color = Color(0.6485813, 0.39008486, 3.85046e-07, 1)
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "area_attack", "skin", "timer_hitstun", "body_collider")]
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
 collision_mask = 4
 axis_lock_linear_x = true
@@ -47,7 +47,8 @@ axis_lock_angular_x = true
 axis_lock_angular_y = true
 axis_lock_angular_z = true
 script = ExtResource("1_h3c4m")
-chase_speed = 6.0
+chase_speed = 15.0
+escape_speed = 15.0
 timer_chase_quit = NodePath("Timers/TimerChaseQuit")
 timer_jump_in_range = NodePath("Timers/TimerJumpInRange")
 max_jump_trigger_distance = 13.0
@@ -58,6 +59,7 @@ area_chase_quit = NodePath("AreaChaseQuit")
 raycast_floor_ahead = NodePath("Raycasts/RaycastFloorAhead")
 raycast_wall = NodePath("Raycasts/RayCastWall")
 raycast_floor = NodePath("Raycasts/RaycastFloor")
+raycast_sight = NodePath("Raycasts/RayCastSight")
 shapecast_jump = NodePath("Raycasts/ShapeCastJump")
 trajectory_debug_parent = NodePath("TrajectoryDebugParent")
 outer_range_left = NodePath("OutLeft")
@@ -69,6 +71,10 @@ skin = NodePath("EnemyJumperSkin")
 timer_hitstun = NodePath("Timers/TimerHitstun")
 body_collider = NodePath("BodyCollider")
 metadata/_custom_type_script = "uid://c0vmpp55n5606"
+
+[node name="EnemyJumperSkin" parent="." instance=ExtResource("2_6hreo")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.3550843, 0)
+visible = false
 
 [node name="AreaDetectPlayer" type="Area3D" parent="."]
 collision_layer = 0
@@ -115,9 +121,6 @@ shape = SubResource("SphereShape3D_nj2nm")
 debug_color = Color(0.85578424, 0.36757025, 0, 0.41960785)
 debug_fill = false
 
-[node name="EnemyJumperSkin" parent="." instance=ExtResource("2_6hreo")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.3550843, 0)
-
 [node name="Timers" type="Node" parent="."]
 
 [node name="TimerHitstun" type="Timer" parent="Timers"]
@@ -153,9 +156,14 @@ target_position = Vector3(0, -0.1, 0)
 collision_mask = 4
 
 [node name="ShapeCastJump" type="ShapeCast3D" parent="Raycasts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("SphereShape3D_usotj")
-target_position = Vector3(0, 0, 0)
+target_position = Vector3(0, 1, 0)
 collision_mask = 5
+
+[node name="RayCastSight" type="RayCast3D" parent="Raycasts"]
+target_position = Vector3(0, 0, 0)
+collision_mask = 4
 
 [node name="OutLeft" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_6hreo")

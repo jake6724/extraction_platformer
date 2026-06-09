@@ -110,3 +110,18 @@ func enable_enemy_collisions_1_frame() -> void:
 	set_collision_mask_value(2, true)
 	await get_tree().process_frame
 	set_collision_mask_value(2, false)
+
+# func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Color.RED) -> MeshInstance3D:
+# 	# Initialize mesh instance, create and configure sphere mesh
+# 	var new_mesh: MeshInstance3D = MeshInstance3D.new()
+# 	var new_sphere_mesh: SphereMesh = SphereMesh.new()
+# 	new_sphere_mesh.radius = _radius
+# 	new_sphere_mesh.height = _height
+# 	new_sphere_mesh.radial_segments = 8
+# 	new_sphere_mesh.rings = 4
+# 	# Assign sphere mesh to mesh instance, create and add material
+# 	new_mesh.mesh = new_sphere_mesh
+# 	var material: StandardMaterial3D = StandardMaterial3D.new()
+# 	material.albedo_color = _color
+# 	new_mesh.material_override = material
+# 	return new_mesh

@@ -1,8 +1,9 @@
-[gd_scene load_steps=15 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=16 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_1fpmp"]
+[ext_resource type="Script" uid="uid://n5anyt4xl3j8" path="res://scripts/smart_platform.gd" id="3_7i0bt"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
 [ext_resource type="PackedScene" uid="uid://btp315oeixtsw" path="res://scenes/enemies/EnemyCube.tscn" id="5_6e24c"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
@@ -78,24 +79,18 @@ collision_mask = 0
 size = Vector3(1, 1, 13.32251)
 material = ExtResource("1_dojpo")
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.8788433, 16.501514)
-use_collision = true
-collision_layer = 4
-collision_mask = 0
-size = Vector3(1, 1, 13.32251)
-material = ExtResource("1_dojpo")
-
 [node name="CSGBox3D6" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20.426725, 50.84035)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1004915, -0.7758789)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(1, 1, 10.593311)
 material = ExtResource("1_dojpo")
+script = ExtResource("3_7i0bt")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.0016405054, 1.7825813, -2.2469342)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.019430228, 1.938199, 3.5445423)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -129,7 +124,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -109.3363)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -112.93714)
 
 [node name="EnemyJumper4" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -21.275307)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8847499, -14.130608)
 
 [node name="EnemyJumper5" parent="Enemies" instance=ExtResource("6_7i0bt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -85.53402)
