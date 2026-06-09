@@ -74,7 +74,6 @@ metadata/_custom_type_script = "uid://c0vmpp55n5606"
 
 [node name="EnemyJumperSkin" parent="." instance=ExtResource("2_6hreo")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.3550843, 0)
-visible = false
 
 [node name="AreaDetectPlayer" type="Area3D" parent="."]
 collision_layer = 0

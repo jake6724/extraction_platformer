@@ -49,7 +49,7 @@ var is_on_terrain_enable_delay: float = 0.2
 @export var trajectory_debug_time_step: float = .0166
 
 enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT}
-enum JumpFailure {NONE, UNDER_ROOF, FALL_CUTOFF, CLIMB}
+enum JumpFailure {NONE, UNDER_ROOF, FALL_CUTOFF, CLIMB, ABOVE_PLATFORM}
 var current_state: State = State.PATROL
 var player: Player
 
@@ -159,6 +159,7 @@ func on_skin_land_complete() -> void:
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
 	if current_state == State.PATROL:
+		print("Spotted player!")
 		player = _player
 		current_state = State.CHASE
 		skin.run()
@@ -235,13 +236,16 @@ func get_jump_impulse(_player_position: Vector3, low_jump: bool=false) -> Vector
 	var impulse = jump_impulse_direction * initial_velocity
 	if not low_jump:
 		var jump_check_result: JumpFailure = is_jump_trajectory_clear(impulse)
-		print("jump_check_result: ", jump_check_result)
+		print_jump_failure(jump_check_result)
 
 		match jump_check_result:
 			JumpFailure.UNDER_ROOF: return get_jump_impulse(_player_position, true)
 			JumpFailure.FALL_CUTOFF: return get_jump_impulse(_player_position, true)
+			JumpFailure.ABOVE_PLATFORM: 
+				print("Above")
+				current_state = State.PATROL
+				return Vector3.ZERO
 			_: pass
-
 
 	if show_debug: debug_draw_jump_trajectory(impulse, target_position)
 	#return Vector3.ZERO
@@ -270,6 +274,7 @@ func is_jump_trajectory_clear(_impulse: Vector3) -> JumpFailure:
 	var local_iterations: int = 128
 	var count: int = 0
 	var count_target: int = 0
+
 	var initial_iterations: int = 2
 	for i in range(initial_iterations):
 		curr_position += (_impulse * local_timestep)
@@ -284,23 +289,33 @@ func is_jump_trajectory_clear(_impulse: Vector3) -> JumpFailure:
 			shapecast_jump.target_position = to_local(curr_position) - shapecast_jump.transform.origin
 			shapecast_jump.force_shapecast_update()
 			if shapecast_jump.is_colliding():
+				print("Shapecast collision: ", shapecast_jump.get_collider(0))
+
+				# Trajectory hits player without anything in the way, this is a valid jump and stop early
+				if shapecast_jump.get_collider(0) is Player:
+					return JumpFailure.NONE
+
+				raycast_sight.target_position = to_local(get_x_locked_player_position())
+				raycast_sight.force_raycast_update()
+
+				# Arc Up intersected
 				if _impulse.y > 0:
 					# Check if under a platform and should perform low jump instead
-					raycast_sight.target_position = to_local(get_x_locked_player_position())
-					raycast_sight.force_raycast_update()
 					if not raycast_sight.is_colliding():
 						return JumpFailure.UNDER_ROOF
-					print("[COLLISION HIT ON UP ARC]")
-					return JumpFailure.NONE
-				elif _impulse.y < 0:
-					print("[COLLISION HIT ON DOWN ARC]")
+					else:
+						return JumpFailure.NONE
+
+				# Arc Down intersected
+				elif _impulse.y < 0:					
 					if not raycast_sight.is_colliding():
 						return JumpFailure.FALL_CUTOFF
-					return JumpFailure.NONE
+					else:
+						return JumpFailure.ABOVE_PLATFORM
 		else:
 			count += 1
 		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
-		# await get_tree().create_timer(1).timeout
+
 	return JumpFailure.NONE
 
 func on_area_chase_quit_body_exited(_player: Player) -> void:
@@ -348,3 +363,14 @@ func add_func(a: float, b: float) -> float:
 
 func sub_func(a: float, b: float) -> float:
 	return a - b
+
+func print_jump_failure(jf: JumpFailure) -> void:
+	var _text: String
+	match jf:
+		JumpFailure.NONE: _text="None"
+		JumpFailure.UNDER_ROOF: _text="Under Roof"
+		JumpFailure.FALL_CUTOFF: _text="Fall Cutoff"
+		JumpFailure.CLIMB: _text="Climb"
+		JumpFailure.ABOVE_PLATFORM: _text="Above Platform"
+		_: push_error("Jump Failure: ", jf, " not defined")
+	print("JumpFailure: ", _text)
