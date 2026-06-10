@@ -39,7 +39,7 @@ albedo_color = Color(0.8627104, 0, 0.054378644, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nj2nm"]
 albedo_color = Color(0.6485813, 0.39008486, 3.85046e-07, 1)
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "area_attack", "skin", "timer_hitstun", "body_collider")]
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "raycast_ceiling", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
 collision_mask = 4
 axis_lock_linear_x = true
@@ -60,8 +60,10 @@ raycast_floor_ahead = NodePath("Raycasts/RaycastFloorAhead")
 raycast_wall = NodePath("Raycasts/RayCastWall")
 raycast_floor = NodePath("Raycasts/RaycastFloor")
 raycast_sight = NodePath("Raycasts/RayCastSight")
+raycast_ceiling = NodePath("Raycasts/RayCastCeiling")
 shapecast_jump = NodePath("Raycasts/ShapeCastJump")
 trajectory_debug_parent = NodePath("TrajectoryDebugParent")
+show_debug = false
 outer_range_left = NodePath("OutLeft")
 outer_range_right = NodePath("OutRight")
 inner_range_left = NodePath("InLeft")
@@ -163,6 +165,10 @@ debug_shape_custom_color = Color(0.98105055, 2.9841065e-06, 0.54308605, 1)
 
 [node name="RayCastSight" type="RayCast3D" parent="Raycasts"]
 target_position = Vector3(0, 0, 0)
+collision_mask = 4
+
+[node name="RayCastCeiling" type="RayCast3D" parent="Raycasts"]
+target_position = Vector3(0, 5, 0)
 collision_mask = 4
 
 [node name="OutLeft" type="MeshInstance3D" parent="."]

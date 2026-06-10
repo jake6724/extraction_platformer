@@ -1,10 +1,9 @@
 class_name EnemyJumper extends Enemy
 
 """
-When patrolling, should they pass thru eachother?
+TODO:
+- If taking a low jump (because of roof or fall cutoff), only calculate that jump once
 """
-
-var j = randf_range(1,3)
 
 @export_group("General")
 # @export var acceleration: float = 40
@@ -14,12 +13,17 @@ var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 @export_group("Chase")
 @export var chase_speed: float = 5.0
 @export var escape_speed: float = 11.0
+@export var speed_modifier_min: float = -1.0
+@export var speed_modifier_max: float = 1.0
 @export var chase_quit_delay: float = 5.0
 @export var timer_chase_quit: Timer
 @export_group("Jump")
 @export var jump_power: float = 25.0
 @export var jump_power_modifier_min: float = -4.0
 @export var jump_power_modifier_max: float = 4.0
+@export var jump_windup_speed_scale_base: float = 1.5
+@export var jump_windup_speed_scale_modifier_min: float = -0.3
+@export var jump_windup_speed_scale_modifier_max: float = 0.3
 @export var timer_jump_in_range: Timer
 @export var jump_in_range_duration_requirement: float = 0.01
 @export var max_jump_trigger_distance: float = 7.0
@@ -27,6 +31,12 @@ var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 ## Tracks the most recent jump impulse; used in apply_jump()
 var _jump_impulse: Vector3
 var is_on_terrain_enable_delay: float = 0.2
+var _jump_windup_speed_scale: float
+var _jump_target_position: Vector3
+var is_targeting_player: bool 
+@export_group("Climb")
+var _climb_move_direction: Vector3
+var _roof_platform: SmartPlatform
 @export_group("Components")
 @export var area_detect_player: Area3D
 @export var collider_detect_player: CollisionShape3D
@@ -35,6 +45,7 @@ var is_on_terrain_enable_delay: float = 0.2
 @export var raycast_wall: RayCast3D
 @export var raycast_floor: RayCast3D
 @export var raycast_sight: RayCast3D
+@export var raycast_ceiling: RayCast3D
 @export var shapecast_jump: ShapeCast3D
 @export_group("Debug")
 @export var trajectory_debug_parent: Node
@@ -48,8 +59,8 @@ var is_on_terrain_enable_delay: float = 0.2
 ## Takes the place of delta in velocity calculations. Lower values give more precision
 @export var trajectory_debug_time_step: float = .0166
 
-enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT}
-enum JumpFailure {SUCCESS, UNDER_ROOF, FALL_CUTOFF, ABOVE_PLATFORM, CLIMB}
+enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT, CLIMB}
+enum JumpStatus {SUCCESS, UNDER_ROOF, FALL_CUTOFF, ABOVE_PLATFORM, CLIMB}
 var current_state: State = State.PATROL
 var player: Player
 
@@ -63,8 +74,10 @@ func _ready():
 	axis_lock_linear_x = true
 
 	jump_power += randf_range(jump_power_modifier_min, jump_power_modifier_max)
-
-	# timer_jump_in_range.timeout.connect(start_jump_charge)
+	chase_speed += randf_range(speed_modifier_min, speed_modifier_max)
+	escape_speed += randf_range(speed_modifier_min, speed_modifier_max)
+	_jump_windup_speed_scale = jump_windup_speed_scale_base + randf_range(jump_windup_speed_scale_modifier_min, jump_windup_speed_scale_modifier_max)
+	skin.jump_windup_speed_scale = _jump_windup_speed_scale
 
 	skin.land_complete.connect(on_skin_land_complete)
 	skin.jump_charge_complete.connect(on_skin_jump_charge_complete)
@@ -91,6 +104,7 @@ func _physics_process(delta):
 		State.CHASE: chase(delta)
 		State.CHARGE: charge(delta)
 		State.AIR: air(delta)
+		State.CLIMB: climb(delta)
 		State.HIT: pass
 
 func idle(delta: float) -> void:
@@ -108,6 +122,10 @@ func charge(delta: float) -> void:
 	move_and_slide()
 
 func patrol(delta: float) -> void:
+	if not is_on_floor():
+		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
+		return 
+
 	# Patrol in a direction until a wall found or end of platform reached
 	if is_floor_ahead() and not is_wall_ahead():
 		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
@@ -130,6 +148,7 @@ func chase(delta: float) -> void:
 	# Take a jump if no where left to run
 	if not is_floor_ahead() or is_wall_ahead():
 		rotate_on_y(-_direction_to_player)
+		_jump_target_position = player.global_transform.origin
 		start_jump_charge()
 
 	# Too close to player, move away
@@ -144,7 +163,66 @@ func chase(delta: float) -> void:
 		timer_jump_in_range.stop()
 	# In jump range
 	else:
+		_jump_target_position = player.global_transform.origin
+		is_targeting_player = true
 		start_jump_charge()
+
+func start_climb() -> void:
+	current_state = State.CLIMB
+	_climb_move_direction = Vector3(0,0,[-1,1].pick_random())
+	_roof_platform = raycast_sight.get_collider()
+	print(_climb_move_direction)
+	print(_roof_platform.left_edge_point)
+	print(_roof_platform.right_edge_point)
+
+func climb(delta: float) -> void:
+	# Get out from under any platforms
+	if raycast_ceiling.is_colliding():
+		# print("Under the roof")
+		rotate_on_y(_climb_move_direction)
+		move_and_fall(delta, chase_speed, _climb_move_direction, acceleration)
+		return
+	
+	var distance_to_left_edge: float = abs(_roof_platform.left_edge_point.z - global_transform.origin.z)
+	var distance_to_right_edge: float = abs(_roof_platform.right_edge_point.z - global_transform.origin.z)
+	# print("_climb_move_direction: ", _climb_move_direction)
+	# print("distance_to_left_edge: ", distance_to_left_edge)
+	# print("distance_to_right_edge: ", distance_to_right_edge)
+	if _climb_move_direction.z == -1: # Moving right
+		if distance_to_right_edge > 4 and distance_to_right_edge < 6:
+			# Try to jump to player before jumping to ledge
+			_jump_target_position = player.global_transform.origin
+			is_targeting_player = true
+			_jump_impulse = get_valid_jump()
+			if _jump_impulse != Vector3.LEFT and _jump_impulse != Vector3.ZERO:
+				current_state = State.CHARGE
+				jump_windup()
+				return
+
+			# Couldn't jump to player, jump to ledge
+			_jump_target_position = _roof_platform.right_edge_point
+			is_targeting_player = false
+			start_jump_charge()
+			return
+
+	elif _climb_move_direction.z == 1: # Moving left:
+		if distance_to_left_edge > 4 and distance_to_left_edge < 6:
+			# Try to jump to player before jumping to ledge
+			_jump_target_position = player.global_transform.origin
+			is_targeting_player = true
+			_jump_impulse = get_valid_jump()
+			if _jump_impulse != Vector3.LEFT and _jump_impulse != Vector3.ZERO:
+				current_state = State.CHARGE
+				jump_windup()
+				return
+
+			# Couldn't jump to player, jump to ledge
+			_jump_target_position = _roof_platform.right_edge_point
+			is_targeting_player = false
+			start_jump_charge()
+			return
+
+	move_and_fall(delta, chase_speed, _climb_move_direction, acceleration)
 
 func air(delta: float) -> void:
 	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
@@ -152,9 +230,7 @@ func air(delta: float) -> void:
 	move_and_slide()
 
 	if is_on_terrain():
-		#print("Terrain hit!")
 		current_state = State.IDLE
-		# set_collisions_with_enemies(true)
 		raycast_floor.enabled = false
 		skin.land()
 		clear_debug_trajectory_points()
@@ -180,24 +256,11 @@ func on_area_detect_player_body_exited(_player: Player) -> void:
 
 func start_jump_charge() -> void:
 	current_state = State.CHARGE
-	var _x_locked_player_position: Vector3 = get_x_locked_player_position()
-	var _squared_discriminant: float = compute_jump_impulse_discriminant(_x_locked_player_position)
-	_jump_impulse = get_jump_impulse(_x_locked_player_position, _squared_discriminant)
-
-	var jump_check_result: JumpFailure = is_jump_trajectory_clear(_jump_impulse)
-	print_jump_failure(jump_check_result)
-
-	match jump_check_result:
-		JumpFailure.UNDER_ROOF: _jump_impulse = get_jump_impulse(_x_locked_player_position, _squared_discriminant, true)
-		JumpFailure.FALL_CUTOFF: _jump_impulse = get_jump_impulse(_x_locked_player_position, _squared_discriminant, true)
-		JumpFailure.ABOVE_PLATFORM: 
-			current_state = State.PATROL
-			_current_patrol_direction = get_direction_to_player(player)
-			rotate_on_y(_current_patrol_direction)
-			clear_debug_trajectory_points()
-			return
-
-	jump_windup()
+	_jump_impulse = get_valid_jump()
+	if _jump_impulse == Vector3.LEFT: # Enemy is above platform and will transition to patrol
+		return
+	if _jump_impulse != Vector3.ZERO:
+		jump_windup()
 
 func jump_windup() -> void:
 	rotate_on_y(get_direction_to_player(player))
@@ -206,16 +269,46 @@ func jump_windup() -> void:
 ## Connected to [skin.jump_charge_complete]; called once skin jump windup animation has finished.
 ## Triggers actual jump physics
 func on_skin_jump_charge_complete() -> void:
-	# var _x_locked_player_position: Vector3 = get_x_locked_player_position()
-	# var temp_jump_impulse: Vector3 = get_jump_impulse(_x_locked_player_position, compute_jump_impulse_discriminant(_x_locked_player_position))
-	# if temp_jump_impulse != Vector3.ZERO:
-	# 	_jump_impulse = temp_jump_impulse
+	var temp_jump_impulse: Vector3 = get_valid_jump()
+	if temp_jump_impulse == Vector3.LEFT:
+		return 
+	elif temp_jump_impulse != Vector3.ZERO:
+		_jump_impulse = temp_jump_impulse
 	apply_jump()
 
-func compute_jump_impulse_discriminant(_player_position: Vector3) -> float:
+func get_x_locked_position(_position: Vector3) -> Vector3:
+	var x_locked_position: Vector3 = _position
+	x_locked_position.x = 0
+	return x_locked_position
+
+func get_valid_jump() -> Vector3:
+	var _x_locked_target_position: Vector3 = get_x_locked_position(_jump_target_position)
+	var _squared_discriminant: float = compute_jump_impulse_discriminant(_x_locked_target_position)
+	var _res_jump_impulse: Vector3 = get_jump_impulse(_x_locked_target_position, _squared_discriminant)
+
+	var jump_check_result: JumpStatus = get_jump_trajectory_status(_res_jump_impulse)
+	print_jump_failure(jump_check_result)
+
+	match jump_check_result:
+		JumpStatus.UNDER_ROOF: _res_jump_impulse = get_jump_impulse(_x_locked_target_position, _squared_discriminant, true)
+		JumpStatus.FALL_CUTOFF: _res_jump_impulse = get_jump_impulse(_x_locked_target_position, _squared_discriminant, true)
+		JumpStatus.CLIMB: 
+			start_climb()
+			return Vector3.LEFT
+		JumpStatus.ABOVE_PLATFORM: 
+			current_state = State.PATROL
+			skin.run()
+			_current_patrol_direction = get_direction_to_player(player)
+			rotate_on_y(_current_patrol_direction)
+			clear_debug_trajectory_points()
+			return Vector3.LEFT
+
+	return _res_jump_impulse
+
+func compute_jump_impulse_discriminant(_x_locked_target_position: Vector3) -> float:
 	var initial_velocity: float = jump_power
-	var x_range: float = _player_position.z - global_transform.origin.z
-	var y_range: float = _player_position.y - global_transform.origin.y
+	var x_range: float = _x_locked_target_position.z - global_transform.origin.z
+	var y_range: float = _x_locked_target_position.y - global_transform.origin.y
 
 	# Compute the products in the discriminant
 	var g_x_squared: float = (abs(gravity_default)) * (pow(x_range, 2))
@@ -268,13 +361,13 @@ func debug_draw_jump_trajectory(_impulse: Vector3, _player_position: Vector3) ->
 		DebugTools.create_debug_sphere(self, curr_position, .15, .3, Color.RED)
 		_impulse.y = move_toward(_impulse.y, gravity_default, trajectory_debug_time_step * gravity_acceleration)
 
-func is_jump_trajectory_clear(_impulse: Vector3) -> JumpFailure: 
+func get_jump_trajectory_status(_impulse: Vector3) -> JumpStatus: 
 	var curr_position: Vector3 = global_transform.origin
 	var prev_position: Vector3
 	var local_timestep: float = 0.016
 	var local_iterations: int = 128
 	var count: int = 0
-	var count_target: int = 2
+	var count_target: int = 1
 
 	var initial_iterations: int = 2
 	for i in range(initial_iterations):
@@ -287,7 +380,7 @@ func is_jump_trajectory_clear(_impulse: Vector3) -> JumpFailure:
 		curr_position += (_impulse * local_timestep)
 		if count == count_target:
 			count = 0
-			DebugTools.create_debug_sphere(self, curr_position, .2, .4, Color.PURPLE)
+			if show_debug: DebugTools.create_debug_sphere(self, curr_position, .2, .4, Color.PURPLE)
 			# Shapecast from the previous trajectory position  to the next. This will sweep along the arc
 			shapecast_jump.global_transform.origin = prev_position
 			shapecast_jump.target_position = to_local(curr_position) - shapecast_jump.transform.origin
@@ -299,8 +392,7 @@ func is_jump_trajectory_clear(_impulse: Vector3) -> JumpFailure:
 
 				# Trajectory hits player without anything in the way, this is a valid jump and stop early
 				if shapecast_jump.get_collider(0) is Player:
-					print("Jump check hit player")
-					return JumpFailure.SUCCESS
+					return JumpStatus.SUCCESS
 
 				raycast_sight.target_position = to_local(get_x_locked_player_position())
 				raycast_sight.force_raycast_update()
@@ -309,21 +401,22 @@ func is_jump_trajectory_clear(_impulse: Vector3) -> JumpFailure:
 				if _impulse.y > 0:
 					# Check if under a platform and should perform low jump instead
 					if not raycast_sight.is_colliding():
-						return JumpFailure.UNDER_ROOF
+						return JumpStatus.UNDER_ROOF
 					else:
-						return JumpFailure.SUCCESS
+						return JumpStatus.CLIMB
 
 				# Arc Down intersected
-				elif _impulse.y < 0:					
+				elif _impulse.y < 0 and is_targeting_player:					
 					if not raycast_sight.is_colliding():
-						return JumpFailure.FALL_CUTOFF
+						return JumpStatus.FALL_CUTOFF
 					else:
-						return JumpFailure.ABOVE_PLATFORM
+						if is_above_player():
+							return JumpStatus.ABOVE_PLATFORM
 		else:
 			count += 1
 		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
 
-	return JumpFailure.SUCCESS
+	return JumpStatus.SUCCESS
 
 ## Apply jump impulse, transition to air. Impulse used is `_jump_impulse`
 func apply_jump() -> void:
@@ -336,17 +429,6 @@ func apply_jump() -> void:
 		raycast_floor.enabled = true
 	else:
 		current_state = State.CHASE
-
-func on_area_chase_quit_body_exited(_player: Player) -> void:
-	pass
-	# if not timer_chase_quit.time_left > 0:
-	# 	timer_chase_quit.start(chase_quit_delay)
-
-func on_timer_chase_quit_timeout() -> void:
-	pass
-	# current_state = State.IDLE
-	# skin.idle()
-	# player = null
 
 func get_direction_to_player(_player: Player) -> Vector3:
 	var z_direction_to_player: float = _player.global_transform.origin.z - global_transform.origin.z
@@ -383,17 +465,34 @@ func add_func(a: float, b: float) -> float:
 func sub_func(a: float, b: float) -> float:
 	return a - b
 
-func print_jump_failure(jf: JumpFailure) -> void:
+func print_jump_failure(jf: JumpStatus) -> void:
 	var _text: String
 	match jf:
-		JumpFailure.SUCCESS: _text="Success"
-		JumpFailure.UNDER_ROOF: _text="Under Roof"
-		JumpFailure.FALL_CUTOFF: _text="Fall Cutoff"
-		JumpFailure.CLIMB: _text="Climb"
-		JumpFailure.ABOVE_PLATFORM: _text="Above Platform"
+		JumpStatus.SUCCESS: _text="Success"
+		JumpStatus.UNDER_ROOF: _text="Under Roof"
+		JumpStatus.FALL_CUTOFF: _text="Fall Cutoff"
+		JumpStatus.CLIMB: _text="Climb"
+		JumpStatus.ABOVE_PLATFORM: _text="Above Platform"
 		_: push_error("Jump Failure: ", jf, " not defined")
-	print("JumpFailure: ", _text)
+	print("JumpStatus: ", _text)
 
 func clear_debug_trajectory_points() -> void:
 	await get_tree().create_timer(1).timeout
 	DebugTools.clear_source_debugs(self)
+
+
+func on_area_chase_quit_body_exited(_player: Player) -> void:
+	pass
+
+func on_timer_chase_quit_timeout() -> void:
+	pass
+
+func is_under_ceiling() -> bool:
+	return true
+
+# func is_same_height_as_player() -> bool:
+# 	var height_diff
+# 	return abs(global_transform.origin.y - player.global_transform.origin.y) > 3
+
+func is_above_player() -> bool:
+	return global_transform.origin.y > (player.global_transform.origin.y + 3)

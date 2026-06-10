@@ -15,8 +15,8 @@ func calc_edge_points() -> void:
 	var z_offset: float = (size.z / 2) - z_margin
 
 	var center_top: Vector3 = global_transform.origin + Vector3(0,y_offset,0)
-	left_edge_point = center_top - Vector3(0,0,z_offset)
-	right_edge_point = center_top + Vector3(0,0,z_offset)
+	left_edge_point = center_top + Vector3(0,0,z_offset)
+	right_edge_point = center_top - Vector3(0,0,z_offset)
 
 	if show_debug:
 		DebugTools.create_debug_sphere(self, left_edge_point, .4, .8, Color.RED)

@@ -26,6 +26,7 @@ func create_debug_sphere(_source: Node3D, _spawn_global_position: Vector3, _radi
 		sources[_source] = [new_mesh]
 
 func clear_source_debugs(_source: Node3D) -> void:
-	for mesh: MeshInstance3D in sources[_source]:
-		mesh.queue_free()
-	sources[_source] = []
+	if sources.has(_source):
+		for mesh: MeshInstance3D in sources[_source]:
+			mesh.queue_free()
+		sources[_source] = []
