@@ -159,6 +159,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("SphereShape3D_usotj")
 target_position = Vector3(0, 1, 0)
 collision_mask = 5
+debug_shape_custom_color = Color(0.98105055, 2.9841065e-06, 0.54308605, 1)
 
 [node name="RayCastSight" type="RayCast3D" parent="Raycasts"]
 target_position = Vector3(0, 0, 0)
