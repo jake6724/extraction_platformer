@@ -173,8 +173,8 @@ var scents: Array[Scent] = []
 @export var state_movement_label: Label3D
 @export var state_action_label: Label3D
 
-enum State {IDLE, RUN, JUMP, FALL, WALL_SLIDE, SLIDE}
-var curr_state: State:
+enum PlayerState {IDLE, RUN, JUMP, FALL, WALL_SLIDE, SLIDE}
+var curr_state: PlayerState:
 	set(value):
 		curr_state = value
 		#print_state_change()
@@ -292,7 +292,7 @@ func update_character(delta: float, move_direction: Vector3) -> void:
 func turn_and_skid(move_direction: Vector3) -> void:
 	# Ensure that character look direction does not update when there is no input
 	if move_direction.length() > MOVE_DIRECTION_THRESHOLD:
-		if curr_state == State.RUN:
+		if curr_state == PlayerState.RUN:
 			# Skid if move direction is not the same as previous
 			if move_direction != _last_movement_direction:
 				var is_skid_active: bool = _skin.animation_tree.get("parameters/SkidOneShot/active") == true
@@ -309,7 +309,7 @@ func turn_and_skid(move_direction: Vector3) -> void:
 					_skin.cancel_skid()
 					flip_skin_horizontal(move_direction)
 
-		elif curr_state == State.IDLE:
+		elif curr_state == PlayerState.IDLE:
 			# Do not flip if currently skidding
 			var is_skid_active: bool = _skin.animation_tree.get("parameters/SkidOneShot/active") == true
 			if not is_skid_active:
@@ -325,14 +325,14 @@ func set_state() -> void:
 	var speed: float = abs(velocity.z)
 	# Wall slide
 	if _is_wall_sliding:
-		if curr_state != State.WALL_SLIDE:
+		if curr_state != PlayerState.WALL_SLIDE:
 			_skin.wall_slide()
-			curr_state = State.WALL_SLIDE
+			curr_state = PlayerState.WALL_SLIDE
 
 	# Slide
 	elif _is_sliding and speed > 1.0:
-		if curr_state != State.SLIDE:
-			curr_state = State.SLIDE
+		if curr_state != PlayerState.SLIDE:
+			curr_state = PlayerState.SLIDE
 			_skin.slide()
 
 	# In Air
@@ -340,12 +340,12 @@ func set_state() -> void:
 		_move_speed = move_speed_air
 
 		if velocity.y <= 0:
-			if curr_state != State.FALL:
-				curr_state = State.FALL
+			if curr_state != PlayerState.FALL:
+				curr_state = PlayerState.FALL
 				_skin.fall()
 		else:
-			if curr_state != State.JUMP:
-				curr_state = State.JUMP
+			if curr_state != PlayerState.JUMP:
+				curr_state = PlayerState.JUMP
 				_skin.jump()
 
 	# Grounded
@@ -353,7 +353,7 @@ func set_state() -> void:
 		# First frame being grounded again
 		# TODO: Maybe heirarchy state for this?
 		# TODO: Everytime you set the usual state var it could set a parent one that tracks grounded or not or whatever
-		if curr_state != State.RUN or curr_state != State.IDLE or curr_state != State.SLIDE:
+		if curr_state != PlayerState.RUN or curr_state != PlayerState.IDLE or curr_state != PlayerState.SLIDE:
 			_coyote_jump_available = true
 			timer_jump_coyote.stop()
 			_jump_count = 0
@@ -363,18 +363,18 @@ func set_state() -> void:
 			_skin.canel_attack_down()
 			disable_attack_hitbox(Attack.DOWN, true)
 
-		if curr_state == State.FALL or curr_state == State.JUMP:
+		if curr_state == PlayerState.FALL or curr_state == PlayerState.JUMP:
 			_skin.land()
 
 		var ground_speed: float = velocity.length()
 		if ground_speed > 1.0:
-			if curr_state != State.RUN:
-				curr_state = State.RUN
+			if curr_state != PlayerState.RUN:
+				curr_state = PlayerState.RUN
 				_skin.run()
 		else:
-			if curr_state != State.IDLE:
+			if curr_state != PlayerState.IDLE:
 				on_slide_released() # Stop slide if slowed down too much
-				curr_state = State.IDLE
+				curr_state = PlayerState.IDLE
 				_skin.idle()
 
 ## TODO: This shold prob be renamed, it turns everything not just the mesh ?
@@ -623,11 +623,11 @@ func reset_from_wall_slide() -> void:
 func print_state_change() -> void:
 	var text: String
 	match curr_state:
-		State.IDLE: text = "Idle"
-		State.RUN: text = "Run"
-		State.FALL: text = "Fall"
-		State.WALL_SLIDE: text = "Wall Slide"
-		State.JUMP: text = "Jump"
+		PlayerState.IDLE: text = "Idle"
+		PlayerState.RUN: text = "Run"
+		PlayerState.FALL: text = "Fall"
+		PlayerState.WALL_SLIDE: text = "Wall Slide"
+		PlayerState.JUMP: text = "Jump"
 	print("Changed current state to: ", text)
 
 func on_timer_spawn_scent_timeout() -> void:

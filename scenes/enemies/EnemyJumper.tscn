@@ -63,7 +63,6 @@ raycast_sight = NodePath("Raycasts/RayCastSight")
 raycast_ceiling = NodePath("Raycasts/RayCastCeiling")
 shapecast_jump = NodePath("Raycasts/ShapeCastJump")
 trajectory_debug_parent = NodePath("TrajectoryDebugParent")
-show_debug = false
 outer_range_left = NodePath("OutLeft")
 outer_range_right = NodePath("OutRight")
 inner_range_left = NodePath("InLeft")

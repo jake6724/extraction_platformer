@@ -59,9 +59,9 @@ var _roof_platform: SmartPlatform
 ## Takes the place of delta in velocity calculations. Lower values give more precision
 @export var trajectory_debug_time_step: float = .0166
 
-enum State {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT, CLIMB}
+enum EnemyState {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT, CLIMB}
 enum JumpStatus {SUCCESS, UNDER_ROOF, FALL_CUTOFF, ABOVE_PLATFORM, CLIMB}
-var current_state: State = State.PATROL
+var current_state: EnemyState = EnemyState.PATROL
 var player: Player
 
 func _ready():
@@ -99,13 +99,13 @@ func _ready():
 func _physics_process(delta):
 	#print_state()
 	match current_state:
-		State.IDLE: idle(delta)
-		State.PATROL: patrol(delta)
-		State.CHASE: chase(delta)
-		State.CHARGE: charge(delta)
-		State.AIR: air(delta)
-		State.CLIMB: climb(delta)
-		State.HIT: pass
+		EnemyState.IDLE: idle(delta)
+		EnemyState.PATROL: patrol(delta)
+		EnemyState.CHASE: chase(delta)
+		EnemyState.CHARGE: charge(delta)
+		EnemyState.AIR: air(delta)
+		EnemyState.CLIMB: climb(delta)
+		EnemyState.HIT: pass
 
 func idle(delta: float) -> void:
 	var velocity_y: float = velocity.y
@@ -168,7 +168,7 @@ func chase(delta: float) -> void:
 		start_jump_charge()
 
 func start_climb() -> void:
-	current_state = State.CLIMB
+	current_state = EnemyState.CLIMB
 	_climb_move_direction = Vector3(0,0,[-1,1].pick_random())
 	_roof_platform = raycast_sight.get_collider()
 	print(_climb_move_direction)
@@ -195,7 +195,7 @@ func climb(delta: float) -> void:
 			is_targeting_player = true
 			_jump_impulse = get_valid_jump()
 			if _jump_impulse != Vector3.LEFT and _jump_impulse != Vector3.ZERO:
-				current_state = State.CHARGE
+				current_state = EnemyState.CHARGE
 				jump_windup()
 				return
 
@@ -212,7 +212,7 @@ func climb(delta: float) -> void:
 			is_targeting_player = true
 			_jump_impulse = get_valid_jump()
 			if _jump_impulse != Vector3.LEFT and _jump_impulse != Vector3.ZERO:
-				current_state = State.CHARGE
+				current_state = EnemyState.CHARGE
 				jump_windup()
 				return
 
@@ -230,7 +230,7 @@ func air(delta: float) -> void:
 	move_and_slide()
 
 	if is_on_terrain():
-		current_state = State.IDLE
+		current_state = EnemyState.IDLE
 		raycast_floor.enabled = false
 		skin.land()
 		clear_debug_trajectory_points()
@@ -238,24 +238,24 @@ func air(delta: float) -> void:
 ## Connected to [skin.land_complete]; called once skin land animation has finished
 ## Tranisitions to post jumping behavior
 func on_skin_land_complete() -> void:
-	current_state = State.CHASE # TODO: Check for target and do idle, patrol, or chase 
+	current_state = EnemyState.CHASE # TODO: Check for target and do idle, patrol, or chase 
 	skin.run()
 	enable_enemy_collisions_1_frame()
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
-	if current_state == State.PATROL:
+	if current_state == EnemyState.PATROL:
 		player = _player
-		current_state = State.CHASE
+		current_state = EnemyState.CHASE
 		skin.run()
 	timer_chase_quit.stop() # Always cancel chase quitting process if they walk into attack range
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	# If patrolling, try to jump when player exits 
-	if current_state == State.PATROL:
+	if current_state == EnemyState.PATROL:
 		start_jump_charge()
 
 func start_jump_charge() -> void:
-	current_state = State.CHARGE
+	current_state = EnemyState.CHARGE
 	_jump_impulse = get_valid_jump()
 	if _jump_impulse == Vector3.LEFT: # Enemy is above platform and will transition to patrol
 		return
@@ -296,7 +296,7 @@ func get_valid_jump() -> Vector3:
 			start_climb()
 			return Vector3.LEFT
 		JumpStatus.ABOVE_PLATFORM: 
-			current_state = State.PATROL
+			current_state = EnemyState.PATROL
 			skin.run()
 			_current_patrol_direction = get_direction_to_player(player)
 			rotate_on_y(_current_patrol_direction)
@@ -423,12 +423,12 @@ func apply_jump() -> void:
 	rotate_on_y(get_direction_to_player(player))
 	if _jump_impulse != Vector3.ZERO:
 		velocity = _jump_impulse
-		current_state = State.AIR
+		current_state = EnemyState.AIR
 		skin.air()
 		await get_tree().create_timer(is_on_terrain_enable_delay).timeout
 		raycast_floor.enabled = true
 	else:
-		current_state = State.CHASE
+		current_state = EnemyState.CHASE
 
 func get_direction_to_player(_player: Player) -> Vector3:
 	var z_direction_to_player: float = _player.global_transform.origin.z - global_transform.origin.z
@@ -444,11 +444,11 @@ func is_wall_ahead() -> bool:
 func print_state() -> void:
 	var _text: String
 	match current_state:
-		State.IDLE: _text = "IDLE"
-		State.CHASE: _text = "CHASE"
-		State.AIR: _text = "AIR"
-		State.LAND: _text = "LAND"
-		State.HIT: _text = "HIT"
+		EnemyState.IDLE: _text = "IDLE"
+		EnemyState.CHASE: _text = "CHASE"
+		EnemyState.AIR: _text = "AIR"
+		EnemyState.LAND: _text = "LAND"
+		EnemyState.HIT: _text = "HIT"
 	print(_text)
 
 func get_x_locked_player_position() -> Vector3:

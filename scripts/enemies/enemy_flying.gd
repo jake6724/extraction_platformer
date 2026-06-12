@@ -55,8 +55,8 @@ var _dash_target_position: Vector3
 @export var last_seen_player_position_indicator: MeshInstance3D
 # @export var skin: EnemyCellBatSkin
 
-enum State {PATROL, CHASE, IDLE, CHARGE, DASH, HIT}
-var current_state: State = State.PATROL
+enum EnemyState {PATROL, CHASE, IDLE, CHARGE, DASH, HIT}
+var current_state: EnemyState = EnemyState.PATROL
 
 # Direction
 var directions: Array[Vector3] = [] # Generated based on num_directions
@@ -111,12 +111,12 @@ func _ready():
 func _physics_process(delta):
 	if show_debug: print_state(current_state)
 	match current_state:
-		State.PATROL: patrol(delta)
-		State.CHASE: chase(delta)
-		State.IDLE: idle(delta)
-		State.CHARGE: pass
-		State.DASH: dash(delta)
-		State.HIT: hit(delta)
+		EnemyState.PATROL: patrol(delta)
+		EnemyState.CHASE: chase(delta)
+		EnemyState.IDLE: idle(delta)
+		EnemyState.CHARGE: pass
+		EnemyState.DASH: dash(delta)
+		EnemyState.HIT: hit(delta)
 		_: push_error("EnemyFlying: invalid current_state. current_state = ", current_state)
 
 func patrol(delta: float) -> void:
@@ -172,7 +172,7 @@ func chase(delta: float) -> void:
 		var x_locked_position: Vector3 = Vector3(0, global_transform.origin.y, global_transform.origin.z)
 		var x_locked_player_position: Vector3 = Vector3(0, player.tracker.global_transform.origin.y, player.tracker.global_transform.origin.z)
 		if x_locked_position.distance_to(x_locked_player_position) < dash_range:
-			current_state = State.CHARGE
+			current_state = EnemyState.CHARGE
 			var charge_time: float = randf_range(dash_charge_duration_min, dash_charge_duration_max)
 
 			# Save dash info for when charge is complete
@@ -189,7 +189,7 @@ func on_timer_dash_charge_timeout() -> void:
 	apply_dash(_dash_start_position, _dash_target_position)
 
 func apply_dash(start_position: Vector3, target_position: Vector3) -> void:
-	current_state = State.DASH
+	current_state = EnemyState.DASH
 	var dash_direction: Vector3 = start_position.direction_to(target_position)
 	velocity = dash_power * dash_direction
 	set_collision_with_enemies(false)
@@ -212,7 +212,7 @@ func dash(delta: float) -> void:
 	velocity = velocity.move_toward(Vector3.ZERO, delta * acceleration)
 	if velocity.length() < _dash_velocity_reset_threshold:
 		start_dash_cooldown(dash_cooldown_duration_min, dash_cooldown_duration_max)
-		current_state = State.CHASE
+		current_state = EnemyState.CHASE
 		set_collision_with_enemies(true)
 		var post_dash_cooldown_duration: float = randf_range(post_dash_cooldown_duration_min, post_dash_cooldown_duration_max)
 		timer_post_dash.start(post_dash_cooldown_duration)
@@ -227,7 +227,7 @@ func on_timer_post_dash_timeout() -> void:
 ## Do not move, but constantly check to see if can see player. If so, return to chasing
 func idle(_delta: float) -> void:
 	if is_target_visible(player.tracker.global_transform.origin):
-		current_state = State.CHASE
+		current_state = EnemyState.CHASE
 
 func hit(delta: float) -> void:
 	move_and_collide(velocity * delta)
@@ -277,7 +277,7 @@ func get_move_target_point() -> Vector3:
 	
 	# Can't see player, no scent trail. Return empty Vector3
 	else:
-		current_state = State.IDLE
+		current_state = EnemyState.IDLE
 		_move_target_point = Vector3()
 
 	return _move_target_point
@@ -382,18 +382,18 @@ func get_closest_scent_position(_player: Player) -> Vector3:
 	return closest_scent_position
 
 func on_area_detect_player_body_entered(_player: Player) -> void:
-	if current_state == State.PATROL:
+	if current_state == EnemyState.PATROL:
 		player = _player
 
 		if timer_dash_cooldown.time_left <= 0: # Don't restart if already cooling down
 			start_dash_cooldown(dash_initial_cooldown_duration_min, dash_initial_cooldown_duration_max)
-		current_state = State.CHASE
+		current_state = EnemyState.CHASE
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass
 
 func on_timer_chase_quit_timeout() -> void:
-	current_state = State.IDLE
+	current_state = EnemyState.IDLE
 
 func die() -> void:
 	skin.hide()
@@ -410,11 +410,11 @@ func start_hitstun(_hitstun_duration: float) -> void:
 		_dash_cooldown_resume_duration = timer_dash_cooldown.time_left
 
 	timer_dash_cooldown.stop()
-	current_state = State.HIT
+	current_state = EnemyState.HIT
 
 func stop_hitstun() -> void:
 	super()
-	current_state = State.CHASE
+	current_state = EnemyState.CHASE
 	on_timer_post_dash_timeout()
 	
 	# If dash was still cooling down, resume
@@ -424,13 +424,13 @@ func stop_hitstun() -> void:
 	else:
 		start_dash_cooldown(dash_initial_cooldown_duration_min, dash_initial_cooldown_duration_max)
 
-func print_state(state: State) -> void:
+func print_state(state: EnemyState) -> void:
 	var _text: String
 	match state:
-		State.IDLE: _text = "IDLE"
-		State.PATROL: _text = "PATROL"
-		State.CHASE: _text = "CHASE"
-		State.CHARGE: _text = "CHARGE"
-		State.DASH: _text = "DASH"
-		State.HIT: _text = "HIT"
+		EnemyState.IDLE: _text = "IDLE"
+		EnemyState.PATROL: _text = "PATROL"
+		EnemyState.CHASE: _text = "CHASE"
+		EnemyState.CHARGE: _text = "CHARGE"
+		EnemyState.DASH: _text = "DASH"
+		EnemyState.HIT: _text = "HIT"
 	print(_text)
