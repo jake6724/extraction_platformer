@@ -34,7 +34,7 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 func on_jump_windup_complete() -> void:
 	var _impulse: Vector3 = jump_data_1.impulse
 	var _status: JumpData.Status = jump_data_1.status
-	if jump_data_1.status != EnemyJumper.JumpStatus.UNDER_ROOF: # This could be an array if more than one quick-fails
+	if jump_data_1.status != JumpData.Status.UNDER_ROOF: # This could be an array if more than one quick-fails
 		jump_data_2 = get_jump_data(target)
 		var continue_jump_windup: bool = modify_jump_data_by_status(jump_data_2)
 		if continue_jump_windup and jump_data_2.impulse != Vector3.ZERO:
@@ -42,7 +42,7 @@ func on_jump_windup_complete() -> void:
 			_status = jump_data_2.status
 
 	print("Jump status: ", enemy.get_jump_status_text(_status))
-	enemy.apply_jump(_impulse)
+	apply_jump(_impulse)
 	enemy.raycast_floor.enabled = false
 	tranisition.emit("enemyhandstateair")
 
@@ -62,6 +62,9 @@ func get_jump_data(_target: Node3D) -> JumpData:
 	_jump_data.squared_discriminant = _squared_discriminant
 	return _jump_data
 
+## Adjust jump_data's impulse value based on its trajectory and obstacles along its path.
+## Returns a bool which describes whether to continue with jump wind up. Certain jump statuses
+## Trigger a transition to a different state, and no further action should occur in this state
 func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
 	match _jump_data.status:
 		JumpData.Status.SUCCESS: return true
@@ -82,3 +85,7 @@ func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
 		_: 
 			push_error("Unknown _jump_status")
 			return false
+
+func apply_jump(_impulse) -> void:
+	if _impulse != Vector3.ZERO:
+		enemy.velocity = _impulse

@@ -1,22 +1,12 @@
 class_name EnemyJumper extends Enemy
 
-"""
-TODO:
-- If taking a low jump (because of roof or fall cutoff), only calculate that jump once
-"""
-
-@export_group("General")
-# @export var acceleration: float = 40
 @export_group("Patrol")
 @export var patrol_speed: float = 3.0
-# var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 @export_group("Chase")
 @export var chase_speed: float = 5.0
 @export var escape_speed: float = 11.0
 @export var speed_modifier_min: float = -1.0
 @export var speed_modifier_max: float = 1.0
-@export var chase_quit_delay: float = 5.0
-@export var timer_chase_quit: Timer
 @export_group("Jump")
 @export var jump_power: float = 25.0
 @export var jump_power_modifier_min: float = -4.0
@@ -24,16 +14,9 @@ TODO:
 @export var jump_windup_speed_scale_base: float = 1.5
 @export var jump_windup_speed_scale_modifier_min: float = -0.3
 @export var jump_windup_speed_scale_modifier_max: float = 0.3
-@export var timer_jump_in_range: Timer
-@export var jump_in_range_duration_requirement: float = 0.01
 @export var max_jump_trigger_distance: float = 7.0
 @export var min_jump_trigger_distance: float = 5.0
-## Tracks the most recent jump impulse; used in apply_jump()
-# var _jump_impulse: Vector3
-var is_on_terrain_enable_delay: float = 0.2
 var _jump_windup_speed_scale: float
-# var _jump_target_position: Vector3
-# var is_targeting_player: bool 
 @export_group("Climb")
 var _climb_move_direction: Vector3
 var _roof_platform: SmartPlatform
@@ -60,17 +43,10 @@ var _roof_platform: SmartPlatform
 @export var trajectory_debug_time_step: float = .0166
 @export var state_label: Label3D
 
-enum EnemyState {IDLE, PATROL, CHASE, CHARGE, AIR, LAND, HIT, CLIMB}
-# enum JumpStatus {SUCCESS, UNDER_ROOF, FALL_CUTOFF, ABOVE_PLATFORM, CLIMB}
-var current_state: EnemyState = EnemyState.PATROL
 var player: Player
 
 func _ready():
 	super()
-	# area_detect_player.body_entered.connect(on_area_detect_player_body_entered)
-	# area_detect_player.body_exited.connect(on_area_detect_player_body_exited)
-	# area_chase_quit.body_exited.connect(on_area_chase_quit_body_exited)
-	# timer_chase_quit.timeout.connect(on_timer_chase_quit_timeout)
 
 	axis_lock_linear_x = true
 
@@ -79,9 +55,6 @@ func _ready():
 	escape_speed += randf_range(speed_modifier_min, speed_modifier_max)
 	_jump_windup_speed_scale = jump_windup_speed_scale_base + randf_range(jump_windup_speed_scale_modifier_min, jump_windup_speed_scale_modifier_max)
 	skin.jump_windup_speed_scale = _jump_windup_speed_scale
-
-	# skin.land_complete.connect(on_skin_land_complete)
-	# skin.jump_windup_complete.connect(on_skin_jump_charge_complete)
 
 	collider_detect_player.shape.radius = min_jump_trigger_distance
 
@@ -97,216 +70,10 @@ func _ready():
 	inner_range_right.visible = show_debug
 	skin.run()
 
-func _physics_process(delta):
-	pass
-	#print_state()
-
-	# match current_state:
-	# 	EnemyState.IDLE: idle(delta)
-	# 	EnemyState.PATROL: patrol(delta)
-	# 	EnemyState.CHASE: chase(delta)
-	# 	EnemyState.CHARGE: charge(delta)
-	# 	EnemyState.AIR: air(delta)
-	# 	EnemyState.CLIMB: climb(delta)
-	# 	EnemyState.HIT: pass
-
-# func idle(delta: float) -> void:
-# 	var velocity_y: float = velocity.y
-# 	velocity = velocity.move_toward(Vector3.ZERO, delta*acceleration)
-# 	velocity.x = 0
-# 	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
-# 	move_and_slide()
-
-# func charge(delta: float) -> void:
-# 	var velocity_y: float = velocity.y
-# 	velocity = Vector3.ZERO
-# 	velocity.x = 0
-# 	velocity.y = move_toward(velocity_y, gravity_default, delta * gravity_acceleration)
-# 	move_and_slide()
-
-# func patrol(delta: float) -> void:
-# 	if not is_on_floor():
-# 		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
-# 		return 
-
-# 	# Patrol in a direction until a wall found or end of platform reached
-# 	if is_floor_ahead() and not is_wall_ahead():
-# 		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
-# 	# Turn around
-# 	else:
-# 		_current_patrol_direction *= -1
-# 		rotate_on_y(_current_patrol_direction)
-# 		return
-
-# ## The goal of chase is to get into a position where a jump can be triggered.
-# func chase(delta: float) -> void:
-# 	# enable_enemy_collisions_1_frame()
-# 	var zdirection_to_target: float = player.global_transform.origin.z - global_transform.origin.z
-# 	var direction_to_target: Vector3 = Vector3(0,0,zdirection_to_target).normalized()
-
-# 	var x_locked_position: Vector3 = global_transform.origin
-# 	x_locked_position.x = 0
-# 	var distance_to_player: float = x_locked_position.distance_to(get_x_locked_player_position())
-
-# 	# Take a jump if no where left to run
-# 	if not is_floor_ahead() or is_wall_ahead():
-# 		rotate_on_y(-direction_to_target)
-# 		_jump_target_position = player.global_transform.origin
-# 		start_jump_charge()
-
-# 	# Too close to player, move away
-# 	if distance_to_player < min_jump_trigger_distance:
-# 		rotate_on_y(-direction_to_target)
-# 		move_and_fall(delta, escape_speed, -direction_to_target, acceleration)
-# 		timer_jump_in_range.stop()
-# 	# Too far from player, move toward
-# 	elif distance_to_player > max_jump_trigger_distance:
-# 		rotate_on_y(direction_to_target)
-# 		move_and_fall(delta, chase_speed, direction_to_target, acceleration)
-# 		timer_jump_in_range.stop()
-# 	# In jump range
-# 	else:
-# 		_jump_target_position = player.global_transform.origin
-# 		is_targeting_player = true
-# 		start_jump_charge()
-
-func start_climb() -> void:
-	current_state = EnemyState.CLIMB
-	_climb_move_direction = Vector3(0,0,[-1,1].pick_random())
-	_roof_platform = raycast_sight.get_collider()
-	print(_climb_move_direction)
-	print(_roof_platform.left_edge_point)
-	print(_roof_platform.right_edge_point)
-
-# func climb(delta: float) -> void:
-# 	# Get out from under any platforms
-# 	if raycast_ceiling.is_colliding():
-# 		# print("Under the roof")
-# 		rotate_on_y(_climb_move_direction)
-# 		move_and_fall(delta, chase_speed, _climb_move_direction, acceleration)
-# 		return
-	
-# 	var distance_to_left_edge: float = abs(_roof_platform.left_edge_point.z - global_transform.origin.z)
-# 	var distance_to_right_edge: float = abs(_roof_platform.right_edge_point.z - global_transform.origin.z)
-# 	# print("_climb_move_direction: ", _climb_move_direction)
-# 	# print("distance_to_left_edge: ", distance_to_left_edge)
-# 	# print("distance_to_right_edge: ", distance_to_right_edge)
-# 	if _climb_move_direction.z == -1: # Moving right
-# 		if distance_to_right_edge > 4 and distance_to_right_edge < 6:
-# 			# Try to jump to player before jumping to ledge
-# 			_jump_target_position = player.global_transform.origin
-# 			is_targeting_player = true
-# 			_jump_impulse = get_valid_jump()
-# 			if _jump_impulse != Vector3.LEFT and _jump_impulse != Vector3.ZERO:
-# 				current_state = EnemyState.CHARGE
-# 				jump_windup()
-# 				return
-
-# 			# Couldn't jump to player, jump to ledge
-# 			_jump_target_position = _roof_platform.right_edge_point
-# 			is_targeting_player = false
-# 			start_jump_charge()
-# 			return
-
-# 	elif _climb_move_direction.z == 1: # Moving left:
-# 		if distance_to_left_edge > 4 and distance_to_left_edge < 6:
-# 			# Try to jump to player before jumping to ledge
-# 			_jump_target_position = player.global_transform.origin
-# 			is_targeting_player = true
-# 			_jump_impulse = get_valid_jump()
-# 			if _jump_impulse != Vector3.LEFT and _jump_impulse != Vector3.ZERO:
-# 				current_state = EnemyState.CHARGE
-# 				jump_windup()
-# 				return
-
-# 			# Couldn't jump to player, jump to ledge
-# 			_jump_target_position = _roof_platform.right_edge_point
-# 			is_targeting_player = false
-# 			start_jump_charge()
-# 			return
-
-# 	move_and_fall(delta, chase_speed, _climb_move_direction, acceleration)
-
-# func air(delta: float) -> void:
-# 	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
-# 	velocity.x = 0
-# 	move_and_slide()
-
-# 	if is_on_terrain():
-# 		current_state = EnemyState.IDLE
-# 		raycast_floor.enabled = false
-# 		skin.land()
-# 		clear_debug_trajectory_points()
-
-## Connected to [skin.land_complete]; called once skin land animation has finished
-## Tranisitions to post jumping behavior
-# func on_skin_land_complete() -> void:
-# 	current_state = EnemyState.CHASE # TODO: Check for target and do idle, patrol, or chase 
-# 	skin.run()
-# 	enable_enemy_collisions_1_frame()
-
-# func on_area_detect_player_body_entered(_player: Player) -> void:
-# 	if current_state == EnemyState.PATROL:
-# 		player = _player
-# 		current_state = EnemyState.CHASE
-# 		skin.run()
-# 	timer_chase_quit.stop() # Always cancel chase quitting process if they walk into attack range
-
-# func on_area_detect_player_body_exited(_player: Player) -> void:
-# 	# If patrolling, try to jump when player exits 
-# 	if current_state == EnemyState.PATROL:
-# 		start_jump_charge()
-
-# func start_jump_charge() -> void:
-# 	current_state = EnemyState.CHARGE
-# 	_jump_impulse = get_valid_jump()
-# 	if _jump_impulse == Vector3.LEFT: # Enemy is above platform and will transition to patrol
-# 		return
-# 	if _jump_impulse != Vector3.ZERO:
-# 		jump_windup()
-
-# func jump_windup() -> void:
-# 	rotate_on_y(getdirection_to_target(player))
-# 	skin.jump_windup() # Plays jump wind-up animations, triggers on_skin_jump_charge_complete() when windup complete
-
-## Connected to [skin.jump_charge_complete]; called once skin jump windup animation has finished.
-## Triggers actual jump physics
-# func on_skin_jump_charge_complete() -> void:
-# 	var temp_jump_impulse: Vector3 = get_valid_jump()
-# 	if temp_jump_impulse == Vector3.LEFT:
-# 		return 
-# 	elif temp_jump_impulse != Vector3.ZERO:
-# 		_jump_impulse = temp_jump_impulse
-# 	apply_jump()
-
 func get_x_locked_position(_position: Vector3) -> Vector3:
 	var x_locked_position: Vector3 = _position
 	x_locked_position.x = 0
 	return x_locked_position
-
-# func get_valid_jump() -> Vector3:
-# 	var _x_locked_target_position: Vector3 = get_x_locked_position(_jump_target_position)
-# 	var _squared_discriminant: float = compute_jump_impulse_discriminant(_x_locked_target_position)
-# 	var _res_jump_impulse: Vector3 = get_jump_impulse(_x_locked_target_position, _squared_discriminant)
-
-# 	var jump_check_result: JumpStatus = get_jump_trajectory_status(_res_jump_impulse)
-# 	print_jump_failure(jump_check_result)
-
-# 	match jump_check_result:
-# 		JumpStatus.UNDER_ROOF: _res_jump_impulse = get_jump_impulse(_x_locked_target_position, _squared_discriminant, true)
-# 		JumpStatus.FALL_CUTOFF: _res_jump_impulse = get_jump_impulse(_x_locked_target_position, _squared_discriminant, true)
-# 		JumpStatus.CLIMB: 
-# 			start_climb()
-# 			return Vector3.LEFT
-# 		JumpStatus.ABOVE_PLATFORM: 
-# 			current_state = EnemyState.PATROL
-# 			skin.run()
-# 			_current_patrol_direction = getdirection_to_target(player)
-# 			rotate_on_y(_current_patrol_direction)
-# 			clear_debug_trajectory_points()
-# 			return Vector3.LEFT
-
-# 	return _res_jump_impulse
 
 func compute_jump_impulse_discriminant(_x_locked_target_position: Vector3) -> float:
 	var initial_velocity: float = jump_power
@@ -429,19 +196,6 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 	#print("SELECTED FINAL SUCCESS")
 	return JumpData.Status.SUCCESS
 
-## Apply jump impulse, transition to air. Impulse used is `_jump_impulse`
-func apply_jump(_impulse) -> void:
-	# print("Apply_jump() impulse: ", _impulse)
-	# rotate_on_y(get_z_direction(_impulse)) # TODO: Broken line
-	if _impulse != Vector3.ZERO:
-		velocity = _impulse
-		current_state = EnemyState.AIR
-		skin.air()
-		await get_tree().create_timer(is_on_terrain_enable_delay).timeout
-		raycast_floor.enabled = true
-	else:
-		current_state = EnemyState.CHASE
-
 func get_z_direction(target_position: Vector3) -> Vector3:
 	var zdirection_to_target: float = target_position.z - global_transform.origin.z
 	var direction_to_target: Vector3 = Vector3(0,0,zdirection_to_target).normalized()
@@ -453,27 +207,6 @@ func is_floor_ahead() -> bool:
 func is_wall_ahead() -> bool:
 	return raycast_wall.is_colliding()
 
-func print_state() -> void:
-	print(get_state_text())
-
-func get_state_text() -> String:
-	var _text: String
-	match current_state:
-		EnemyState.IDLE: _text = "IDLE"
-		EnemyState.CHASE: _text = "CHASE"
-		EnemyState.PATROL: _text = "PATROL"
-		EnemyState.AIR: _text = "AIR"
-		EnemyState.LAND: _text = "LAND"
-		EnemyState.HIT: _text = "HIT"
-		EnemyState.CHARGE: _text = "CHARGE"
-		_: _text = "UNKNOWN"
-	return _text
-
-# func get_x_locked_player_position() -> Vector3:
-# 	var x_locked_player_position: Vector3 = player.tracker.global_transform.origin
-# 	x_locked_player_position.x = 0
-# 	return x_locked_player_position
-
 func is_on_terrain() -> bool:
 	return true if raycast_floor.is_colliding() else false
 
@@ -482,17 +215,6 @@ func add_func(a: float, b: float) -> float:
 
 func sub_func(a: float, b: float) -> float:
 	return a - b
-
-func print_jump_failure(jf: JumpData.Status) -> void:
-	var _text: String
-	match jf:
-		JumpData.Status.SUCCESS: _text="Success"
-		JumpData.Status.UNDER_ROOF: _text="Under Roof"
-		JumpData.Status.FALL_CUTOFF: _text="Fall Cutoff"
-		JumpData.Status.CLIMB: _text="Climb"
-		JumpData.Status.ABOVE_PLATFORM: _text="Above Platform"
-		_: push_error("Jump Failure: ", jf, " not defined")
-	print("JumpStatus: ", _text)
 
 func get_jump_status_text(_status: JumpData.Status) -> String:
 	var _text: String
@@ -508,18 +230,8 @@ func clear_debug_trajectory_points() -> void:
 	await get_tree().create_timer(1).timeout
 	DebugTools.clear_source_debugs(self)
 
-# func on_area_chase_quit_body_exited(_player: Player) -> void:
-# 	pass
-
-# func on_timer_chase_quit_timeout() -> void:
-# 	pass
-
 func is_under_ceiling() -> bool:
 	return true
-
-# func is_same_height_as_player() -> bool:
-# 	var height_diff
-# 	return abs(global_transform.origin.y - player.global_transform.origin.y) > 3
 
 func is_above_player() -> bool:
 	return global_transform.origin.y > (player.global_transform.origin.y + 3)

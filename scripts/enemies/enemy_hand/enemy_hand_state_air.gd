@@ -1,8 +1,10 @@
 class_name EnemyHandStateAir extends StateEnemy
 
+var _is_on_terrain_enable_delay: float = 0.2
+
 func enter(_previous_state_path: String, _data := {}) -> void:
 	enemy.set_state_label("AIR")
-	await get_tree().create_timer(enemy.is_on_terrain_enable_delay).timeout
+	await get_tree().create_timer(_is_on_terrain_enable_delay).timeout
 	enemy.raycast_floor.enabled = true
 
 func exit() -> void:
