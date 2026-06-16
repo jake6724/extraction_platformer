@@ -1,11 +1,10 @@
-[gd_scene load_steps=16 format=3 uid="uid://bfbpxodaug1w2"]
+[gd_scene load_steps=15 format=3 uid="uid://bfbpxodaug1w2"]
 
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_dojpo"]
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_i6x8u"]
 [ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_1fpmp"]
 [ext_resource type="Script" uid="uid://n5anyt4xl3j8" path="res://scripts/smart_platform.gd" id="3_7i0bt"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="3_df0lk"]
-[ext_resource type="PackedScene" uid="uid://btp315oeixtsw" path="res://scenes/enemies/EnemyCube.tscn" id="5_6e24c"]
 [ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="6_5n3yh"]
 [ext_resource type="PackedScene" uid="uid://cceo475cxqqlf" path="res://scenes/enemies/EnemyFlying.tscn" id="6_5ycvo"]
 [ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="6_7i0bt"]
@@ -121,41 +120,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 
 [node name="Enemies" type="Node" parent="."]
 
-[node name="EnemyCube" parent="Enemies" instance=ExtResource("5_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7538657, -120.77684)
-
-[node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -117.00411)
-
-[node name="EnemyJumper2" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -109.3363)
-
-[node name="EnemyJumper3" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -112.93714)
-
-[node name="EnemyJumper4" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -92.92862)
-
-[node name="EnemyJumper8" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -92.365295)
-
 [node name="EnemyJumper9" parent="Enemies" instance=ExtResource("6_7i0bt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -12.681755)
-
-[node name="EnemyJumper10" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -103.40494)
-
-[node name="EnemyJumper11" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -121.03038)
-
-[node name="EnemyJumper5" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -135.85078)
-
-[node name="EnemyJumper6" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -135.02171)
-
-[node name="EnemyJumper7" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.9990063, -157.41502)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)

@@ -12,6 +12,10 @@ func exit() -> void:
 
 func physics_update(delta: float) -> void:
 	enemy.fall(delta)
+	#sprint(enemy.velocity)
+	# enemy.velocity.y = move_toward(enemy.velocity.y, enemy.gravity_default, delta * enemy.gravity_acceleration)
+	# enemy.velocity.x = 0
+	# enemy.move_and_slide()
 
 	if enemy.is_on_terrain():
 		enemy.raycast_floor.enabled = false

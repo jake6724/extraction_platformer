@@ -30,6 +30,7 @@ var _roof_platform: SmartPlatform
 @export var raycast_sight: RayCast3D
 @export var raycast_ceiling: RayCast3D
 @export var shapecast_jump: ShapeCast3D
+@export var state_machine: StateMachineEnemy
 @export_group("Debug")
 @export var trajectory_debug_parent: Node
 @export var show_debug: bool = true
@@ -69,6 +70,10 @@ func _ready():
 	inner_range_left.visible = show_debug
 	inner_range_right.visible = show_debug
 	skin.run()
+
+func _physics_process(_delta):
+	pass
+	# print(state_machine.state.name)
 
 func get_x_locked_position(_position: Vector3) -> Vector3:
 	var x_locked_position: Vector3 = _position
@@ -163,7 +168,7 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 
 				# Trajectory hits player without anything in the way, this is a valid jump and stop early
 				if shapecast_jump.get_collider(0) is Player:
-					#print("SELECTED EARLY SUCCESS")
+					print("SELECTED EARLY SUCCESS")
 					return JumpData.Status.SUCCESS
 				else:
 					#print("Collision occurred with terrain")
@@ -174,26 +179,26 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 					if _impulse.y > 0:
 						# Check if under a platform and should perform low jump instead
 						if not raycast_sight.is_colliding():
-							#print("SELECTED ROOF")
+							print("SELECTED ROOF")
 							return JumpData.Status.UNDER_ROOF
 						else:
-							#print("SELECTED CLIMB")
+							print("SELECTED CLIMB")
 							return JumpData.Status.CLIMB
 
 					# Arc Down intersected
 					elif _impulse.y < 0 and target_is_player:					
 						if not raycast_sight.is_colliding():
-							#print("SELECTED FALL_CUTOFF")
+							print("SELECTED FALL_CUTOFF")
 							return JumpData.Status.FALL_CUTOFF
 						else:
 							if is_above_player():
-								#print("SELECTED ABOVE_PLATFORM")
+								print("SELECTED ABOVE_PLATFORM")
 								return JumpData.Status.ABOVE_PLATFORM
 		else:
 			count += 1
 		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
 
-	#print("SELECTED FINAL SUCCESS")
+	print("SELECTED FINAL SUCCESS")
 	return JumpData.Status.SUCCESS
 
 func get_z_direction(target_position: Vector3) -> Vector3:

@@ -13,8 +13,8 @@ func initialize(_owner) -> void:
 	super(_owner)
 	enemy.skin.jump_windup_complete.connect(on_jump_windup_complete)
 
-func physics_update(delta: float) -> void:
-	enemy.move_and_fall(delta, 0, Vector3.ZERO, enemy.acceleration)
+func physics_update(_delta: float) -> void:
+	enemy.velocity = Vector3.ZERO
 
 func enter(_previous_state_path: String, _data := {}) -> void:
 	enemy.set_state_label("JUMP WINDUP")

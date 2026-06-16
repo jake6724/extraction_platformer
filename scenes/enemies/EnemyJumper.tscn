@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://12ajln3ylrvt" path="res://scripts/enemies/enemy_hand/enemy_hand_state_climb.gd" id="9_nklfy"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_h3c4m"]
-radius = 5.692749
+radius = 7.4758496
 
 [sub_resource type="SphereMesh" id="SphereMesh_h3c4m"]
 radius = 1.0
@@ -46,7 +46,7 @@ albedo_color = Color(0.8627104, 0, 0.054378644, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nj2nm"]
 albedo_color = Color(0.6485813, 0.39008486, 3.85046e-07, 1)
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "raycast_ceiling", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "state_label", "area_attack", "skin", "timer_hitstun", "body_collider")]
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "raycast_ceiling", "shapecast_jump", "state_machine", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "state_label", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
 collision_mask = 4
 axis_lock_linear_x = true
@@ -56,8 +56,6 @@ axis_lock_angular_z = true
 script = ExtResource("1_h3c4m")
 chase_speed = 15.0
 escape_speed = 15.0
-timer_chase_quit = NodePath("Timers/TimerChaseQuit")
-timer_jump_in_range = NodePath("Timers/TimerJumpInRange")
 max_jump_trigger_distance = 13.0
 min_jump_trigger_distance = 10.0
 area_detect_player = NodePath("AreaDetectPlayer")
@@ -69,6 +67,7 @@ raycast_floor = NodePath("Raycasts/RaycastFloor")
 raycast_sight = NodePath("Raycasts/RayCastSight")
 raycast_ceiling = NodePath("Raycasts/RayCastCeiling")
 shapecast_jump = NodePath("Raycasts/ShapeCastJump")
+state_machine = NodePath("StateMachineEnemy")
 trajectory_debug_parent = NodePath("TrajectoryDebugParent")
 outer_range_left = NodePath("OutLeft")
 outer_range_right = NodePath("OutRight")
