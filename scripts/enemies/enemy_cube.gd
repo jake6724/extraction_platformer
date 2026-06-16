@@ -25,26 +25,21 @@ class_name EnemyCube extends Enemy
 var _current_patrol_direction: Vector3 = Vector3(0,0,1)
 
 func _ready():
-	skin.walk()
+	skin.animation_player.speed_scale = 1.4
+	skin.run()
 
 func _physics_process(delta):
 	patrol(delta)
 
 func patrol(delta: float) -> void:
-	# print("is_on_floor(): ", is_on_floor())
-	# if not is_on_floor():
-	# 	move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
-	# 	return 
-
 	# Patrol in a direction until a wall found or end of platform reached
-	print("is_floor_ahead(): ", is_floor_ahead())
-	print("is_wall_ahead(): ", is_wall_ahead())
 	if is_floor_ahead() and not is_wall_ahead():
 		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
+		face_all(_current_patrol_direction)
 	# Turn around
 	else:
 		_current_patrol_direction *= -1
-		rotate_on_y(_current_patrol_direction)
+		face_all(_current_patrol_direction)
 		return
 
 func is_floor_ahead() -> bool:

@@ -3,7 +3,7 @@ class_name EnemyJumperSkin extends EnemySkin
 var jump_windup_speed_scale: float # Set by EnemyJumper
 
 signal land_complete
-signal jump_charge_complete
+signal jump_windup_complete
 
 func run() -> void:
     animation_player.play("Run")
@@ -11,7 +11,7 @@ func run() -> void:
 func idle() -> void:
     animation_player.play("Idle")
 
-func jump() -> void:
+func jump_windup() -> void:
     animation_player.speed_scale = jump_windup_speed_scale
     animation_player.play("Jump")
     await animation_player.animation_finished
@@ -29,5 +29,5 @@ func land() -> void:
 func emit_land_complete() -> void:
     land_complete.emit()
 
-func emit_jump_charge_complete() -> void:
-    jump_charge_complete.emit()
+func emit_jump_windup_complete() -> void:
+    jump_windup_complete.emit()

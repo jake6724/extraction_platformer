@@ -140,7 +140,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -92.92862)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -92.365295)
 
 [node name="EnemyJumper9" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -81.733444)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -12.681755)
 
 [node name="EnemyJumper10" parent="Enemies" instance=ExtResource("6_7i0bt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -103.40494)
@@ -156,9 +156,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8717916, -135.02171)
 
 [node name="EnemyJumper7" parent="Enemies" instance=ExtResource("6_7i0bt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.9990063, -157.41502)
-
-[node name="EnemyCube2" parent="Enemies" instance=ExtResource("5_6e24c")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.46274495, 0)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)
@@ -202,6 +199,7 @@ progress = 32.999996
 loop = false
 
 [node name="EnemyFlying" parent="EnemyPatrols/Path3D3/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("6_5ycvo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4363213, 29.748003)
 path_follow = NodePath("..")
 start_left_to_right = false
 health = 30

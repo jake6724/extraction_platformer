@@ -1050,6 +1050,7 @@ bones/41/rotation = Quaternion(-0.43365088, 1.0741735e-07, -5.169527e-08, 0.9010
 bones/41/scale = Vector3(1, 1, 1)
 
 [node name="CellBat" type="MeshInstance3D" parent="Enemy_CellBat/Armature/Skeleton3D"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
 mesh = SubResource("ArrayMesh_rt663")
 skin = SubResource("Skin_n7qb5")
 

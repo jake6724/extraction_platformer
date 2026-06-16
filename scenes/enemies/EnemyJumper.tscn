@@ -1,7 +1,14 @@
-[gd_scene load_steps=14 format=3 uid="uid://d01c7ugxu20qw"]
+[gd_scene load_steps=21 format=3 uid="uid://d01c7ugxu20qw"]
 
 [ext_resource type="Script" uid="uid://c0vmpp55n5606" path="res://scripts/enemies/enemy_jumper.gd" id="1_h3c4m"]
 [ext_resource type="PackedScene" uid="uid://b81857coulg6n" path="res://scenes/enemies/EnemyJumperSkin.tscn" id="2_6hreo"]
+[ext_resource type="Script" uid="uid://biousaspkorwn" path="res://scripts/enemies/State/state_machine_enemy.gd" id="3_ql82d"]
+[ext_resource type="Script" uid="uid://cmf7rgwda16qm" path="res://scripts/enemies/enemy_hand/enemy_hand_state_jump_windup.gd" id="4_nj2nm"]
+[ext_resource type="Script" uid="uid://cb3rmvgrw3dm7" path="res://scripts/enemies/enemy_hand/enemy_hand_state_patrol.gd" id="4_xtawh"]
+[ext_resource type="Script" uid="uid://cywj8r17hglf" path="res://scripts/enemies/enemy_hand/enemy_hand_state_chase.gd" id="5_y4ctl"]
+[ext_resource type="Script" uid="uid://csgc3fvrm5q7i" path="res://scripts/enemies/enemy_hand/enemy_hand_state_air.gd" id="7_nklfy"]
+[ext_resource type="Script" uid="uid://bfvbk886bel8x" path="res://scripts/enemies/enemy_hand/enemy_hand_state_land.gd" id="8_y4ctl"]
+[ext_resource type="Script" uid="uid://12ajln3ylrvt" path="res://scripts/enemies/enemy_hand/enemy_hand_state_climb.gd" id="9_nklfy"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_h3c4m"]
 radius = 5.692749
@@ -39,7 +46,7 @@ albedo_color = Color(0.8627104, 0, 0.054378644, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nj2nm"]
 albedo_color = Color(0.6485813, 0.39008486, 3.85046e-07, 1)
 
-[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "raycast_ceiling", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "area_attack", "skin", "timer_hitstun", "body_collider")]
+[node name="EnemyJumper" type="CharacterBody3D" node_paths=PackedStringArray("timer_chase_quit", "timer_jump_in_range", "area_detect_player", "collider_detect_player", "area_chase_quit", "raycast_floor_ahead", "raycast_wall", "raycast_floor", "raycast_sight", "raycast_ceiling", "shapecast_jump", "trajectory_debug_parent", "outer_range_left", "outer_range_right", "inner_range_left", "inner_range_right", "state_label", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
 collision_mask = 4
 axis_lock_linear_x = true
@@ -67,6 +74,7 @@ outer_range_left = NodePath("OutLeft")
 outer_range_right = NodePath("OutRight")
 inner_range_left = NodePath("InLeft")
 inner_range_right = NodePath("InRight")
+state_label = NodePath("StateLabel")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyJumperSkin")
 timer_hitstun = NodePath("Timers/TimerHitstun")
@@ -159,6 +167,7 @@ collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("SphereShape3D_usotj")
 target_position = Vector3(0, 1, 0)
+max_results = 1
 collision_mask = 5
 debug_shape_custom_color = Color(0.98105055, 2.9841065e-06, 0.54308605, 1)
 
@@ -187,3 +196,35 @@ mesh = SubResource("SphereMesh_6hreo")
 surface_material_override/0 = SubResource("StandardMaterial3D_nj2nm")
 
 [node name="TrajectoryDebugParent" type="Node" parent="."]
+
+[node name="StateLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7612343, 0)
+billboard = 1
+text = "State"
+font_size = 72
+
+[node name="StateMachineEnemy" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_ql82d")
+initial_state = NodePath("EnemyHandStatePatrol")
+metadata/_custom_type_script = "uid://biousaspkorwn"
+
+[node name="EnemyHandStatePatrol" type="Node" parent="StateMachineEnemy"]
+script = ExtResource("4_xtawh")
+metadata/_custom_type_script = "uid://cb3rmvgrw3dm7"
+
+[node name="EnemyHandStateChase" type="Node" parent="StateMachineEnemy"]
+script = ExtResource("5_y4ctl")
+metadata/_custom_type_script = "uid://cywj8r17hglf"
+
+[node name="EnemyHandStateJumpWindup" type="Node" parent="StateMachineEnemy"]
+script = ExtResource("4_nj2nm")
+metadata/_custom_type_script = "uid://cmf7rgwda16qm"
+
+[node name="EnemyHandStateAir" type="Node" parent="StateMachineEnemy"]
+script = ExtResource("7_nklfy")
+
+[node name="EnemyHandStateLand" type="Node" parent="StateMachineEnemy"]
+script = ExtResource("8_y4ctl")
+
+[node name="EnemyHandStateClimb" type="Node" parent="StateMachineEnemy"]
+script = ExtResource("9_nklfy")

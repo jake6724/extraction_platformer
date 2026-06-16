@@ -32,6 +32,13 @@ func move_and_fall(delta: float, _move_speed: float, _move_direction: Vector3, _
 	velocity.x = 0
 	move_and_slide()
 
+## Similar to move and fall, but only adds gravity and does not affect movement on Z-axis. Uses 
+## gravity_acceleration internally
+func fall(delta: float) -> void:
+	velocity.y = move_toward(velocity.y, gravity_default, delta * gravity_acceleration)
+	velocity.x = 0
+	move_and_slide()
+
 ## Attack
 func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void: 
 	if _player_hurtbox:

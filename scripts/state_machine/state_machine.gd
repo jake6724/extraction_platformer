@@ -1,16 +1,18 @@
 class_name StateMachine extends Node
 
 @export var initial_state: State = null
-
 @onready var state: State = (func get_initial_state() -> State:
 	return initial_state if initial_state != null else get_child(0)
 ).call()
 
+var states: Dictionary[String, State]
+
 func _ready() -> void:
 	await owner.ready # Ensure player is available, this will allow State.initialize() to reference player components
 	for state_node: State in find_children("*", "State"):
-		state_node.finished.connect(_transition_to_next_state)
-		state_node.initialize()
+		state_node.tranisition.connect(transition_state)
+		state_node.initialize(owner)
+		states[state_node.name.to_lower()] = state_node
 	state.enter("")
 
 func connect_to_input_signals() -> void:
@@ -25,12 +27,13 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	state.physics_update(delta)
 
-func _transition_to_next_state(target_state_path: String, data: Dictionary = {}) -> void:
-	if not has_node(target_state_path):
-		printerr(owner.name + ": Trying to transition to state " + target_state_path + " but it does not exist.")
+func transition_state(target_state_name: String, data: Dictionary = {}) -> void:
+	target_state_name = target_state_name.to_lower()
+	if not states.has(target_state_name):
+		printerr(owner.name + ": Trying to transition to state " + target_state_name + " but it does not exist.")
 		return
 
 	var previous_state_path := state.name
 	state.exit()
-	state = get_node(target_state_path)
+	state = states[target_state_name]
 	state.enter(previous_state_path, data)
