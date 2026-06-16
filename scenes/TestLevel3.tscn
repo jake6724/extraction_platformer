@@ -153,6 +153,14 @@ collision_mask = 0
 size = Vector3(3, 27.0719, 146.57007)
 material = ExtResource("3_byxhg")
 
+[node name="CSGBox3D17" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -13.3497925, 4.7371445)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(3, 27.0719, 146.57007)
+material = ExtResource("3_byxhg")
+
 [node name="CSGBox3D4" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0500193, -2.7736397)
 use_collision = true
@@ -180,7 +188,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_byxhg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 6.009042, -2.3041687)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 0.58204937, -12.069289)
+
+[node name="EnemyJumper2" parent="Enemies" instance=ExtResource("6_byxhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 0.58204937, -7.9623766)
+
+[node name="EnemyJumper3" parent="Enemies" instance=ExtResource("6_byxhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 0.58204937, 1.9626646)
+
+[node name="EnemyJumper4" parent="Enemies" instance=ExtResource("6_byxhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 6.0090456, -2.5842786)
+
+[node name="EnemyJumper5" parent="Enemies" instance=ExtResource("6_byxhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 14.516225, 3.2338514)
+
+[node name="EnemyJumper6" parent="Enemies" instance=ExtResource("6_byxhg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011843681, 4.78675, -20.723145)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_aarjr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 18)
@@ -301,9 +324,6 @@ debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
 transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, 3)
 loop = false
 
-[node name="EnemyFlying" parent="EnemyPatrols/Path3D/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("7_wgs22")]
-path_follow = NodePath("..")
-
 [node name="Path3D2" type="Path3D" parent="EnemyPatrols"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 14.521744)
 curve = SubResource("Curve3D_byxhg")
@@ -327,7 +347,3 @@ debug_custom_color = Color(1, 0.3097451, 0.43065768, 1)
 transform = Transform3D(0.999999, 0, 0, 0, 0.99999344, 0, 0, 0, 0.9999968, 0, 50, -30)
 progress = 32.999996
 loop = false
-
-[node name="EnemyFlying" parent="EnemyPatrols/Path3D3/PathFollow3D" node_paths=PackedStringArray("path_follow") instance=ExtResource("7_wgs22")]
-path_follow = NodePath("..")
-start_left_to_right = false

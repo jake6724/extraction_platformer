@@ -164,36 +164,41 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 			prev_position = curr_position
 			#await get_tree().create_timer(.05).timeout
 			if shapecast_jump.is_colliding():
-				#print("Shapecast collision: ", shapecast_jump.get_collider(0))
+				var collision_object: Object = shapecast_jump.get_collider(0)
+				print("collision_object: ", collision_object)
 
 				# Trajectory hits player without anything in the way, this is a valid jump and stop early
-				if shapecast_jump.get_collider(0) is Player:
+				if collision_object is Player:
 					print("SELECTED EARLY SUCCESS")
 					return JumpData.Status.SUCCESS
+
 				else:
-					#print("Collision occurred with terrain")
+					print("Collision occurred with terrain")
 					raycast_sight.target_position = to_local(get_x_locked_position(_target.global_transform.origin))
 					raycast_sight.force_raycast_update()
 
 					# Arc Up intersected
 					if _impulse.y > 0:
+						print("is_same_height_as_target: ", is_same_height_as_target(_target))
 						# Check if under a platform and should perform low jump instead
-						if not raycast_sight.is_colliding():
-							print("SELECTED ROOF")
+						if (_target.global_transform.origin.y < collision_object.global_transform.origin.y) and (global_transform.origin.y < collision_object.global_transform.origin.y):
 							return JumpData.Status.UNDER_ROOF
 						else:
 							print("SELECTED CLIMB")
 							return JumpData.Status.CLIMB
 
 					# Arc Down intersected
-					elif _impulse.y < 0 and target_is_player:					
-						if not raycast_sight.is_colliding():
+					elif _impulse.y < 0 and target_is_player:
+						if (_target.global_transform.origin.y < collision_object.global_transform.origin.y) and (global_transform.origin.y < collision_object.global_transform.origin.y):
 							print("SELECTED FALL_CUTOFF")
 							return JumpData.Status.FALL_CUTOFF
 						else:
 							if is_above_player():
 								print("SELECTED ABOVE_PLATFORM")
 								return JumpData.Status.ABOVE_PLATFORM
+					
+					else:
+						print("No options taken")
 		else:
 			count += 1
 		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
@@ -202,9 +207,15 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 	return JumpData.Status.SUCCESS
 
 func get_z_direction(target_position: Vector3) -> Vector3:
-	var zdirection_to_target: float = target_position.z - global_transform.origin.z
-	var direction_to_target: Vector3 = Vector3(0,0,zdirection_to_target).normalized()
-	return direction_to_target
+	# var zdirection_to_target: float = target_position.z - global_transform.origin.z
+	# var direction_to_target: Vector3 = Vector3(0,0,zdirection_to_target).normalized()
+
+	var direction: Vector3 = global_transform.origin.direction_to(target_position)
+	direction.x = 0
+	direction.y = 0
+	direction = direction.normalized()
+
+	return direction
 
 func is_floor_ahead() -> bool:
 	return raycast_floor_ahead.is_colliding()
@@ -240,6 +251,10 @@ func is_under_ceiling() -> bool:
 
 func is_above_player() -> bool:
 	return global_transform.origin.y > (player.global_transform.origin.y + 3)
+
+func is_same_height_as_target(_target: Node3D) -> bool: 
+	var diff: float = abs(global_transform.origin.y - _target.global_transform.origin.y)
+	return diff < .5
 
 func set_state_label(_text: String) -> void:
 	state_label.text = _text

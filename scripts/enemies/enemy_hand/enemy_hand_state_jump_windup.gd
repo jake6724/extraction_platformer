@@ -13,8 +13,8 @@ func initialize(_owner) -> void:
 	super(_owner)
 	enemy.skin.jump_windup_complete.connect(on_jump_windup_complete)
 
-func physics_update(_delta: float) -> void:
-	enemy.velocity = Vector3.ZERO
+func physics_update(delta: float) -> void:
+	enemy.move_and_fall(delta, 0, Vector3.ZERO, 1000)
 
 func enter(_previous_state_path: String, _data := {}) -> void:
 	enemy.set_state_label("JUMP WINDUP")
@@ -25,9 +25,12 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 	# Set the pre-windup impulse, start windup
 	else:
 		target = _data["target"]
+		var z_direction_to_player: Vector3 = enemy.get_z_direction(target.global_transform.origin)
+		enemy.rotate_on_y(z_direction_to_player)
+
 		jump_data_1 = get_jump_data(target)
 		var continue_jump_windup: bool = modify_jump_data_by_status(jump_data_1)
-		if continue_jump_windup:
+		if continue_jump_windup: # No else for this; the match in modify_jump_data_by_status will handle calling transition
 			enemy.skin.jump_windup()
 
 # Calculate post-windup impulse and select which impulse to use
@@ -67,7 +70,8 @@ func get_jump_data(_target: Node3D) -> JumpData:
 ## Trigger a transition to a different state, and no further action should occur in this state
 func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
 	match _jump_data.status:
-		JumpData.Status.SUCCESS: return true
+		JumpData.Status.SUCCESS: 
+			return _jump_data.impulse != Vector3.ZERO
 		JumpData.Status.UNDER_ROOF: 
 			_jump_data.impulse = enemy.get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
 			return true

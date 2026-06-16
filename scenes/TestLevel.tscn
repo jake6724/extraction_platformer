@@ -79,7 +79,17 @@ size = Vector3(1, 1, 13.32251)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1004915, 7.261865)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1004915, 5.8319216)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 14.710424)
+material = ExtResource("1_dojpo")
+script = ExtResource("3_7i0bt")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.769617, -20.32109)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
@@ -99,7 +109,7 @@ script = ExtResource("3_7i0bt")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
 
 [node name="Player" parent="." instance=ExtResource("2_1fpmp")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.03060861, 5.3482075, 7.1836824)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.044023827, 4.812866, 11.551033)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -121,7 +131,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="Enemies" type="Node" parent="."]
 
 [node name="EnemyJumper9" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5214353, -12.681755)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -3.3454046)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)

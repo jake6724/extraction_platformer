@@ -149,7 +149,7 @@ one_shot = true
 [node name="Raycasts" type="Node3D" parent="."]
 
 [node name="RaycastFloorAhead" type="RayCast3D" parent="Raycasts"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012383699, 1.5062873)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.012383699, 2.0350335)
 collision_mask = 4
 
 [node name="RayCastWall" type="RayCast3D" parent="Raycasts"]
