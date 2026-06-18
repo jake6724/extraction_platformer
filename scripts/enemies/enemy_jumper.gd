@@ -84,22 +84,6 @@ func get_x_locked_position(_position: Vector3) -> Vector3:
 	x_locked_position.x = 0
 	return x_locked_position
 
-# func get_jump_data(_target: Node3D) -> JumpData:
-# 	var _jump_data: JumpData = JumpData.new()
-
-# 	# Calc impulse
-# 	var _x_locked_target_position: Vector3 = get_x_locked_position(_target.global_transform.origin)
-# 	var _squared_discriminant: float = compute_jump_impulse_discriminant(_x_locked_target_position)
-# 	var _impulse: Vector3 = get_jump_impulse(_x_locked_target_position, _squared_discriminant)
-# 	# Calc status
-# 	var _status: JumpData.Status = get_jump_trajectory_status(_impulse, _target)
-
-# 	_jump_data.impulse = _impulse
-# 	_jump_data.status = _status
-# 	_jump_data.target_position = _x_locked_target_position
-# 	_jump_data.squared_discriminant = _squared_discriminant
-# 	return _jump_data
-
 func compute_jump_impulse_discriminant(_x_locked_target_position: Vector3) -> float:
 	var initial_velocity: float = jump_power
 	var x_range: float = _x_locked_target_position.z - global_transform.origin.z
@@ -143,18 +127,6 @@ func get_jump_impulse(_target_position: Vector3, squared_discriminant: float, lo
 	var impulse = jump_impulse_direction * initial_velocity
 	if show_debug: debug_draw_jump_trajectory(impulse, _target_position)
 	return impulse
-
-func debug_draw_jump_trajectory(_impulse: Vector3, _player_position: Vector3) -> void:
-	var curr_position: Vector3 = global_transform.origin	
-	# Place a debug mesh at the target position
-	DebugTools.create_debug_sphere(self, _player_position, .3, .6, Color.ORANGE)
-
-	# Place a debug mesh along the jump impulse's trajectory
-	for i in range(trajectory_debug_iterations):
-		# Increment placement position based on trajectory's path at next time step
-		curr_position += (_impulse * trajectory_debug_time_step)
-		DebugTools.create_debug_sphere(self, curr_position, .15, .3, Color.RED)
-		_impulse.y = move_toward(_impulse.y, gravity_default, trajectory_debug_time_step * gravity_acceleration)
 
 func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.Status: 
 	var target_is_player: bool = _target is Player
@@ -230,30 +202,17 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 	print("SELECTED FINAL SUCCESS")
 	return JumpData.Status.SUCCESS
 
-# ## Adjust jump_data's impulse value based on its trajectory and obstacles along its path.
-# ## Returns a bool which describes whether to continue with jump wind up. Certain jump statuses
-# ## Trigger a transition to a different state, and no further action should occur in this state
-# func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
-# 	match _jump_data.status:
-# 		JumpData.Status.SUCCESS: 
-# 			return true
-# 		JumpData.Status.UNDER_ROOF: 
-# 			_jump_data.impulse = get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
-# 			return true
-# 		JumpData.Status.FALL_CUTOFF: 
-# 			_jump_data.impulse = get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
-# 			return true
-# 		JumpData.Status.CLIMB:
-# 			clear_debug_trajectory_points()
-# 			# tranisition.emit("enemyhandstateclimb") 
-# 			return false
-# 		JumpData.Status.ABOVE_PLATFORM: 
-# 			clear_debug_trajectory_points()
-# 			# tranisition.emit("enemyhandstatepatrol") 
-# 			return false
-# 		_: 
-# 			push_error("Unknown _jump_status")
-# 			return false
+func debug_draw_jump_trajectory(_impulse: Vector3, _target_position: Vector3) -> void:
+	var curr_position: Vector3 = global_transform.origin	
+	# Place a debug mesh at the target position
+	DebugTools.create_debug_sphere(self, _target_position, .3, .6, Color.ORANGE)
+
+	# Place a debug mesh along the jump impulse's trajectory
+	for i in range(trajectory_debug_iterations):
+		# Increment placement position based on trajectory's path at next time step
+		curr_position += (_impulse * trajectory_debug_time_step)
+		DebugTools.create_debug_sphere(self, curr_position, .15, .3, Color.RED)
+		_impulse.y = move_toward(_impulse.y, gravity_default, trajectory_debug_time_step * gravity_acceleration)
 
 func get_z_direction(target_position: Vector3) -> Vector3:
 	# var zdirection_to_target: float = target_position.z - global_transform.origin.z

@@ -153,18 +153,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 [node name="EnemyJumper9" parent="Enemies" instance=ExtResource("6_7i0bt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -3.3454046)
 
-[node name="EnemyJumper10" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -10.074633)
-
-[node name="EnemyJumper11" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -16.445524)
-
-[node name="EnemyJumper12" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -24.505104)
-
-[node name="EnemyJumper13" parent="Enemies" instance=ExtResource("6_7i0bt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.8248277, -24.505104)
-
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)
 player = NodePath("../Player")

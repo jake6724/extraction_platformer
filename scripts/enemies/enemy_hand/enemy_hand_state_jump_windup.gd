@@ -11,6 +11,8 @@ var target: Node3D
 
 var is_climbing: bool = false
 
+var skip_second_jump_data_statuses: Array[JumpData.Status] = [JumpData.Status.UNDER_ROOF, JumpData.Status.ABOVE_PLATFORM]
+
 func initialize(_owner) -> void:
 	super(_owner)
 	enemy.skin.jump_windup_complete.connect(on_jump_windup_complete)
@@ -51,10 +53,10 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 		enemy.rotate_on_y(z_direction_to_target)
 		jump_data_1 = get_jump_data(target)
 
-		continue_jump_windup = modify_jump_data_by_status(jump_data_1)
+		continue_jump_windup = modify_jump_data_by_status(jump_data_1, false)
 		print("Jump_data_1 Status: ", enemy.get_jump_status_text(jump_data_1.status))
 		print("Jump_data_1 Impulse: ", jump_data_1.impulse)
-		if continue_jump_windup:
+		if continue_jump_windup and jump_data_1.impulse != Vector3.ZERO:
 			print("Jump continuing to windup")
 			enemy.skin.jump_windup()
 		else:
@@ -63,13 +65,22 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 
 # Calculate post-windup impulse and select which impulse to use
 func on_jump_windup_complete() -> void:
+	# Set defaults
 	var _impulse: Vector3 = jump_data_1.impulse
 	var _status: JumpData.Status = jump_data_1.status
-	if not is_climbing:
-		if jump_data_1.status != JumpData.Status.UNDER_ROOF: # This could be an array if more than one quick-fails
-			jump_data_2 = get_jump_data(target)
-			var continue_jump_windup: bool = modify_jump_data_by_status(jump_data_2)
-			if continue_jump_windup:
+
+	# Just use first jump_data if climbing or if status code in in skip category
+	if not is_climbing and not jump_data_1.status in skip_second_jump_data_statuses:
+		jump_data_2 = get_jump_data(target) 
+
+		# THE +++++Transition to chase from success+++++++ error is here! 
+		# Calling transition on status from the second jump is an issue. If it 
+		# fails in certain cases we just want to use the first jump, not give up like
+		# we would if the first jump completely fails (if first fails we have no backup so more serious)
+		
+		if jump_data_2.impulse != Vector3.ZERO:
+			var continue_jump_windup: bool = modify_jump_data_by_status(jump_data_2, true)
+			if continue_jump_windup and jump_data_2.impulse != Vector3.ZERO:
 				if jump_data_2.impulse != Vector3.ZERO:
 					_impulse = jump_data_2.impulse
 					_status = jump_data_2.status
@@ -88,21 +99,8 @@ func on_jump_windup_complete() -> void:
 		tranisition.emit("enemyhandstateair")
 		return
 	else:
+		print("Final Impulse was ZERO; patrolling")
 		tranisition.emit("enemyhandstatepatrol")
-
-func transition_on_status(_jump_data: JumpData) -> void:
-	print("Transition jump status: ", enemy.get_jump_status_text(_jump_data.status))
-	match _jump_data.status:
-		JumpData.Status.SUCCESS: 
-			print("++++++++++++++++++++++++Transition to chase from success++++++++++++++++++++++++++")
-			tranisition.emit("enemyhandstatechase", {"trigger_jump_delay": .25})
-		JumpData.Status.UNDER_ROOF: push_error("Trying to transition on status that does not require it: ", enemy.get_jump_status_text(_jump_data.status))
-		JumpData.Status.FALL_CUTOFF: push_error("Trying to transition on status that does not require it: ", enemy.get_jump_status_text(_jump_data.status))
-		JumpData.Status.ABOVE_PLATFORM: tranisition.emit("enemyhandstatepatrol")
-		JumpData.Status.CLIMB:
-			if is_climbing: tranisition.emit("enemyhandstatepatrol")
-			else: tranisition.emit("enemyhandstateclimb")
-		_: push_error("Trying to transition on unknown jump_status")
 
 func get_jump_data(_target: Node3D) -> JumpData:
 	var _jump_data: JumpData = JumpData.new()
@@ -123,29 +121,49 @@ func get_jump_data(_target: Node3D) -> JumpData:
 ## Adjust jump_data's impulse value based on its trajectory and obstacles along its path.
 ## Returns a bool which describes whether to continue with jump wind up. Certain jump statuses
 ## Trigger a transition to a different state, and no further action should occur in this state
-func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
+func modify_jump_data_by_status(_jump_data: JumpData, second_jump_data: bool=false) -> bool:
 	match _jump_data.status:
 		JumpData.Status.SUCCESS: 
-			return _jump_data.impulse != Vector3.ZERO
+			# return _jump_data.impulse != Vector3.ZERO
+			return true
 		JumpData.Status.UNDER_ROOF: 
 			_jump_data.impulse = enemy.get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
 			return true
 		JumpData.Status.FALL_CUTOFF: 
 			_jump_data.impulse = enemy.get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
 			return true
+		JumpData.Status.ABOVE_PLATFORM: 
+			# Find a jump point in the direction of player, but at the same level as enemy; low jump to it
+			var z_direction_to_target = enemy.get_z_direction(target.global_transform.origin)
+			var new_target_position: Vector3 = enemy.global_transform.origin + Vector3(0,1.5,(z_direction_to_target.z * 8))
+			_jump_data.impulse = enemy.get_jump_impulse(new_target_position, enemy.compute_jump_impulse_discriminant(new_target_position), true)
+			if enemy.show_debug: 
+				DebugTools.create_debug_sphere(enemy,  new_target_position, .5, 1, Color.GREEN)
+				enemy.debug_draw_jump_trajectory(_jump_data.impulse, target.global_transform.origin)
+			return true
 		JumpData.Status.CLIMB:
 			enemy.clear_debug_trajectory_points()
 			tranisition.emit("enemyhandstateclimb") 
 			return false
-		JumpData.Status.ABOVE_PLATFORM: 
-			# enemy.clear_debug_trajectory_points()
-			# tranisition.emit("enemyhandstatepatrol") 
-			# return false
-			enemy.get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
-			return true
 		_: 
 			push_error("Unknown _jump_status")
 			return false
+
+# Transition to a new state based on the status of _jump_data. Not all options will cause a transition
+func transition_on_status(_jump_data: JumpData) -> void:
+	print("Transition jump status: ", enemy.get_jump_status_text(_jump_data.status))
+	match _jump_data.status:
+		JumpData.Status.SUCCESS: 
+			print("++++++++++++++++++++++++Transition to chase from success++++++++++++++++++++++++++")
+			# tranisition.emit("enemyhandstatechase", {"trigger_jump_delay": .25})
+			tranisition.emit("enemyhandstatepatrol")
+		JumpData.Status.UNDER_ROOF: push_error("Trying to transition on status that does not require it: ", enemy.get_jump_status_text(_jump_data.status))
+		JumpData.Status.FALL_CUTOFF: push_error("Trying to transition on status that does not require it: ", enemy.get_jump_status_text(_jump_data.status))
+		JumpData.Status.ABOVE_PLATFORM: push_error("Trying to transition on status that does not require it: ", enemy.get_jump_status_text(_jump_data.status))
+		JumpData.Status.CLIMB:
+			if is_climbing: tranisition.emit("enemyhandstatepatrol")
+			else: tranisition.emit("enemyhandstateclimb")
+		_: push_error("Trying to transition on unknown jump_status")
 
 func apply_jump(_impulse) -> void:
 	if _impulse != Vector3.ZERO:

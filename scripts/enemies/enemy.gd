@@ -43,10 +43,6 @@ func fall(delta: float) -> void:
 func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void: 
 	if _player_hurtbox:
 		_player_hurtbox.take_damage(global_position, attack_power)
-		
-# func take_damage_old(_direction, _power, _damage) -> void:
-# 	velocity = _direction * _power
-	# flash_mesh_color()
 
 func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_duration: float) -> void:
 	velocity = _direction * _power
@@ -56,11 +52,6 @@ func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_dura
 		die()
 	else:
 		start_hitstun(_hitstun_duration)
-
-# func flash_mesh_color() -> void:
-# 	var flash_tween: Tween = get_tree().create_tween()
-# 	# var mesh_material: StandardMaterial3D = mesh.get_active_material(0)
-# 	# flash_tween.tween_property(mesh_material, "albedo_color", base_color, .25).from(Color.YELLOW)
 
 func die() -> void:
 	queue_free()
@@ -117,18 +108,3 @@ func enable_enemy_collisions_1_frame() -> void:
 	set_collision_mask_value(2, true)
 	await get_tree().process_frame
 	set_collision_mask_value(2, false)
-
-# func create_debug_mesh(_radius: float=0.1, _height: float=0.2, _color: Color=Color.RED) -> MeshInstance3D:
-# 	# Initialize mesh instance, create and configure sphere mesh
-# 	var new_mesh: MeshInstance3D = MeshInstance3D.new()
-# 	var new_sphere_mesh: SphereMesh = SphereMesh.new()
-# 	new_sphere_mesh.radius = _radius
-# 	new_sphere_mesh.height = _height
-# 	new_sphere_mesh.radial_segments = 8
-# 	new_sphere_mesh.rings = 4
-# 	# Assign sphere mesh to mesh instance, create and add material
-# 	new_mesh.mesh = new_sphere_mesh
-# 	var material: StandardMaterial3D = StandardMaterial3D.new()
-# 	material.albedo_color = _color
-# 	new_mesh.material_override = material
-# 	return new_mesh
