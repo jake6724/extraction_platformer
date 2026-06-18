@@ -7,6 +7,7 @@ class_name EnemyJumper extends Enemy
 @export var escape_speed: float = 11.0
 @export var speed_modifier_min: float = -1.0
 @export var speed_modifier_max: float = 1.0
+@export var quit_delay: float = 4.0
 @export_group("Jump")
 @export var jump_power: float = 25.0
 @export var jump_power_modifier_min: float = -4.0
@@ -73,6 +74,9 @@ func _ready():
 
 func _physics_process(_delta):
 	pass
+	# if player:
+	# 	var height_difference: float = abs(player.global_transform.origin.y - global_transform.origin.y)
+	# 	print(height_difference)
 	# print(state_machine.state.name)
 
 func get_x_locked_position(_position: Vector3) -> Vector3:
@@ -80,21 +84,21 @@ func get_x_locked_position(_position: Vector3) -> Vector3:
 	x_locked_position.x = 0
 	return x_locked_position
 
-func get_jump_data(_target: Node3D) -> JumpData:
-	var _jump_data: JumpData = JumpData.new()
+# func get_jump_data(_target: Node3D) -> JumpData:
+# 	var _jump_data: JumpData = JumpData.new()
 
-	# Calc impulse
-	var _x_locked_target_position: Vector3 = get_x_locked_position(_target.global_transform.origin)
-	var _squared_discriminant: float = compute_jump_impulse_discriminant(_x_locked_target_position)
-	var _impulse: Vector3 = get_jump_impulse(_x_locked_target_position, _squared_discriminant)
-	# Calc status
-	var _status: JumpData.Status = get_jump_trajectory_status(_impulse, _target)
+# 	# Calc impulse
+# 	var _x_locked_target_position: Vector3 = get_x_locked_position(_target.global_transform.origin)
+# 	var _squared_discriminant: float = compute_jump_impulse_discriminant(_x_locked_target_position)
+# 	var _impulse: Vector3 = get_jump_impulse(_x_locked_target_position, _squared_discriminant)
+# 	# Calc status
+# 	var _status: JumpData.Status = get_jump_trajectory_status(_impulse, _target)
 
-	_jump_data.impulse = _impulse
-	_jump_data.status = _status
-	_jump_data.target_position = _x_locked_target_position
-	_jump_data.squared_discriminant = _squared_discriminant
-	return _jump_data
+# 	_jump_data.impulse = _impulse
+# 	_jump_data.status = _status
+# 	_jump_data.target_position = _x_locked_target_position
+# 	_jump_data.squared_discriminant = _squared_discriminant
+# 	return _jump_data
 
 func compute_jump_impulse_discriminant(_x_locked_target_position: Vector3) -> float:
 	var initial_velocity: float = jump_power
@@ -226,30 +230,30 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 	print("SELECTED FINAL SUCCESS")
 	return JumpData.Status.SUCCESS
 
-## Adjust jump_data's impulse value based on its trajectory and obstacles along its path.
-## Returns a bool which describes whether to continue with jump wind up. Certain jump statuses
-## Trigger a transition to a different state, and no further action should occur in this state
-func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
-	match _jump_data.status:
-		JumpData.Status.SUCCESS: 
-			return true
-		JumpData.Status.UNDER_ROOF: 
-			_jump_data.impulse = get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
-			return true
-		JumpData.Status.FALL_CUTOFF: 
-			_jump_data.impulse = get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
-			return true
-		JumpData.Status.CLIMB:
-			clear_debug_trajectory_points()
-			# tranisition.emit("enemyhandstateclimb") 
-			return false
-		JumpData.Status.ABOVE_PLATFORM: 
-			clear_debug_trajectory_points()
-			# tranisition.emit("enemyhandstatepatrol") 
-			return false
-		_: 
-			push_error("Unknown _jump_status")
-			return false
+# ## Adjust jump_data's impulse value based on its trajectory and obstacles along its path.
+# ## Returns a bool which describes whether to continue with jump wind up. Certain jump statuses
+# ## Trigger a transition to a different state, and no further action should occur in this state
+# func modify_jump_data_by_status(_jump_data: JumpData) -> bool:
+# 	match _jump_data.status:
+# 		JumpData.Status.SUCCESS: 
+# 			return true
+# 		JumpData.Status.UNDER_ROOF: 
+# 			_jump_data.impulse = get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
+# 			return true
+# 		JumpData.Status.FALL_CUTOFF: 
+# 			_jump_data.impulse = get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
+# 			return true
+# 		JumpData.Status.CLIMB:
+# 			clear_debug_trajectory_points()
+# 			# tranisition.emit("enemyhandstateclimb") 
+# 			return false
+# 		JumpData.Status.ABOVE_PLATFORM: 
+# 			clear_debug_trajectory_points()
+# 			# tranisition.emit("enemyhandstatepatrol") 
+# 			return false
+# 		_: 
+# 			push_error("Unknown _jump_status")
+# 			return false
 
 func get_z_direction(target_position: Vector3) -> Vector3:
 	# var zdirection_to_target: float = target_position.z - global_transform.origin.z

@@ -89,8 +89,8 @@ radius = 0.71875
 height = 2.2944336
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_o4126"]
-radius = 0.46435547
-height = 1.7145138
+radius = 0.76171875
+height = 3.0301085
 
 [sub_resource type="SphereMesh" id="SphereMesh_70d11"]
 
@@ -385,7 +385,7 @@ collision_layer = 0
 collision_mask = 16
 
 [node name="HitboxForward" type="CollisionShape3D" parent="AttackAreas/AreaAttackForward"]
-transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665768, 0.84254223, 1.2007463)
+transform = Transform3D(0.013107, -9.313226e-10, 0.9999141, 0.9998734, -0.00902323, -0.013106467, 0.009022455, 0.9999593, -0.00011826772, -0.0013665773, 0.8366068, 1.8585169)
 shape = SubResource("CapsuleShape3D_o4126")
 debug_color = Color(0.89702433, 0, 0.07988889, 0.41960785)
 

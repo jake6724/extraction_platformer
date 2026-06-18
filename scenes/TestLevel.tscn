@@ -64,7 +64,6 @@ material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D10" type="CSGBox3D" parent="Terrain"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.294181, -9.942158)
-visible = false
 use_collision = true
 collision_layer = 4
 collision_mask = 0
@@ -85,6 +84,26 @@ use_collision = true
 collision_layer = 4
 collision_mask = 0
 size = Vector3(1, 1, 14.710424)
+material = ExtResource("1_dojpo")
+script = ExtResource("3_7i0bt")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.874753, -40.966404)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 37.49579, 10.059436)
+material = ExtResource("1_dojpo")
+script = ExtResource("3_7i0bt")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.874753, 29.081245)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 37.49579, 10.059436)
 material = ExtResource("1_dojpo")
 script = ExtResource("3_7i0bt")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
@@ -133,6 +152,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
 
 [node name="EnemyJumper9" parent="Enemies" instance=ExtResource("6_7i0bt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -3.3454046)
+
+[node name="EnemyJumper10" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -10.074633)
+
+[node name="EnemyJumper11" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -16.445524)
+
+[node name="EnemyJumper12" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1073346, -24.505104)
+
+[node name="EnemyJumper13" parent="Enemies" instance=ExtResource("6_7i0bt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.8248277, -24.505104)
 
 [node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("6_5n3yh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)

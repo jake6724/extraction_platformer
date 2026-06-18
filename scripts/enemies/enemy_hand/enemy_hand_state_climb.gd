@@ -1,5 +1,7 @@
 class_name EnemyHandStateClimb extends StateEnemy
 
+## CHeck both ways when reposition, if the first doesnt work. If both dont work, patrol
+
 var smart_platform: SmartPlatform = null
 var selected_edge: SmartPlatform.Edge = SmartPlatform.Edge.LEFT
 var edge_options: Array[SmartPlatform.Edge] = [SmartPlatform.Edge.LEFT, SmartPlatform.Edge.RIGHT]
@@ -9,31 +11,35 @@ var left_checked: bool = false
 var right_checked: bool = false
 
 var jump_triggered: bool = false
+var state_active: bool = true
 
 func enter(_previous_state_path: String, _data := {}) -> void:
+	state_active = true
 	enemy.set_state_label("CLIMB")
 	smart_platform = get_target()
 	selected_edge = edge_options.pick_random()
 	if not smart_platform: # If can't find a smart platform between them, lose aggro and start patrolling
 		tranisition.emit("enemyhandstatepatrol") 
+		state_active = false
 		print("COULD NOT FIND A SMART PLATFORM")
 		return
 	
 	var edge_position: Vector3 = smart_platform.edges[selected_edge].global_transform.origin
 	direction_to_edge = enemy.get_z_direction(edge_position)
-	#print(direction_to_edge)
 
 func exit() -> void:
 	smart_platform = null
 	jump_triggered = false
+	state_active = false
 
 func physics_update(delta: float) -> void:
-	if smart_platform and not jump_triggered:
-		reposition(delta)
-		if can_jump():
-			jump_triggered = true
-			tranisition.emit("enemyhandstatejumpwindup", {"target": smart_platform.edges[selected_edge]})
-			return
+	if state_active:
+		if smart_platform and not jump_triggered:
+			reposition(delta)
+			if can_jump():
+				jump_triggered = true
+				tranisition.emit("enemyhandstatejumpwindup", {"target": smart_platform.edges[selected_edge]})
+				return
 
 func get_target() -> SmartPlatform:
 	enemy.raycast_sight.target_position = enemy.raycast_sight.to_local(enemy.get_x_locked_position(enemy.player.global_transform.origin))
