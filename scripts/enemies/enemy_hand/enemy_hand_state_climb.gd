@@ -9,21 +9,16 @@ var direction_to_edge: Vector3
 
 var initial_direction_checked: bool = false
 
-# var left_checked: bool = false
-# var right_checked: bool = false
-
 var jump_triggered: bool = false
 var state_active: bool = true
 
 func enter(_previous_state_path: String, _data := {}) -> void:
-	print("----------------------------ENTERED CLIMB---------------------------------")
 	state_active = true
 	jump_triggered = false
 	enemy.set_state_label("CLIMB")
 	smart_platform = get_target()
 	selected_edge = edge_options.pick_random()
 	if not smart_platform: # If can't find a smart platform between them, lose aggro and start patrolling
-		print("COULD NOT FIND A SMART PLATFORM")
 		tranisition.emit("enemyhandstatepatrol") 
 		state_active = false
 		return
@@ -32,7 +27,6 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 	direction_to_edge = enemy.get_z_direction(edge_position)
 
 func exit() -> void:
-	print("+++-------------------------EXITED CLIMB------------------------------+++")
 	smart_platform = null
 	jump_triggered = false
 	state_active = false
@@ -43,7 +37,6 @@ func physics_update(delta: float) -> void:
 			reposition(delta)
 			if can_jump():
 				jump_triggered = true
-				print("!CLIMB CAN JUMP!")
 				tranisition.emit("enemyhandstatejumpwindup", {"target": smart_platform.edges[selected_edge]})
 				return
 
@@ -57,11 +50,9 @@ func get_target() -> SmartPlatform:
 	return null
 
 func reposition(delta: float) -> void:
-	print("Repositioning")
 	enemy.move_and_fall(delta, enemy.chase_speed, direction_to_edge, enemy.acceleration)
 	if enemy.is_wall_ahead() or not enemy.is_floor_ahead():
 		if not initial_direction_checked:
-			print("CLIMB REPOSITION HIT OBSTACLE, SWITCHING!")
 			initial_direction_checked = true
 			direction_to_edge *= -1
 			if selected_edge == SmartPlatform.Edge.LEFT:
@@ -71,7 +62,6 @@ func reposition(delta: float) -> void:
 			enemy.rotate_on_y(direction_to_edge)
 		else:
 			state_active = false
-			print("CLIMB HIT OBSTACLE IN EACH DIRECTION: GIVING UP!")
 			tranisition.emit("enemyhandstatepatrol")
 
 func can_jump() -> bool:	
@@ -81,7 +71,6 @@ func can_jump() -> bool:
 	var distance_to_selected_edge = enemy.global_transform.origin.distance_to(smart_platform.edges[selected_edge].global_transform.origin)
 	
 	if distance_to_selected_edge > 8 and distance_to_selected_edge < 16:
-		print("IN RANGE TO JUMP CLIMB")
 		return true
 
 	return false

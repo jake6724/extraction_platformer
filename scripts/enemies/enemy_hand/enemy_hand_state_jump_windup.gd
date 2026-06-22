@@ -17,16 +17,13 @@ func physics_update(delta: float) -> void:
 	enemy.move_and_fall(delta, 0, Vector3.ZERO, 1000)
 
 func enter(_previous_state_path: String, _data := {}) -> void:
-	print("==========================ENTERED JUMP WINDUP===================================")
 	enemy.set_state_label("JUMP WINDUP")
 	# Fail and write error to console if missing data
 	if not _data.has("target"):
-		push_error(name, ": enter() called with incomplete _data; missing 'target' key. _data = ", _data)
+		printerr(name, ": enter() called with incomplete _data; missing 'target' key. _data = ", _data)
 		return
 	else:
 		is_climbing = _previous_state_path.to_lower() == "enemyhandstateclimb"
-		print("_previous_state_path.to_lower(): ", _previous_state_path.to_lower())
-		print("Is climbing = ", is_climbing)
 		var continue_jump_windup: bool
 		var z_direction_to_target: Vector3
 
@@ -36,11 +33,8 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 			enemy.rotate_on_y(z_direction_to_target)
 			jump_data_1 = get_jump_data(target)
 			if jump_data_1.status == JumpData.Status.SUCCESS and jump_data_1.impulse != Vector3.ZERO:
-				print("Climb jump found player")
 				enemy.skin.jump_windup()
 				return
-			else:
-				print("Is climbing jump to player failed. Going back to target jump")
 
 		# Set the pre-windup impulse, start windup
 		target = _data["target"]

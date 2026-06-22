@@ -177,6 +177,8 @@ collision_mask = 4
 [node name="RayCastCeiling" type="RayCast3D" parent="Raycasts"]
 target_position = Vector3(0, 5, 0)
 collision_mask = 4
+debug_shape_custom_color = Color(0.66224086, 0.3334711, 1.92523e-07, 1)
+debug_shape_thickness = 5
 
 [node name="OutLeft" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_6hreo")

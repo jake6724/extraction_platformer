@@ -33,14 +33,12 @@ func on_timer_trigger_jump_delay_timeout() -> void:
 	can_trigger_jump = true
 
 func on_timer_quit_chase_timeout() -> void:
-	print("QUIT TIMER TRIGGERED")
 	tranisition.emit("enemyhandstatepatrol")
 
 func physics_update(delta: float) -> void:
 	chase(delta)
 
 func chase(delta: float) -> void:
-	# enable_enemy_collisions_1_frame()
 	var z_direction_to_player: float = enemy.player.global_transform.origin.z - enemy.global_transform.origin.z
 	var _direction_to_player: Vector3 = Vector3(0,0,z_direction_to_player).normalized()
 
@@ -51,7 +49,6 @@ func chase(delta: float) -> void:
 	var height_difference: float = abs(enemy.player.global_transform.origin.y - enemy.global_transform.origin.y)
 
 	if timer_quit_chase.is_stopped() and height_difference > enemy._max_jump_height:
-		print("Start quitting")
 		timer_quit_chase.start(enemy.quit_delay)
 		return
 
@@ -61,7 +58,6 @@ func chase(delta: float) -> void:
 	# Take a jump if no where left to run
 	if not enemy.is_floor_ahead() or enemy.is_wall_ahead():
 		enemy.rotate_on_y(-_direction_to_player)
-		print("JUMPED CAUSE I GOT NO WHERE ELSE TO BE")
 		tranisition.emit("enemyhandstatejumpwindup", {"target": enemy.player})
 
 	# Too close to player, move away
@@ -74,6 +70,4 @@ func chase(delta: float) -> void:
 		enemy.move_and_fall(delta, enemy.chase_speed, _direction_to_player, enemy.acceleration)
 	# In jump range
 	else:
-		print("JUMP IN CHASE RANGE")
-		# if can_trigger_jump:
 		tranisition.emit("enemyhandstatejumpwindup", {"target": enemy.player})

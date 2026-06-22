@@ -82,11 +82,11 @@ scale_curve = SubResource("CurveTexture_bruh7")
 radius = 0.7172312
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_lkdrv"]
-radius = 1.0709678
+radius = 1.2617884
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_70d11"]
-radius = 0.71875
-height = 2.2944336
+radius = 1.1665039
+height = 2.3330078
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_o4126"]
 radius = 0.76171875
@@ -366,7 +366,7 @@ collision_layer = 0
 collision_mask = 16
 
 [node name="HitboxDown1" type="CollisionShape3D" parent="AttackAreas/AreaAttackDown"]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, -0.0003798604, 0)
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, -0.33768302, 0)
 shape = SubResource("SphereShape3D_lkdrv")
 debug_color = Color(1, 0, 0.16470589, 0.41960785)
 

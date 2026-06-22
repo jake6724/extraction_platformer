@@ -164,18 +164,15 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 			shapecast_jump.target_position = to_local(curr_position) - shapecast_jump.transform.origin
 			shapecast_jump.force_shapecast_update()
 			prev_position = curr_position
-			#await get_tree().create_timer(.05).timeout
+
 			if shapecast_jump.is_colliding():
 				var collision_object: Object = shapecast_jump.get_collider(0)
-				print("collision_object: ", collision_object)
 
 				# Trajectory hits player without anything in the way, this is a valid jump and stop early
 				if collision_object is Player:
-					print("SELECTED EARLY SUCCESS")
 					return JumpData.Status.SUCCESS
 
 				else:
-					print("Collision occurred with terrain")
 					raycast_sight.target_position = to_local(get_x_locked_position(_target.global_transform.origin))
 					raycast_sight.force_raycast_update()
 
@@ -185,21 +182,17 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 						if (_target.global_transform.origin.y < collision_object.global_transform.origin.y) and (global_transform.origin.y < collision_object.global_transform.origin.y):
 							return JumpData.Status.UNDER_ROOF
 						else:
-							print("SELECTED CLIMB")
 							return JumpData.Status.CLIMB
 
 					# Arc Down intersected
 					elif _impulse.y < 0:
 						if target_is_player:
 							if (_target.global_transform.origin.y < collision_object.global_transform.origin.y) and (global_transform.origin.y < collision_object.global_transform.origin.y):
-								print("SELECTED FALL_CUTOFF")
 								return JumpData.Status.FALL_CUTOFF
 							else:
 								if is_above_player():
-									print("SELECTED ABOVE_PLATFORM")
 									return JumpData.Status.ABOVE_PLATFORM
 						else:
-							print("Jump arc intersected down, and target WAS NOT player")
 							return JumpData.Status.SUCCESS
 
 					else:
@@ -209,7 +202,7 @@ func get_jump_trajectory_status(_impulse: Vector3, _target: Node3D) -> JumpData.
 			count += 1
 		_impulse.y = move_toward(_impulse.y, gravity_default, local_timestep * gravity_acceleration)
 
-	print("SELECTED FINAL SUCCESS")
+	# print("SELECTED FINAL SUCCESS")
 	return JumpData.Status.SUCCESS
 
 func debug_draw_jump_trajectory(_impulse: Vector3, _target_position: Vector3) -> void:
@@ -276,3 +269,7 @@ func is_same_height_as_target(_target: Node3D) -> bool:
 
 func set_state_label(_text: String) -> void:
 	state_label.text = _text
+
+func die() -> void:
+	clear_debug_trajectory_points()
+	queue_free()
