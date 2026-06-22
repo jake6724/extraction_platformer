@@ -18,6 +18,7 @@ var state_active: bool = true
 func enter(_previous_state_path: String, _data := {}) -> void:
 	print("----------------------------ENTERED CLIMB---------------------------------")
 	state_active = true
+	jump_triggered = false
 	enemy.set_state_label("CLIMB")
 	smart_platform = get_target()
 	selected_edge = edge_options.pick_random()
@@ -74,7 +75,7 @@ func reposition(delta: float) -> void:
 			tranisition.emit("enemyhandstatepatrol")
 
 func can_jump() -> bool:	
-	if enemy.raycast_ceiling.is_colliding():
+	if enemy.raycast_ceiling.is_colliding() or not smart_platform:
 		return false
 	
 	var distance_to_selected_edge = enemy.global_transform.origin.distance_to(smart_platform.edges[selected_edge].global_transform.origin)

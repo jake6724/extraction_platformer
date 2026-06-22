@@ -110,7 +110,7 @@ script = ExtResource("3_7i0bt")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
 
 [node name="CSGBox3D9" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.121271, -20.32109)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.0050945, -20.32109)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
