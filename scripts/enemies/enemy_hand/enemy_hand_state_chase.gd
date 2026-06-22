@@ -5,8 +5,6 @@ var timer_trigger_jump_delay = Timer.new()
 
 var timer_quit_chase: Timer = Timer.new()
 
-
-
 func _ready():
 	timer_trigger_jump_delay.one_shot = true
 	timer_trigger_jump_delay.autostart = false
@@ -19,6 +17,8 @@ func _ready():
 	timer_quit_chase.timeout.connect(on_timer_quit_chase_timeout)
 
 func enter(_previous_state_path: String, _data := {}) -> void:
+	var z_direction_to_player: float = enemy.player.global_transform.origin.z - enemy.global_transform.origin.z
+	enemy.rotate_on_y(Vector3(0,0,z_direction_to_player))
 	if _data.has("trigger_jump_delay"):
 		can_trigger_jump = false
 		timer_trigger_jump_delay.start(_data["trigger_jump_delay"])

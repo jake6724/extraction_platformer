@@ -80,11 +80,11 @@ size = Vector3(1, 1, 13.32251)
 material = ExtResource("1_dojpo")
 
 [node name="CSGBox3D6" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1004915, 5.8319216)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1004915, 8.554157)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
-size = Vector3(1, 1, 14.710424)
+size = Vector3(1, 1, 20.154896)
 material = ExtResource("1_dojpo")
 script = ExtResource("3_7i0bt")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
@@ -100,7 +100,7 @@ script = ExtResource("3_7i0bt")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
 
 [node name="CSGBox3D12" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.874753, 29.081245)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.874753, 26.96326)
 use_collision = true
 collision_layer = 4
 collision_mask = 0
@@ -110,7 +110,7 @@ script = ExtResource("3_7i0bt")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
 
 [node name="CSGBox3D9" type="CSGBox3D" parent="Terrain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.769617, -20.32109)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.121271, -20.32109)
 use_collision = true
 collision_layer = 4
 collision_mask = 0

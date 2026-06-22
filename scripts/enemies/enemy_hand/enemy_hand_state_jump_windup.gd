@@ -53,6 +53,7 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 		if continue_jump_windup and jump_data_1.impulse != Vector3.ZERO:
 			enemy.skin.jump_windup()
 		else:
+			print("Triggering a transition")
 			trigger_jump_data_transition(jump_data_1)
 
 # Calculate post-windup impulse and select which impulse to use
@@ -80,17 +81,12 @@ func can_continue_from_jump_data_status(_jump_data: JumpData) -> bool:
 			_jump_data.impulse = enemy.get_jump_impulse(_jump_data.target_position, _jump_data.squared_discriminant, true)
 			return true
 		JumpData.Status.ABOVE_PLATFORM: 
-			# Find a jump point in the direction of player, but at the same level as enemy; low jump to it
-			var z_direction_to_target = enemy.get_z_direction(target.global_transform.origin)
-			var new_target_position: Vector3 = enemy.global_transform.origin + Vector3(0,1.5,(z_direction_to_target.z * 8))
-			_jump_data.impulse = enemy.get_jump_impulse(new_target_position, enemy.compute_jump_impulse_discriminant(new_target_position), true)
-			if enemy.show_debug: 
-				DebugTools.create_debug_sphere(enemy,  new_target_position, .5, 1, Color.GREEN)
-				enemy.debug_draw_jump_trajectory(_jump_data.impulse, target.global_transform.origin)
+			_jump_data.impulse = get_low_jump_impulse_in_player_direction()
+			return true
+		JumpData.Status.FAILED_IMPULSE:
+			_jump_data.impulse = get_low_jump_impulse_in_player_direction()
 			return true
 		JumpData.Status.CLIMB:
-			return false
-		JumpData.Status.FAILED_IMPULSE:
 			return false
 		_: 
 			push_error("Unknown _jump_status")
@@ -117,8 +113,6 @@ func trigger_jump_data_transition(_jump_data: JumpData) -> void:
 			enemy.clear_debug_trajectory_points()
 			if is_climbing: tranisition.emit("enemyhandstatepatrol") # Don't transition back into climb if already climbing
 			else: tranisition.emit("enemyhandstateclimb") 
-		JumpData.Status.FAILED_IMPULSE:
-			tranisition.emit("enemyhandstatepatrol") 
 		_: 
 			push_error("Trying to transition on a JumpStatus that does not require it. JumpData.Status= ", enemy.get_jump_status_text(_jump_data.status))
 
@@ -148,3 +142,12 @@ func get_jump_data(_target: Node3D) -> JumpData:
 func apply_jump(_impulse) -> void:
 	if _impulse != Vector3.ZERO:
 		enemy.velocity = _impulse
+
+func get_low_jump_impulse_in_player_direction() -> Vector3:
+	var z_direction_to_target = enemy.get_z_direction(target.global_transform.origin)
+	var new_target_position: Vector3 = enemy.global_transform.origin + Vector3(0,1.5,(z_direction_to_target.z * 8))
+	var _impulse = enemy.get_jump_impulse(new_target_position, enemy.compute_jump_impulse_discriminant(new_target_position), true)
+	if enemy.show_debug: 
+		DebugTools.create_debug_sphere(enemy, new_target_position, .5, 1, Color.GREEN)
+		enemy.debug_draw_jump_trajectory(_impulse, target.global_transform.origin)
+	return _impulse

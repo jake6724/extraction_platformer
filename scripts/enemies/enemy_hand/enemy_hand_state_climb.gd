@@ -7,8 +7,10 @@ var selected_edge: SmartPlatform.Edge = SmartPlatform.Edge.LEFT
 var edge_options: Array[SmartPlatform.Edge] = [SmartPlatform.Edge.LEFT, SmartPlatform.Edge.RIGHT]
 var direction_to_edge: Vector3
 
-var left_checked: bool = false
-var right_checked: bool = false
+var initial_direction_checked: bool = false
+
+# var left_checked: bool = false
+# var right_checked: bool = false
 
 var jump_triggered: bool = false
 var state_active: bool = true
@@ -54,8 +56,22 @@ func get_target() -> SmartPlatform:
 	return null
 
 func reposition(delta: float) -> void:
-	#print("Repositioning")
+	print("Repositioning")
 	enemy.move_and_fall(delta, enemy.chase_speed, direction_to_edge, enemy.acceleration)
+	if enemy.is_wall_ahead() or not enemy.is_floor_ahead():
+		if not initial_direction_checked:
+			print("CLIMB REPOSITION HIT OBSTACLE, SWITCHING!")
+			initial_direction_checked = true
+			direction_to_edge *= -1
+			if selected_edge == SmartPlatform.Edge.LEFT:
+				selected_edge = SmartPlatform.Edge.RIGHT
+			else:
+				selected_edge = SmartPlatform.Edge.LEFT
+			enemy.rotate_on_y(direction_to_edge)
+		else:
+			state_active = false
+			print("CLIMB HIT OBSTACLE IN EACH DIRECTION: GIVING UP!")
+			tranisition.emit("enemyhandstatepatrol")
 
 func can_jump() -> bool:	
 	if enemy.raycast_ceiling.is_colliding():
@@ -74,13 +90,3 @@ func get_selected_edge(_smart_platform: SmartPlatform, _selected_edge: SmartPlat
 		return _smart_platform.left_edge
 	else:
 		return _smart_platform.right_edge
-
-# func climb_jump() -> void:
-# 	var target = smart_platform.edges[selected_edge]
-# 	var z_direction_to_target: Vector3 = enemy.get_z_direction(target.global_transform.origin)
-# 	enemy.rotate_on_y(z_direction_to_target)
-
-# 	var jump_data_1 = enemy.get_jump_data(target)
-# 	modify_jump_data_by_status(jump_data_1)
-# 	if continue_jump_windup: # No else for this; the match in modify_jump_data_by_status will handle calling transition
-# 		enemy.skin.jump_windup()
