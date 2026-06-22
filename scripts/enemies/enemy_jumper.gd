@@ -18,6 +18,7 @@ class_name EnemyJumper extends Enemy
 @export var max_jump_trigger_distance: float = 7.0
 @export var min_jump_trigger_distance: float = 5.0
 var _jump_windup_speed_scale: float
+var _max_jump_height: float
 @export_group("Climb")
 var _climb_move_direction: Vector3
 var _roof_platform: SmartPlatform
@@ -71,6 +72,15 @@ func _ready():
 	inner_range_left.visible = show_debug
 	inner_range_right.visible = show_debug
 	skin.run()
+
+	_max_jump_height = get_max_jump_height()
+
+func get_max_jump_height() -> float:
+	var v_squared: float = pow(jump_power, 2)
+	var denominator: float = 2 * abs(gravity_default)
+	var max_height: float = v_squared / denominator
+	DebugTools.create_debug_sphere(self, global_transform.origin + Vector3(0,max_height,0), 1,2,Color.MAGENTA)
+	return max_height
 
 func _physics_process(_delta):
 	pass

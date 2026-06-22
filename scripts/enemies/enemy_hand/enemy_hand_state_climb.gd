@@ -14,20 +14,22 @@ var jump_triggered: bool = false
 var state_active: bool = true
 
 func enter(_previous_state_path: String, _data := {}) -> void:
+	print("----------------------------ENTERED CLIMB---------------------------------")
 	state_active = true
 	enemy.set_state_label("CLIMB")
 	smart_platform = get_target()
 	selected_edge = edge_options.pick_random()
 	if not smart_platform: # If can't find a smart platform between them, lose aggro and start patrolling
+		print("COULD NOT FIND A SMART PLATFORM")
 		tranisition.emit("enemyhandstatepatrol") 
 		state_active = false
-		print("COULD NOT FIND A SMART PLATFORM")
 		return
 	
 	var edge_position: Vector3 = smart_platform.edges[selected_edge].global_transform.origin
 	direction_to_edge = enemy.get_z_direction(edge_position)
 
 func exit() -> void:
+	print("+++-------------------------EXITED CLIMB------------------------------+++")
 	smart_platform = null
 	jump_triggered = false
 	state_active = false
@@ -38,6 +40,7 @@ func physics_update(delta: float) -> void:
 			reposition(delta)
 			if can_jump():
 				jump_triggered = true
+				print("!CLIMB CAN JUMP!")
 				tranisition.emit("enemyhandstatejumpwindup", {"target": smart_platform.edges[selected_edge]})
 				return
 

@@ -1,6 +1,6 @@
 class_name JumpData extends RefCounted
 
-enum Status {SUCCESS, UNDER_ROOF, FALL_CUTOFF, ABOVE_PLATFORM, CLIMB}
+enum Status {SUCCESS, UNDER_ROOF, FALL_CUTOFF, ABOVE_PLATFORM, CLIMB, FAILED_IMPULSE}
 
 var impulse: Vector3
 var status: Status
