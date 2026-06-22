@@ -42,5 +42,4 @@ func on_area_detect_player_body_entered(_player: Player) -> void:
 
 func on_area_detect_player_body_exited(_player: Player) -> void:
 	if can_detect_player:
-		print("XXXXXXXXXXXXXXXXXJumping because of area exitXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 		tranisition.emit("enemyhandstatejumpwindup", {"target": _player})

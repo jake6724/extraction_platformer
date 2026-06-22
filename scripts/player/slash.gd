@@ -4,5 +4,4 @@ class_name Slash extends Node3D
 @export var parent: Player
 
 func slash() -> void:
-	print("Playing slash")
 	animation_player.play("slash")

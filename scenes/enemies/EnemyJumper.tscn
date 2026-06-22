@@ -69,6 +69,7 @@ raycast_ceiling = NodePath("Raycasts/RayCastCeiling")
 shapecast_jump = NodePath("Raycasts/ShapeCastJump")
 state_machine = NodePath("StateMachineEnemy")
 trajectory_debug_parent = NodePath("TrajectoryDebugParent")
+show_debug = false
 outer_range_left = NodePath("OutLeft")
 outer_range_right = NodePath("OutRight")
 inner_range_left = NodePath("InLeft")
@@ -200,6 +201,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_nj2nm")
 
 [node name="StateLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7612343, 0)
+visible = false
 billboard = 1
 text = "State"
 font_size = 72

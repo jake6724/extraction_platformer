@@ -47,7 +47,6 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 		if continue_jump_windup and jump_data_1.impulse != Vector3.ZERO:
 			enemy.skin.jump_windup()
 		else:
-			print("Triggering a transition")
 			trigger_jump_data_transition(jump_data_1)
 
 # Calculate post-windup impulse and select which impulse to use
