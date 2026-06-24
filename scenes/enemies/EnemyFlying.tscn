@@ -71,15 +71,17 @@ material = SubResource("StandardMaterial3D_v6fml")
 radius = 0.25
 height = 0.5
 
-[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "area_attack", "skin", "timer_hitstun", "body_collider")]
+[node name="EnemyFlying" type="CharacterBody3D" node_paths=PackedStringArray("raycast_detect_top", "raycast_detect_center", "raycast_detect_bottom", "area_detect_player", "timer_chase_quit", "timer_dash_charge", "timer_dash_cooldown", "timer_post_dash", "death_particles", "move_indicator", "last_seen_player_position_indicator", "state_label", "area_attack", "skin", "timer_hitstun", "body_collider")]
 collision_layer = 2
-collision_mask = 6
+collision_mask = 4
 script = ExtResource("1_ayqf6")
 raycast_detect_top = NodePath("RaycastDetectTop")
 raycast_detect_center = NodePath("RaycastDetectCenter")
 raycast_detect_bottom = NodePath("RayCastDetectBottom")
 area_detect_player = NodePath("AreaDetectPlayer")
-patrol_speed_scale = 1.0
+patrol_speed_scale = 0.2
+chase_speed_min = 10.0
+chase_speed_max = 12.0
 timer_chase_quit = NodePath("Timers/TimerChaseQuit")
 timer_dash_charge = NodePath("Timers/TimerDashCharge")
 timer_dash_cooldown = NodePath("Timers/TimerDashCooldown")
@@ -87,9 +89,9 @@ timer_post_dash = NodePath("Timers/TimerPostDash")
 death_particles = NodePath("DeathParticles")
 move_indicator = NodePath("MoveIndicator")
 last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator")
+state_label = NodePath("StateLabel")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyCellBatSkin")
-health = 1
 timer_hitstun = NodePath("Timers/TimerHitstun")
 body_collider = NodePath("BodyCollider")
 metadata/_custom_type_script = "uid://bhegt4y07ydw8"
@@ -132,6 +134,7 @@ collide_with_areas = true
 
 [node name="LastSeenPlayerPositionIndicator" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0039067, 0)
+visible = false
 mesh = SubResource("SphereMesh_2xq3x")
 surface_material_override/0 = SubResource("StandardMaterial3D_fadmd")
 
@@ -190,3 +193,10 @@ one_shot = true
 explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_x246h")
 draw_pass_1 = SubResource("SphereMesh_cnk4h")
+
+[node name="StateLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7612343, 0)
+visible = false
+billboard = 1
+text = "State"
+font_size = 128

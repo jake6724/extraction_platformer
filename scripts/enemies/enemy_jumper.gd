@@ -2,6 +2,7 @@ class_name EnemyJumper extends Enemy
 
 @export_group("Patrol")
 @export var patrol_speed: float = 3.0
+var _current_patrol_direction: Vector3
 @export_group("Chase")
 @export var chase_speed: float = 5.0
 @export var escape_speed: float = 11.0
@@ -74,6 +75,9 @@ func _ready():
 	skin.run()
 
 	_max_jump_height = get_max_jump_height()
+
+func configure_spawn(_initial_patrol_direction: Vector3) -> void:
+	_current_patrol_direction = _initial_patrol_direction
 
 func get_max_jump_height() -> float:
 	var v_squared: float = pow(jump_power, 2)
@@ -272,4 +276,4 @@ func set_state_label(_text: String) -> void:
 
 func die() -> void:
 	clear_debug_trajectory_points()
-	queue_free()
+	super()

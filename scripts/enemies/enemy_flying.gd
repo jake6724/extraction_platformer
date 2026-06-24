@@ -53,6 +53,7 @@ var _dash_target_position: Vector3
 @export var show_debug: bool = false
 @export var move_indicator: MeshInstance3D
 @export var last_seen_player_position_indicator: MeshInstance3D
+@export var state_label: Label3D
 # @export var skin: EnemyCellBatSkin
 
 enum EnemyState {IDLE, PATROL, CHASE, CHARGE, DASH, HIT, ALERT}
@@ -102,7 +103,9 @@ func configure_spawn(_path_follow: PathFollow3D) -> void:
 	current_state = EnemyState.PATROL
 
 func _physics_process(delta):
-	if show_debug: print_state(current_state)
+	if show_debug: 
+		print_state(current_state)
+	update_state_label(current_state)
 	match current_state:
 		EnemyState.IDLE: idle(delta)
 		EnemyState.PATROL: patrol(delta)
@@ -116,15 +119,12 @@ func _physics_process(delta):
 func patrol(delta: float) -> void:
 	path_follow.progress_ratio = clampf(path_follow.progress_ratio + (delta * patrol_speed_scale), 0.0, 1.0)
 	
-	print(path_follow.progress_ratio)
 	if is_equal_approx(path_follow.progress_ratio, 1.0):
-		print("FLIP")
 		patrol_speed_scale *= -1
 		path_follow.progress_ratio = .99
 		#skin.flip_horizontal(true)
 		skin.mirror_mesh(true)
 	elif is_equal_approx(path_follow.progress_ratio, 0.0):
-		print("FLIP")
 		patrol_speed_scale *= -1
 		path_follow.progress_ratio = .01
 		#skin.flip_horizontal(false)
@@ -394,7 +394,8 @@ func on_area_detect_player_body_exited(_player: Player) -> void:
 	pass
 
 func on_timer_chase_quit_timeout() -> void:
-	current_state = EnemyState.IDLE
+	print("Gave up!")
+	current_state = EnemyState.ALERT
 
 func die() -> void:
 	skin.hide()
@@ -426,12 +427,19 @@ func stop_hitstun() -> void:
 		start_dash_cooldown(dash_initial_cooldown_duration_min, dash_initial_cooldown_duration_max)
 
 func print_state(state: EnemyState) -> void:
+	print(get_state_text(state))
+
+func get_state_text(_state: EnemyState) -> String:
 	var _text: String
-	match state:
+	match _state:
 		EnemyState.IDLE: _text = "IDLE"
 		EnemyState.PATROL: _text = "PATROL"
 		EnemyState.CHASE: _text = "CHASE"
 		EnemyState.CHARGE: _text = "CHARGE"
 		EnemyState.DASH: _text = "DASH"
 		EnemyState.HIT: _text = "HIT"
-	print(_text)
+		EnemyState.ALERT: _text = "ALERT"
+	return _text
+
+func update_state_label(_state: EnemyState) -> void:
+	state_label.text = get_state_text(_state)

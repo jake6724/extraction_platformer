@@ -14,6 +14,8 @@ var base_color: Color
 @export var acceleration: float = 40
 @export var body_collider: CollisionShape3D
 
+var alive: bool = true
+
 signal died
 
 func _ready():
@@ -47,17 +49,21 @@ func on_area_attack_area_entered(_player_hurtbox: PlayerHurtbox) -> void:
 		_player_hurtbox.take_damage(global_position, attack_power)
 
 func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_duration: float) -> void:
-	velocity = _direction * _power
-	flash_mesh()
-	health -= _damage
-	if health <= 0:
-		die()
-	else:
-		start_hitstun(_hitstun_duration)
+	if alive:
+		velocity = _direction * _power
+		flash_mesh()
+		health -= _damage
+		if health <= 0:
+			die()
+		else:
+			start_hitstun(_hitstun_duration)
 
 func die() -> void:
-	died.emit(self)
-	# queue_free()
+	# queue free is handled by spawner
+	if alive:
+		print("DIed")
+		alive = false
+		died.emit(self)
 
 ## Flash skin mesh using shader
 func flash_mesh() -> void:

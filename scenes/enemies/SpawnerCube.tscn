@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://cjsmqucubn6oy"]
+
+[ext_resource type="Script" uid="uid://bj0j5rcvqwj72" path="res://scripts/enemies/spawner/spawner_cube.gd" id="1_jrf56"]
+[ext_resource type="PackedScene" uid="uid://btp315oeixtsw" path="res://scenes/enemies/EnemyCube.tscn" id="2_0ilua"]
+[ext_resource type="ArrayMesh" uid="uid://bm1ospuk8trj6" path="res://assets/enemy/AbstractWalkerMesh.tres" id="2_cm1ix"]
+
+[node name="SpawnerCube" type="Node3D" node_paths=PackedStringArray("indicator")]
+script = ExtResource("1_jrf56")
+enemy_scene = ExtResource("2_0ilua")
+indicator = NodePath("Indicator")
+
+[node name="Indicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, -0.70710677, 0, 0.02645731, 0)
+mesh = ExtResource("2_cm1ix")

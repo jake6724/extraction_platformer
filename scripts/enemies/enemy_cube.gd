@@ -28,6 +28,9 @@ func _ready():
 	skin.animation_player.speed_scale = 1.4
 	skin.run()
 
+func configure_spawn(_initial_patrol_direction: Vector3) -> void:
+	_current_patrol_direction = _initial_patrol_direction
+	
 func _physics_process(delta):
 	patrol(delta)
 
@@ -35,11 +38,11 @@ func patrol(delta: float) -> void:
 	# Patrol in a direction until a wall found or end of platform reached
 	if is_floor_ahead() and not is_wall_ahead():
 		move_and_fall(delta, patrol_speed, _current_patrol_direction, acceleration)
-		face_all(_current_patrol_direction)
+		# face_all(_current_patrol_direction)
 	# Turn around
 	else:
 		_current_patrol_direction *= -1
-		face_all(_current_patrol_direction)
+		# face_all(_current_patrol_direction)
 		return
 
 func is_floor_ahead() -> bool:

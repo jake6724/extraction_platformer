@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://lsqwshxqgp7r"]
+
+[ext_resource type="Script" uid="uid://27jvle5eks8o" path="res://scripts/enemies/spawner/spawner_jumper.gd" id="1_yy6b3"]
+[ext_resource type="ArrayMesh" uid="uid://bkckt001hyg8" path="res://assets/enemy/SalaryHandMesh.tres" id="2_1ybgu"]
+[ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="2_q3fi4"]
+
+[node name="SpawnerJumper" type="Node3D" node_paths=PackedStringArray("indicator")]
+script = ExtResource("1_yy6b3")
+enemy_scene = ExtResource("2_q3fi4")
+indicator = NodePath("Indicator")
+
+[node name="Indicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1.4142135, 0, 1.4142135, 0, 2, 0, -1.4142135, 0, -1.4142135, 0, -0.8923894, 0)
+mesh = ExtResource("2_1ybgu")
