@@ -6,6 +6,7 @@ var jump_data_2: JumpData
 var target: Node3D
 
 var is_climbing: bool = false
+var fast_windup: bool = false
 
 var skip_second_jump_data_statuses: Array[JumpData.Status] = [JumpData.Status.UNDER_ROOF, JumpData.Status.ABOVE_PLATFORM, JumpData.Status.CLIMB]
 
@@ -18,6 +19,7 @@ func physics_update(delta: float) -> void:
 
 func enter(_previous_state_path: String, _data := {}) -> void:
 	enemy.set_state_label("JUMP WINDUP")
+	fast_windup = false
 	# Fail and write error to console if missing data
 	if not _data.has("target"):
 		printerr(name, ": enter() called with incomplete _data; missing 'target' key. _data = ", _data)
@@ -45,7 +47,7 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 		# Make sure jump_data_1 is always a valid option; if it isn't transition out
 		continue_jump_windup = can_continue_from_jump_data_status(jump_data_1)
 		if continue_jump_windup and jump_data_1.impulse != Vector3.ZERO:
-			enemy.skin.jump_windup()
+			enemy.skin.jump_windup(is_climbing)
 		else:
 			trigger_jump_data_transition(jump_data_1)
 

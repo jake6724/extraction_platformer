@@ -20,6 +20,7 @@ config/icon="uid://c46tvte2oxmw0"
 TimeManager="*res://scripts/time_manager.gd"
 PickupManager="*res://scripts/pickups/pickup_manager.gd"
 DebugTools="*res://scripts/debug_tools.gd"
+EnemySpawnManager="*res://scripts/enemies/spawner/enemy_spawn_manager.gd"
 
 [debug]
 

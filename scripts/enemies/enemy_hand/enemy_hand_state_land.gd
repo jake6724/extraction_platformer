@@ -9,7 +9,7 @@ func enter(_previous_state_path: String, _data := {}) -> void:
 	enemy.skin.land()
 
 func physics_update(delta: float) -> void:
-	enemy.move_and_fall(delta, 0, Vector3.ZERO, enemy.acceleration*3)
+	enemy.move_and_fall(delta, 0, Vector3.ZERO, enemy.acceleration*1.5)
 
 func on_enemy_skin_land_complete() -> void:
 	tranisition.emit("enemyhandstatechase")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=17 format=4 uid="uid://b81857coulg6n"]
 
-[ext_resource type="Script" uid="uid://btmv7hut7xgo1" path="res://scripts/enemies/enemy_jumper_skin.gd" id="1_xc45a"]
+[ext_resource type="Script" uid="uid://btmv7hut7xgo1" path="res://scripts/enemies/enemy_hand/enemy_jumper_skin.gd" id="1_xc45a"]
 [ext_resource type="Texture2D" uid="uid://ca87s63r34kxl" path="res://assets/enemy/jumper_hand/Enemy_SalaryHand_HandTex.png" id="2_e01rx"]
 [ext_resource type="Shader" uid="uid://bugoaq3j1v4o6" path="res://materials/hit_flash.gdshader" id="3_g30br"]
 
@@ -1903,7 +1903,7 @@ _data = {
 }
 
 [node name="EnemyJumperSkin" type="Node3D" node_paths=PackedStringArray("mesh", "mesh_parent", "animation_player")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 0, 0, 0)
 script = ExtResource("1_xc45a")
 mesh = NodePath("Enemy_SalaryHand/Armature/Skeleton3D/SalaryHand")
 mesh_parent = NodePath("Enemy_SalaryHand")

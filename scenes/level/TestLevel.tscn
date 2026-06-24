@@ -1,0 +1,254 @@
+[gd_scene load_steps=15 format=3 uid="uid://bfbpxodaug1w2"]
+
+[ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_sbg8j"]
+[ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="2_070x0"]
+[ext_resource type="Script" uid="uid://n5anyt4xl3j8" path="res://scripts/smart_platform.gd" id="3_0o4sy"]
+[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/player/Player.tscn" id="4_hkths"]
+[ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="5_pkhva"]
+[ext_resource type="PackedScene" uid="uid://d01c7ugxu20qw" path="res://scenes/enemies/EnemyJumper.tscn" id="6_yfjxv"]
+[ext_resource type="PackedScene" uid="uid://bi4d4p32esnen" path="res://scenes/environment/Platform.tscn" id="7_4lvly"]
+[ext_resource type="PackedScene" uid="uid://l3kpcfyvnwvf" path="res://scenes/environment/SpikePlatform.tscn" id="8_bt1yk"]
+[ext_resource type="PackedScene" uid="uid://x3cr4w78xyvo" path="res://scenes/enemies/SpinTurrent.tscn" id="9_011de"]
+[ext_resource type="PackedScene" uid="uid://sjiifpt1sqyr" path="res://scenes/enemies/SpawnerFlying.tscn" id="10_sbg8j"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_i6x8u"]
+panorama = ExtResource("5_pkhva")
+
+[sub_resource type="Sky" id="Sky_8xg12"]
+sky_material = SubResource("PanoramaSkyMaterial_i6x8u")
+
+[sub_resource type="Environment" id="Environment_5n3yh"]
+background_mode = 2
+background_color = Color(1, 1, 1, 1)
+sky = SubResource("Sky_8xg12")
+ambient_light_source = 2
+ambient_light_color = Color(0.74558026, 0.7455802, 0.7455802, 1)
+ambient_light_energy = 1.5
+reflected_light_source = 2
+
+[sub_resource type="Curve3D" id="Curve3D_sbg8j"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15),
+"tilts": PackedFloat32Array(0, 0)
+}
+point_count = 2
+
+[node name="TestLevel" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
+script = ExtResource("1_sbg8j")
+player = NodePath("Player")
+left_boundary = NodePath("LevelBoundaries/Marker3D")
+right_boundary = NodePath("LevelBoundaries/Marker3D2")
+
+[node name="Terrain" type="Node" parent="."]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Terrain"]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 76.86693, 17.22636)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 5.2661743, 7)
+material = ExtResource("2_070x0")
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 74.41957, 28.226358)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 10.160889, 7)
+material = ExtResource("2_070x0")
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.294181, -9.942158)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 31.47168, 126.48816)
+material = ExtResource("2_070x0")
+
+[node name="CSGBox3D4" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 28.991276, -43.934895)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 13.32251)
+material = ExtResource("2_070x0")
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1004915, 3.6745338)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 34.13528)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.278226, 13.406782)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 4.6445313, 14.670783)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.278226, -9.36371)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 4.6445313, 14.670783)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.874753, -40.966404)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 37.49579, 10.059436)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.874753, 26.96326)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 37.49579, 10.059436)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.0050945, -20.32109)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 11.850537)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15.846964, -9.2642355)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 19.259668)
+material = ExtResource("2_070x0")
+script = ExtResource("3_0o4sy")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="Player" parent="." instance=ExtResource("4_hkths")]
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.09446935, 28.043879, 27.973671)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_5n3yh")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.1374445, 0.8508079, 0.50718325, 0, -0.5120428, 0.8589599, 0.99050945, 0.118059315, 0.07037747, 0, 454.56116, 227.96664)
+light_energy = 1.5
+shadow_enabled = true
+directional_shadow_mode = 1
+
+[node name="LevelBoundaries" type="Node" parent="."]
+
+[node name="Marker3D" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 152.62216)
+
+[node name="Marker3D2" type="Marker3D" parent="LevelBoundaries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -34)
+
+[node name="Enemies" type="Node" parent="."]
+
+[node name="EnemyJumper" parent="Enemies" instance=ExtResource("6_yfjxv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.92118406, 0)
+
+[node name="Platform" parent="." node_paths=PackedStringArray("player") instance=ExtResource("7_4lvly")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, -53.23487)
+player = NodePath("../Player")
+
+[node name="Platform2" parent="." node_paths=PackedStringArray("player") instance=ExtResource("7_4lvly")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, 16)
+player = NodePath("../Player")
+
+[node name="Platform3" parent="." node_paths=PackedStringArray("player") instance=ExtResource("7_4lvly")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17.364937, 14)
+player = NodePath("../Player")
+
+[node name="SpikePlatform" parent="." instance=ExtResource("8_bt1yk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 29.118319, -18.527645)
+
+[node name="SpikePlatform2" parent="." instance=ExtResource("8_bt1yk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 29.118319, -20.527645)
+
+[node name="SpikePlatform3" parent="." instance=ExtResource("8_bt1yk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 29.118319, -22.527645)
+
+[node name="SpinTurrent" parent="." instance=ExtResource("9_011de")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 6)
+enabled = false
+
+[node name="SpinTurrent3" parent="." instance=ExtResource("9_011de")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, -2.304771)
+enabled = false
+
+[node name="EnemyPatrols" type="Node" parent="."]
+
+[node name="SpawnerFlying" parent="EnemyPatrols" instance=ExtResource("10_sbg8j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38.31007, 34.87439)
+is_initial_spawn = true
+spawn_delay = 0.5
+
+[node name="Path3D" type="Path3D" parent="EnemyPatrols/SpawnerFlying"]
+curve = SubResource("Curve3D_sbg8j")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/SpawnerFlying/Path3D"]
+
+[node name="SpawnerFlying4" parent="EnemyPatrols" instance=ExtResource("10_sbg8j")]
+transform = Transform3D(0.9999933, 0, -0.00364773, 0, 1, 0, 0.00364773, 0, 0.9999933, 0, 34.101334, 34.87439)
+start_left_to_right = true
+spawn_delay = 0.5
+
+[node name="Path3D" type="Path3D" parent="EnemyPatrols/SpawnerFlying4"]
+curve = SubResource("Curve3D_sbg8j")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/SpawnerFlying4/Path3D"]
+
+[node name="SpawnerFlying2" parent="EnemyPatrols" instance=ExtResource("10_sbg8j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42.442444, 34.87439)
+start_left_to_right = true
+spawn_delay = 0.5
+
+[node name="Path3D" type="Path3D" parent="EnemyPatrols/SpawnerFlying2"]
+curve = SubResource("Curve3D_sbg8j")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/SpawnerFlying2/Path3D"]
+
+[node name="SpawnerFlying3" parent="EnemyPatrols" instance=ExtResource("10_sbg8j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 46.065086, 34.87439)
+start_left_to_right = true
+is_initial_spawn = true
+spawn_delay = 0.5
+
+[node name="Path3D" type="Path3D" parent="EnemyPatrols/SpawnerFlying3"]
+curve = SubResource("Curve3D_sbg8j")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/SpawnerFlying3/Path3D"]
+
+[node name="SpawnerFlying5" parent="EnemyPatrols" instance=ExtResource("10_sbg8j")]
+transform = Transform3D(0.9999933, 0, -0.00364773, 0, 1, 0, 0.00364773, 0, 0.9999933, 0, 49.777985, 34.87439)
+spawn_delay = 0.5
+
+[node name="Path3D" type="Path3D" parent="EnemyPatrols/SpawnerFlying5"]
+curve = SubResource("Curve3D_sbg8j")
+
+[node name="PathFollow3D" type="PathFollow3D" parent="EnemyPatrols/SpawnerFlying5/Path3D"]

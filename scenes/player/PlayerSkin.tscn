@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bl1vrdxrfn0u" path="res://assets/character/Char_Player_TEX_Player.png" id="3_e801p"]
 [ext_resource type="AnimationNodeBlendTree" uid="uid://mnexgmj80x4h" path="res://assets/character/player_skin_animation_tree.tres" id="3_fdq5p"]
 [ext_resource type="Animation" uid="uid://cba3yjsgps5h3" path="res://assets/character/animations/attack_1.res" id="3_quhyi"]
-[ext_resource type="PackedScene" uid="uid://d18vlw8symap8" path="res://scenes/Chainsaw.tscn" id="3_x4iup"]
+[ext_resource type="PackedScene" uid="uid://d18vlw8symap8" path="res://scenes/player/Chainsaw.tscn" id="3_x4iup"]
 [ext_resource type="Animation" uid="uid://crwbfwunetdg0" path="res://assets/character/animations/attack_2.res" id="4_e801p"]
 [ext_resource type="Animation" uid="uid://cjh0wx6crk528" path="res://assets/character/animations/attack_3.res" id="5_x4iup"]
 [ext_resource type="Animation" uid="uid://cnjyyj1tgipx0" path="res://assets/character/animations/attack_down.res" id="6_8k8h3"]

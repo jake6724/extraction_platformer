@@ -82,12 +82,13 @@ body_collider = NodePath("BodyCollider")
 metadata/_custom_type_script = "uid://c0vmpp55n5606"
 
 [node name="EnemyJumperSkin" parent="." instance=ExtResource("2_6hreo")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -0.3550843, 0)
+transform = Transform3D(-8.742278e-08, 0, 2, 0, 2, 0, -2, 0, -8.742278e-08, 0, -0.33987784, 0)
 
 [node name="AreaDetectPlayer" type="Area3D" parent="."]
 collision_layer = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AreaDetectPlayer"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.40049672, 0)
 shape = SubResource("SphereShape3D_h3c4m")
 debug_color = Color(0.5869858, 0.54949015, 0, 0.41960785)
 

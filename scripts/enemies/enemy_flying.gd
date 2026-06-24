@@ -16,7 +16,7 @@ class_name EnemyFlying extends Enemy
 @export_group("Patrol")
 @export var path_follow: PathFollow3D
 @export var patrol_speed_scale: float = 0.1
-@export var start_left_to_right: bool = true
+# @export var start_left_to_right: bool = true
 @export_group("Chase")
 @export var chase_speed_min: float = 8.0
 @export var chase_speed_max: float = 10.0
@@ -55,8 +55,8 @@ var _dash_target_position: Vector3
 @export var last_seen_player_position_indicator: MeshInstance3D
 # @export var skin: EnemyCellBatSkin
 
-enum EnemyState {PATROL, CHASE, IDLE, CHARGE, DASH, HIT}
-var current_state: EnemyState = EnemyState.PATROL
+enum EnemyState {IDLE, PATROL, CHASE, CHARGE, DASH, HIT, ALERT}
+var current_state: EnemyState = EnemyState.IDLE
 
 # Direction
 var directions: Array[Vector3] = [] # Generated based on num_directions
@@ -83,17 +83,6 @@ func _ready():
 	move_indicator.visible = show_debug
 	last_seen_player_position_indicator.visible = show_debug
 
-	if not start_left_to_right:
-		patrol_speed_scale *= -1
-		path_follow.progress_ratio = 0.99
-		skin.flip_horizontal(true)
-		skin.mirror_mesh(true)
-	else:
-		patrol_speed_scale *= 1
-		path_follow.progress_ratio = 0.01
-		skin.flip_horizontal(false)
-		skin.mirror_mesh(false)
-
 	area_detect_player.body_entered.connect(on_area_detect_player_body_entered)
 	area_detect_player.body_exited.connect(on_area_detect_player_body_exited)
 	
@@ -108,28 +97,37 @@ func _ready():
 
 	timer_post_dash.timeout.connect(on_timer_post_dash_timeout)
 
+func configure_spawn(_path_follow: PathFollow3D) -> void:
+	path_follow = _path_follow
+	current_state = EnemyState.PATROL
+
 func _physics_process(delta):
 	if show_debug: print_state(current_state)
 	match current_state:
+		EnemyState.IDLE: idle(delta)
 		EnemyState.PATROL: patrol(delta)
 		EnemyState.CHASE: chase(delta)
-		EnemyState.IDLE: idle(delta)
 		EnemyState.CHARGE: pass
 		EnemyState.DASH: dash(delta)
 		EnemyState.HIT: hit(delta)
+		EnemyState.ALERT: alert(delta)
 		_: push_error("EnemyFlying: invalid current_state. current_state = ", current_state)
 
 func patrol(delta: float) -> void:
-	path_follow.progress_ratio += (delta * patrol_speed_scale)
+	path_follow.progress_ratio = clampf(path_follow.progress_ratio + (delta * patrol_speed_scale), 0.0, 1.0)
+	
+	print(path_follow.progress_ratio)
 	if is_equal_approx(path_follow.progress_ratio, 1.0):
+		print("FLIP")
 		patrol_speed_scale *= -1
 		path_follow.progress_ratio = .99
-		skin.flip_horizontal(true)
+		#skin.flip_horizontal(true)
 		skin.mirror_mesh(true)
 	elif is_equal_approx(path_follow.progress_ratio, 0.0):
+		print("FLIP")
 		patrol_speed_scale *= -1
 		path_follow.progress_ratio = .01
-		skin.flip_horizontal(false)
+		#skin.flip_horizontal(false)
 		skin.mirror_mesh(false)
 
 func chase(delta: float) -> void:
@@ -155,7 +153,7 @@ func chase(delta: float) -> void:
 	velocity = velocity.move_toward(move_direction * _active_chase_speed, delta * acceleration)
 	velocity.x = 0
 
-	face_mesh(move_direction)
+	#(move_direction)
 
 	move_and_collide(velocity * delta)
 	global_transform.origin.x = 0
@@ -201,12 +199,11 @@ func set_collision_with_enemies(_disabled: bool) -> void:
 
 func start_dash_cooldown(_min, _max) -> void:
 	var dash_cooldown: float = randf_range(_min, _max)
-	print("COOLDOWN: ", dash_cooldown)
 	timer_dash_cooldown.start(dash_cooldown)
 
 func dash(delta: float) -> void:
-	var move_direction: Vector3 = get_move_direction()
-	face_mesh(move_direction)
+	# var move_direction: Vector3 = get_move_direction()
+	#face_mesh(move_direction)
 	# move_and_collide(velocity * delta)
 	move_and_slide()
 	velocity = velocity.move_toward(Vector3.ZERO, delta * acceleration)
@@ -224,8 +221,12 @@ func on_timer_dash_cooldown_timeout() -> void:
 func on_timer_post_dash_timeout() -> void:
 	_active_chase_speed = _chase_speed
 
-## Do not move, but constantly check to see if can see player. If so, return to chasing
+## Do not move or look for player or do anything!
 func idle(_delta: float) -> void:
+	pass
+
+## Do not move, but constantly check to see if can see player. If so, return to chasing
+func alert(_delta: float) -> void:
 	if is_target_visible(player.tracker.global_transform.origin):
 		current_state = EnemyState.CHASE
 
@@ -277,7 +278,7 @@ func get_move_target_point() -> Vector3:
 	
 	# Can't see player, no scent trail. Return empty Vector3
 	else:
-		current_state = EnemyState.IDLE
+		current_state = EnemyState.ALERT
 		_move_target_point = Vector3()
 
 	return _move_target_point
@@ -400,7 +401,7 @@ func die() -> void:
 	death_particles.restart()
 	await death_particles.finished
 	PickupManager.spawn_pickups(Pickup.Type.COIN, 1, global_transform.origin)
-	queue_free()
+	super()
 
 func start_hitstun(_hitstun_duration: float) -> void:
 	super(_hitstun_duration)

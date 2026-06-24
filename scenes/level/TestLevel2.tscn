@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://hhb8pegw3s4j"]
 
 [ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_2mfes"]
-[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/Player.tscn" id="2_gi74u"]
+[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/player/Player.tscn" id="2_gi74u"]
 [ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="3_gbniu"]
 [ext_resource type="Texture2D" uid="uid://bt213508s4cqg" path="res://assets/AllSkyFree_Sky_ClearBlueSky_Equirect.png" id="4_bddin"]
 [ext_resource type="PackedScene" uid="uid://bodsvsc1dnh3i" path="res://scenes/enemies/EnemyFloater.tscn" id="5_lwwg4"]

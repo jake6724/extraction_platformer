@@ -165,7 +165,7 @@ var _combo_decay_multiplier: float = 0.0
 
 @export_group("Scents")
 @export var timer_spawn_scent: Timer
-@export var scent_scene: PackedScene = load("res://scenes/Scent.tscn")
+@export var scent_scene: PackedScene
 @export var scent_parent: Node
 var scents: Array[Scent] = []
 

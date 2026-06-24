@@ -14,6 +14,8 @@ var base_color: Color
 @export var acceleration: float = 40
 @export var body_collider: CollisionShape3D
 
+signal died
+
 func _ready():
 	# base_color = mesh.get_active_material(0).albedo_color
 	area_attack.area_entered.connect(on_area_attack_area_entered)
@@ -54,7 +56,8 @@ func take_damage(_direction: Vector3, _power: float, _damage: int, _hitstun_dura
 		start_hitstun(_hitstun_duration)
 
 func die() -> void:
-	queue_free()
+	died.emit(self)
+	# queue_free()
 
 ## Flash skin mesh using shader
 func flash_mesh() -> void:
@@ -81,17 +84,19 @@ func flash_mesh_repeat(_total_duration: float, flash_amount: int, flash_color: C
 	flash_tween.tween_interval(interval)
 
 func face_mesh(_move_direction: Vector3) -> void:
-	var flip: bool = _move_direction.z > 0
-	skin.flip_horizontal(flip)
+	var flip: bool = _move_direction.z < 0
+	#skin.flip_horizontal(flip)
 	skin.mirror_mesh(flip)
 
 func rotate_on_y(_direction: Vector3) -> void:
 	var target_angle: float = Vector3.BACK.signed_angle_to(_direction, Vector3.UP)
-	global_rotation.y = target_angle
-
-func face_all(_direction: Vector3) -> void:
+	#print(target_angle)
+	global_rotation.y = -target_angle
 	face_mesh(_direction)
-	rotate_on_y(_direction)
+
+# func face_all(_direction: Vector3) -> void:
+# 	face_mesh(_direction)
+# 	rotate_on_y(_direction)
 	
 func start_hitstun(_hitstun_duration: float) -> void:
 	timer_hitstun.start(_hitstun_duration)
