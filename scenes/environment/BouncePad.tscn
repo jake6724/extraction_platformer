@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://c31hwriup8lev"]
+
+[ext_resource type="Script" uid="uid://d73epjmmtclh" path="res://scripts/environment/bounce_pad.gd" id="1_hmfw0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7r8yi"]
+albedo_color = Color(0.7491539, 0.0013551695, 0.87416476, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_hmfw0"]
+material = SubResource("StandardMaterial3D_7r8yi")
+radius = 1.0
+height = 2.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7r8yi"]
+radius = 1.0
+
+[node name="BouncePad" type="Node3D"]
+script = ExtResource("1_hmfw0")
+metadata/_custom_type_script = "uid://d73epjmmtclh"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_hmfw0")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 128
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("CapsuleShape3D_7r8yi")

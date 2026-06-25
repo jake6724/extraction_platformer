@@ -3,10 +3,12 @@ class_name Spawner extends Node3D
 @export var spawn_on_start: bool = false
 @export var direction_mode: DirectionMode
 @export var spawn_group: int = 0
-@export_range(0.5,10,.5) var spawn_delay: float = 5.0
+@export_range(1,60,1, "or_greater", "or_less") var spawn_delay_base: float = 5.0
+@export_range(1,60,1, "or_greater", "or_less") var spawn_delay_random_offset: float = 0.0
 @export var enemy_scene: PackedScene
 @export var indicator: MeshInstance3D
 var active: bool
+var spawn_delay: float
 
 enum DirectionMode {
 	## Start patrol moving left to right.
@@ -27,6 +29,7 @@ func _ready() -> void:
 
 func on_spawned_enemy_died(_enemy: Enemy) -> void:
 	active = false
+	spawn_delay = spawn_delay_base + randf_range(-spawn_delay_random_offset, spawn_delay_random_offset)
 	_enemy.queue_free()
 	EnemySpawnManager.start_spawn(self)
 

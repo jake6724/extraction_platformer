@@ -40,5 +40,4 @@ func get_valid_spawner(_spawner: Spawner) -> Spawner:
 			selected_spawner = s
 		else:
 			group_list.erase(s)    
-
 	return selected_spawner

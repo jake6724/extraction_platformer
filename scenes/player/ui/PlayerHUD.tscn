@@ -4,11 +4,12 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_v5eg6"]
 
-[node name="PlayerHud" type="CanvasLayer" node_paths=PackedStringArray("jump_reset_value", "combo_level_value", "combo_value")]
+[node name="PlayerHud" type="CanvasLayer" node_paths=PackedStringArray("jump_reset_value", "combo_level_value", "combo_value", "stopwatch_display")]
 script = ExtResource("1_v5eg6")
 jump_reset_value = NodePath("PanelContainer/MarginContainer/HBoxContainer/JumpResetValue")
 combo_level_value = NodePath("PanelContainer/MarginContainer/HBoxContainer2/ComboLevelValue")
 combo_value = NodePath("PanelContainer/MarginContainer/HBoxContainer2/ComboValue")
+stopwatch_display = NodePath("PanelContainer/MarginContainer/StopwatchDisplay")
 metadata/_custom_type_script = "uid://dar0jf88whcdc"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
@@ -67,3 +68,10 @@ custom_minimum_size = Vector2(200, 60)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
+
+[node name="StopwatchDisplay" type="Label" parent="PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(64, 23)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "00:00:00"

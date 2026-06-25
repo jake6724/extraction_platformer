@@ -1,0 +1,1 @@
+class_name BouncePad extends Node3D

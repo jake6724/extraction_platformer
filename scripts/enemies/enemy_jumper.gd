@@ -83,7 +83,7 @@ func get_max_jump_height() -> float:
 	var v_squared: float = pow(jump_power, 2)
 	var denominator: float = 2 * abs(gravity_default)
 	var max_height: float = v_squared / denominator
-	DebugTools.create_debug_sphere(self, global_transform.origin + Vector3(0,max_height,0), 1,2,Color.MAGENTA)
+	#if showDebugTools.create_debug_sphere(self, global_transform.origin + Vector3(0,max_height,0), 1,2,Color.MAGENTA)
 	return max_height
 
 func _physics_process(_delta):

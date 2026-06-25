@@ -1,0 +1,293 @@
+[gd_scene load_steps=11 format=3 uid="uid://bri3w310rvo5w"]
+
+[ext_resource type="Script" uid="uid://c7ebb3tft4wn4" path="res://scripts/test_level.gd" id="1_37d35"]
+[ext_resource type="Material" uid="uid://41avpc24wsls" path="res://materials/TestLevelTerrainShaderMaterial.tres" id="1_vvrrt"]
+[ext_resource type="Script" uid="uid://n5anyt4xl3j8" path="res://scripts/smart_platform.gd" id="2_1acfd"]
+[ext_resource type="PackedScene" uid="uid://dvr2kvvvboiwv" path="res://scenes/player/Player.tscn" id="2_sstno"]
+[ext_resource type="PackedScene" uid="uid://c31hwriup8lev" path="res://scenes/environment/BouncePad.tscn" id="5_rr4bb"]
+[ext_resource type="PackedScene" uid="uid://lsqwshxqgp7r" path="res://scenes/enemies/SpawnerJumper.tscn" id="6_4ctps"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sstno"]
+sky_top_color = Color(0.2613558, 0.5828484, 1, 1)
+sky_horizon_color = Color(1.0397496, 1.2005149, 1.4087243, 1)
+ground_bottom_color = Color(0.2627451, 0.58431375, 1, 1)
+ground_horizon_color = Color(1.0397496, 1.2005149, 1.4087243, 1)
+energy_multiplier = 0.2
+
+[sub_resource type="Sky" id="Sky_1acfd"]
+sky_material = SubResource("ProceduralSkyMaterial_sstno")
+
+[sub_resource type="Environment" id="Environment_37d35"]
+background_mode = 2
+sky = SubResource("Sky_1acfd")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="PrismMesh" id="PrismMesh_4ctps"]
+material = ExtResource("1_vvrrt")
+left_to_right = 1.0
+size = Vector3(20.92, 11.915, 1)
+
+[node name="Level1" type="Node3D" node_paths=PackedStringArray("player", "left_boundary", "right_boundary")]
+script = ExtResource("1_37d35")
+player = NodePath("Player")
+left_boundary = NodePath("Marker3D")
+right_boundary = NodePath("Marker3D2")
+metadata/_custom_type_script = "uid://c7ebb3tft4wn4"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_37d35")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+light_specular = 0.0
+shadow_enabled = true
+
+[node name="Terrain" type="Node" parent="."]
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 3, 48)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D20" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.5, 26.5)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 3, 47)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D18" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.8660254, 0, -0.8660254, 0.5, 0, 3.5669873, -24.75)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 12, 2)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D19" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.8660254, 0, -0.8660254, 0.5, 0, 3.2260854, -26.710443)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 8.9453125, 4.5509033)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -25.701967, 0.71868896)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 19.992188, 49.437378)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D17" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -29.757143, -31.782995)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 11.881836, 16.603115)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5192213, 74.47664)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 79, 49.796814)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D34" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5192213, -72.52336)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 79, 49.796814)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 12)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 8)
+material = ExtResource("1_vvrrt")
+script = ExtResource("2_1acfd")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9227467, -0.38540685, 0, 0.38540685, 0.9227467, 0, -1.9987054, 29.776066)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 2.9233398, 13.738159)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D21" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, 20.915537, 31.961632)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 2.9233398, 39)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D22" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, 21.971622, 42.359524)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 9, 27)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D25" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, 16.333755, 26.29047)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 3, 11)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D26" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, 16.18303, 28.521452)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 5, 5)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D23" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, 16.396961, 43.97851)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 3, 14)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D24" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, 16.439188, 46.670765)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 5, 9)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D27" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.7414277e-06, 13.5, -15.160778)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 3, 24)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 0.9225381, 0.38590604, 0, -0.38590604, 0.9225381, 0, -19.85857, 40.292778)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 20.412598, 43.049805)
+material = ExtResource("1_vvrrt")
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="Terrain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, -12)
+use_collision = true
+collision_layer = 4
+collision_mask = 0
+size = Vector3(1, 1, 8)
+material = ExtResource("1_vvrrt")
+script = ExtResource("2_1acfd")
+metadata/_custom_type_script = "uid://n5anyt4xl3j8"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Terrain"]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 19.752005, -16.618902)
+mesh = SubResource("PrismMesh_4ctps")
+
+[node name="Player" parent="." instance=ExtResource("2_sstno")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2, 0)
+
+[node name="Marker3D" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 39.99269)
+
+[node name="Marker3D2" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -40.154785)
+
+[node name="BouncePad" parent="." instance=ExtResource("5_rr4bb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -11.790626, -34.177135)
+
+[node name="BouncePad2" parent="." instance=ExtResource("5_rr4bb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4569726, -42.003014)
+
+[node name="BouncePad3" parent="." instance=ExtResource("5_rr4bb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18.754982, -33.968678)
+
+[node name="BouncePad4" parent="." instance=ExtResource("5_rr4bb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 33.390137, -39.38867)
+
+[node name="BouncePad5" parent="." instance=ExtResource("5_rr4bb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 28.327229, 7.6779633)
+
+[node name="BouncePad6" parent="." instance=ExtResource("5_rr4bb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 28.327229, -6.1784706)
+
+[node name="SpawnerJumper" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, 3.32193)
+spawn_on_start = true
+direction_mode = 2
+spawn_delay_base = 7.0
+spawn_delay_random_offset = 3.0
+
+[node name="SpawnerJumper2" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, -5.67807)
+spawn_on_start = true
+direction_mode = 2
+
+[node name="SpawnerJumper6" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, -11.67807)
+direction_mode = 2
+
+[node name="SpawnerJumper7" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, 7.32193)
+direction_mode = 2
+
+[node name="SpawnerJumper8" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, 18.32193)
+direction_mode = 2
+
+[node name="SpawnerJumper9" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.685816, 13.32193)
+spawn_on_start = true
+direction_mode = 2
+
+[node name="SpawnerJumper10" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.685816, 10.32193)
+direction_mode = 2
+
+[node name="SpawnerJumper11" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, 10.32193)
+direction_mode = 2
+
+[node name="SpawnerJumper12" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, -14.67807)
+spawn_on_start = true
+direction_mode = 2
+
+[node name="SpawnerJumper13" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.685816, -14.67807)
+direction_mode = 2
+
+[node name="SpawnerJumper3" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, 12.32193)
+spawn_on_start = true
+direction_mode = 2
+
+[node name="SpawnerJumper4" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6858158, -17.67807)
+direction_mode = 2
+
+[node name="SpawnerJumper5" parent="." instance=ExtResource("6_4ctps")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.685816, -12.67807)
+spawn_on_start = true
+direction_mode = 2

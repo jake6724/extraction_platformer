@@ -28,8 +28,9 @@ ambient_light_energy = 1.5
 reflected_light_source = 2
 
 [sub_resource type="Curve3D" id="Curve3D_sbg8j"]
+resource_local_to_scene = true
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -25.185),
 "tilts": PackedFloat32Array(0, 0)
 }
 point_count = 2
@@ -129,7 +130,7 @@ script = ExtResource("3_0o4sy")
 metadata/_custom_type_script = "uid://n5anyt4xl3j8"
 
 [node name="Player" parent="." instance=ExtResource("4_hkths")]
-transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, -0.0113889165, 1.1363277, -6.4886866)
+transform = Transform3D(-0.9999953, 0, -0.0030716928, 0, 1, 0, 0.0030716928, 0, -0.9999953, 0.089184225, 27.579304, 26.25309)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_5n3yh")
@@ -182,7 +183,7 @@ enabled = false
 [node name="Flying" type="Node" parent="Enemies"]
 
 [node name="SpawnerFlying" parent="Enemies/Flying" instance=ExtResource("10_sbg8j")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38.31007, 34.87439)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38.31007, 41.244354)
 direction_mode = 2
 spawn_delay = 0.5
 
@@ -192,7 +193,8 @@ curve = SubResource("Curve3D_sbg8j")
 [node name="PathFollow3D" type="PathFollow3D" parent="Enemies/Flying/SpawnerFlying/Path3D"]
 
 [node name="SpawnerFlying4" parent="Enemies/Flying" instance=ExtResource("10_sbg8j")]
-transform = Transform3D(0.9999933, 0, -0.00364773, 0, 1, 0, 0.00364773, 0, 0.9999933, 0, 34.101334, 34.87439)
+transform = Transform3D(0.9999933, 0, -0.00364773, 0, 1, 0, 0.00364773, 0, 0.9999933, -0.023235912, 34.101334, 41.244312)
+spawn_on_start = true
 direction_mode = 2
 spawn_delay = 0.5
 
@@ -202,9 +204,10 @@ curve = SubResource("Curve3D_sbg8j")
 [node name="PathFollow3D" type="PathFollow3D" parent="Enemies/Flying/SpawnerFlying4/Path3D"]
 
 [node name="SpawnerFlying2" parent="Enemies/Flying" instance=ExtResource("10_sbg8j")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42.442444, 34.87439)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42.442444, 41.244354)
+spawn_on_start = true
 direction_mode = 2
-spawn_delay = 0.5
+spawn_delay = 1.5
 
 [node name="Path3D" type="Path3D" parent="Enemies/Flying/SpawnerFlying2"]
 curve = SubResource("Curve3D_sbg8j")
@@ -213,7 +216,9 @@ curve = SubResource("Curve3D_sbg8j")
 
 [node name="SpawnerFlying3" parent="Enemies/Flying" instance=ExtResource("10_sbg8j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42.442444, 15.100063)
+spawn_on_start = true
 direction_mode = 2
+spawn_group = 1
 spawn_delay = 0.5
 
 [node name="Path3D" type="Path3D" parent="Enemies/Flying/SpawnerFlying3"]
@@ -224,6 +229,7 @@ curve = SubResource("Curve3D_sbg8j")
 [node name="SpawnerFlying5" parent="Enemies/Flying" instance=ExtResource("10_sbg8j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 38.274445, 15.100063)
 direction_mode = 2
+spawn_group = 1
 spawn_delay = 0.5
 
 [node name="Path3D" type="Path3D" parent="Enemies/Flying/SpawnerFlying5"]
@@ -235,6 +241,7 @@ curve = SubResource("Curve3D_sbg8j")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 34.070686, 15.100063)
 spawn_on_start = true
 direction_mode = 2
+spawn_group = 1
 spawn_delay = 0.5
 
 [node name="Path3D" type="Path3D" parent="Enemies/Flying/SpawnerFlying6"]
@@ -245,7 +252,8 @@ curve = SubResource("Curve3D_sbg8j")
 [node name="Jumper" type="Node" parent="Enemies"]
 
 [node name="SpawnerJumper" parent="Enemies/Jumper" instance=ExtResource("10_070x0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3732896, 14.269973)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.770952, 15.182625)
+spawn_on_start = true
 direction_mode = 3
 spawn_delay = 0.5
 

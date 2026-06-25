@@ -92,6 +92,7 @@ last_seen_player_position_indicator = NodePath("LastSeenPlayerPositionIndicator"
 state_label = NodePath("StateLabel")
 area_attack = NodePath("AreaAttack")
 skin = NodePath("EnemyCellBatSkin")
+health = 1
 timer_hitstun = NodePath("Timers/TimerHitstun")
 body_collider = NodePath("BodyCollider")
 metadata/_custom_type_script = "uid://bhegt4y07ydw8"

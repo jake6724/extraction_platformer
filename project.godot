@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="extraction_platformer"
-run/main_scene="uid://bfbpxodaug1w2"
+run/main_scene="uid://bri3w310rvo5w"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="uid://c46tvte2oxmw0"
 
@@ -128,6 +128,7 @@ dash={
 3d_physics/layer_5="enemy_hurtbox"
 3d_physics/layer_6="platform"
 3d_physics/layer_7="trap"
+3d_physics/layer_8="bounce_pad"
 
 [rendering]
 

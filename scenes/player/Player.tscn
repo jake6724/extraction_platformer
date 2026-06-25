@@ -323,7 +323,7 @@ debug_color = Color(0.9436076, 0.23969346, 0, 0.41960785)
 
 [node name="AreaAttackDown" type="Area3D" parent="AttackAreas"]
 collision_layer = 0
-collision_mask = 16
+collision_mask = 144
 
 [node name="HitboxDown1" type="CollisionShape3D" parent="AttackAreas/AreaAttackDown"]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, -0.33768302, 0)

@@ -536,6 +536,11 @@ func on_attack_area_entered(_intruder: Area3D) -> void: # Could have 1 for each 
 		pogo_bounce()
 		return
 
+	if _intruder.owner is BouncePad:
+		print("Bounce pad!")
+		pogo_bounce()
+		return
+
 	var enemy: Enemy = _intruder.owner as Enemy
 	if enemy:
 		var _direction: Vector3
